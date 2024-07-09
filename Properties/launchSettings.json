@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "OneDrive Simple Management Tool (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "OneDrive Simple Management Tool (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
