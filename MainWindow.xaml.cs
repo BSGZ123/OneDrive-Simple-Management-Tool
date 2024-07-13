@@ -28,9 +28,9 @@ namespace OneDrive_Simple_Management_Tool
             this.InitializeComponent();
         }
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            myButton.Content = "Clicked";
-        }
+        //private void myButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    myButton.Content = "Clicked";
+        //}
     }
 }
