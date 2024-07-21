@@ -10,7 +10,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition />
         </Grid.RowDefinitions>
 
         <Grid x:Name="AppTitleBar">
@@ -26,13 +26,34 @@
                        Margin="28,0,0,0"/>
         </Grid>
 
-        <NavigationView>
-            <NavigationViewItem x:Uid="NavigationBar_Home"/>
-            <!--<NavigationViewItem x:Uid="NavigationBar_Files"/>
-            <NavigationViewItem x:Uid="NavigationBar_Tasks"/>
-            <NavigationViewItem x:Uid="NavigationBar_Tools"/>
-            <NavigationViewItem x:Uid="NavigationBar_Bookmark"/>-->
+        
+        <NavigationView
+            Grid.Row="1"
+            x:Name="nvSample"
+            IsSettingsVisible="True"
+            IsBackButtonVisible="Collapsed"
+            IsBackEnabled="False"
+            SelectionChanged="nvSample_SelectionChanged"
+            PaneDisplayMode="Left"
+            ExpandedModeThresholdWidth="500"
+            SelectionFollowsFocus="Disabled"
+            IsTabStop="False">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Uid="NavigationBar_Home" Tag="HomePage" x:Name="HomePageItem" Icon="Home" IsSelected="True"/>
+                <NavigationViewItem x:Uid="NavigationBar_Files" Tag="CloudPage" x:Name="CloudPageItem" Icon="Document"/>
+                <NavigationViewItem x:Uid="NavigationBar_Tasks" Tag="TaskManagerPage" x:Name="TaskManagerItem" Icon="Sort"/>
+                <NavigationViewItem x:Uid="NavigationBar_Tools" Tag="ToolPage" x:Name="ToolPageItem">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE74C;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem x:Uid="NavigationBar_Bookmark" Tag="BookmarkPage" x:Name="BookmarkItem" Icon="Bookmarks"/>
+            </NavigationView.MenuItems>
+
             
+            <Frame x:Name="contentFrame" />
         </NavigationView>
         
     </Grid>
