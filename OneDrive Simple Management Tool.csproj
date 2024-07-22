@@ -15,7 +15,12 @@
     <RepositoryUrl>https://github.com/BSGZ123/OneDrive-Simple-Management-Tool</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Pages\BookmarkPage.xaml" />
+    <None Remove="Pages\CloudPage.xaml" />
     <None Remove="Pages\HomePage.xaml" />
+    <None Remove="Pages\SettingPage.xaml" />
+    <None Remove="Pages\TaskManagerPage.xaml" />
+    <None Remove="Pages\ToolPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,6 +64,31 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\SettingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\BookmarkPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\ToolPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\TaskManagerPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\CloudPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Pages\HomePage.xaml">

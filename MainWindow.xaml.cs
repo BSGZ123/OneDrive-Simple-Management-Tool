@@ -1,10 +1,13 @@
+using Microsoft.Graph.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using OneDrive_Simple_Management_Tool.Pages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,10 +37,32 @@ namespace OneDrive_Simple_Management_Tool
             this.SetTitleBar(AppTitleBar);
         }
 
+        //NavigationView 控件的导航功能
         private void nvSample_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
+            if(args.IsSettingsSelected)
+            {
+                contentFrame.Navigate(typeof(SettingPage));
+            }
+            else
+            {
+                var selectedItem=(NavigationViewItem)args.SelectedItem;
+                string selectedItemTag = (string)selectedItem.Tag;
+                //路径不可以少了.
+                string pageName = "OneDrive_Simple_Management_Tool.Pages." + selectedItemTag;
+                Type pageNameType = Type.GetType(pageName);//根据页面名称路径获取对应的 Type 对象
+                contentFrame.Navigate(pageNameType);
 
+            }
         }
+
+        //三个参数，分别代表目标页面的类型、传递给目标页面的参数和导航动画信息
+        public void Navigate(Type pageType,object targetPageArguments = null, NavigationTransitionInfo navigationTransitionInfo = null)
+        {
+            Rootframe.Navigate(pageType, targetPageArguments, navigationTransitionInfo);
+        }
+
+        public Frame Rootframe => contentFrame;
 
         //private void myButton_Click(object sender, RoutedEventArgs e)
         //{
