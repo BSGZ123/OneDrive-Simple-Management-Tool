@@ -9,7 +9,18 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <TextBlock>2333333333</TextBlock>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="1" x:Name="StorageText" FontSize="15" />
+        <StackPanel Orientation="Vertical" Grid.Row="2">
+            <TextBlock x:Uid="HomePage_QuickStart_Title" FontSize="25" />
+            <TextBlock 
+                x:Uid="HomePage_QuickStart_Content"
+                FontSize="16"
+                Margin="0 20 0 5" />
+        </StackPanel>
     </Grid>
 </Page>
