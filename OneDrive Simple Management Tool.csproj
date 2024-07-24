@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\" />
-    <Folder Include="Converters\" />
     <Folder Include="Helpers\" />
     <Folder Include="Models\" />
     <Folder Include="Services\" />
