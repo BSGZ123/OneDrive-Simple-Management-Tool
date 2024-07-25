@@ -211,7 +211,7 @@
     <value>首页</value>
   </data>
   <data name="NavigationBar_Tasks.Content" xml:space="preserve">
-    <value>任务</value>
+    <value>传输</value>
   </data>
   <data name="NavigationBar_Tools.Content" xml:space="preserve">
     <value>工具</value>
