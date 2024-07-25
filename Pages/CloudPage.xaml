@@ -6,10 +6,12 @@
     xmlns:local="using:OneDrive_Simple_Management_Tool.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:OneDrive_Simple_Management_Tool.ViewModels"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    NavigationCacheMode="Enabled">
 
-    <Grid>
-        <TextBlock>2444444444444444</TextBlock>
+    <Grid Margin="10">
+        <TextBlock>999999999999999999999</TextBlock>
     </Grid>
 </Page>
