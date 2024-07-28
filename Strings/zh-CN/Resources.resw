@@ -145,7 +145,7 @@
     <value>刷新</value>
   </data>
   <data name="CloudPage_Title.Text" xml:space="preserve">
-    <value>你的网盘</value>
+    <value>网盘列表</value>
   </data>
   <data name="FileView_Flyout_Convert.Text" xml:space="preserve">
     <value>转换</value>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="OneDrive_Simple_Management_Tool.Views.CreateDrive"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    d:DataContext="{x:Bind viewmodels:CreateDriveViewModel}"
+    mc:Ignorable="d"
+    Title="Create Drive"
+    DefaultButton="Primary"
+    PrimaryButtonText="Create"
+    CloseButtonText="Cancel">
+
+    <Grid>
+        <TextBox x:Name="DriveName" Header="Display Name(Optional)" PlaceholderText="Drive Name" Text="正在开发中呢🤣" Margin="10,10,10,0" />
+    </Grid>
+</ContentDialog>
