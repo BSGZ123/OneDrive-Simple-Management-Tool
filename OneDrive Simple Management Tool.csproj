@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Remove="Pages\BookmarkPage.xaml" />
     <None Remove="Pages\CloudPage.xaml" />
+    <None Remove="Pages\DrivePage.xaml" />
     <None Remove="Pages\HomePage.xaml" />
     <None Remove="Pages\SettingPage.xaml" />
     <None Remove="Pages\TaskManagerPage.xaml" />
@@ -116,4 +117,10 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
+  <ItemGroup>
+    <CustomAdditionalCompileInputs Remove="Pages\DrivePage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Remove="Pages\DrivePage.xaml" />
+  </ItemGroup>
 </Project>

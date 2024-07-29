@@ -14,17 +14,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _cloud = cloud;
         }
 
-
+        //更简洁的数据绑定和操作
         [RelayCommand]
-        public async Task CreateDrive()
+        public void  CreateDrive()
         {
             MessageBox.Show("88888888");
-            OneDrive oneDrive = new();
-            await oneDrive.Login();
-            if (oneDrive.IsAuthenticated)
-            {
-                MessageBox.Show("777777777");
-            }
+            //OneDrive oneDrive = new();
+            //await oneDrive.Login();
+            //if (oneDrive.IsAuthenticated)
+            //{
+            //    MessageBox.Show("777777777");
+            //}
         }
 
 

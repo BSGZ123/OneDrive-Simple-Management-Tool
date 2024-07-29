@@ -11,6 +11,7 @@
     Title="Create Drive"
     DefaultButton="Primary"
     PrimaryButtonText="Create"
+    PrimaryButtonCommand="{Binding CreateDriveCommand}" 
     CloseButtonText="Cancel">
 
     <Grid>
