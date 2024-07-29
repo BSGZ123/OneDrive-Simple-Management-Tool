@@ -16,15 +16,15 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         //更简洁的数据绑定和操作
         [RelayCommand]
-        public void  CreateDrive()
+        public async Task CreateDrive()
         {
-            MessageBox.Show("88888888");
-            //OneDrive oneDrive = new();
-            //await oneDrive.Login();
-            //if (oneDrive.IsAuthenticated)
-            //{
-            //    MessageBox.Show("777777777");
-            //}
+            OneDrive oneDrive = new();
+            await oneDrive.Login();
+            if (oneDrive.IsAuthenticated)
+            {
+                DriveViewModel driveViewModel = new(oneDrive, DisplayName);
+                //_cloud.AddDrive(driveViewModel);
+            }
         }
 
 
