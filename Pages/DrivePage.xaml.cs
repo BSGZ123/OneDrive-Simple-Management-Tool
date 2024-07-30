@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -32,7 +33,12 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private void CopyIcon_DragOver(object sender, DragEventArgs e)
         {
-
+            //检查拖动的数据中是否包含 StorageItems 格式的数据
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                //允许执行拖放操作
+                e.AcceptedOperation = DataPackageOperation.Copy;
+            }
         }
 
         private void ToUpload_Drop(object sender, DragEventArgs e)
@@ -56,6 +62,11 @@ namespace OneDrive_Simple_Management_Tool.Pages
         }
 
         private void ShowSearchDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
         {
 
         }

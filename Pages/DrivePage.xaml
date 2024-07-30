@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:models="using:OneDrive_Simple_Management_Tool.Models"
     d:DataContext="{d:DesignInstance Type=viewmodels:DriveViewModel}"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -30,13 +31,13 @@
 
         <RelativePanel Grid.Row="1" Margin="10 5 10 5">
             <!--显示当前导航路径的导航条-->
-            <BreadcrumbBar x:Name="BreadcrumbBar">
+            <BreadcrumbBar x:Name="BreadcrumbBar" ItemsSource="{Binding BreadcrumbItems}" ItemClicked="BreadcrumbBar_ItemClicked" KeyboardAcceleratorPlacementMode="Hidden">
                 <BreadcrumbBar.ItemTemplate>
-                    <DataTemplate>
-                        <BreadcrumbBarItem>
+                    <DataTemplate x:DataType="models:BreadcrumbItem">
+                        <BreadcrumbBarItem Content="{Binding}" AutomationProperties.Name="{Binding Name}" Tag="{Binding ItemId}">
                             <BreadcrumbBarItem.ContentTemplate>
                                 <DataTemplate>
-                                    <TextBlock />
+                                    <TextBlock Text="{Binding Name}" Margin="5 0 5 0"/>
                                 </DataTemplate>
                             </BreadcrumbBarItem.ContentTemplate>
                         </BreadcrumbBarItem>
@@ -64,7 +65,7 @@
             </StackPanel>
         </RelativePanel>
 
-        <!--右键菜单-->
+        <!--网盘文件列表区域，支持右键菜单，拖放上传，快捷键等-->
         <ContentControl
             Grid.Row="2"
             x:Name="CloudControl"

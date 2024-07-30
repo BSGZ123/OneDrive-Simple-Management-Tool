@@ -29,6 +29,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
 
         private readonly CloudViewModel _cloud;
+        //别忘了在页面前端绑定displayName
         [ObservableProperty] private string _displayName;
     }
 }
