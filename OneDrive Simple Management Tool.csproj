@@ -23,6 +23,7 @@
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
+    <None Remove="Views\SearchView.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -122,5 +123,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Remove="Pages\DrivePage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomAdditionalCompileInputs Remove="Views\SearchView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Remove="Views\SearchView.xaml" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Graph.Models;
 using Microsoft.UI.Xaml;
 using OneDrive_Simple_Management_Tool.Helpers;
 using OneDrive_Simple_Management_Tool.Models;
@@ -26,8 +27,19 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             
         }
 
-        [ObservableProperty] private Visibility _isLoading = Visibility.Collapsed;
 
+        [RelayCommand]
+        public async Task GetFiles(string itemId = "Root")
+        {
+
+        }
+
+        private string _parentItemId = "Root";
+        [ObservableProperty] private Visibility _isLoading = Visibility.Collapsed;
+        [ObservableProperty] private string _storageInfo;
+
+
+        public string ParentItemId => _parentItemId;
         public ObservableCollection<BreadcrumbItem> BreadcrumbItems { get; } = new();
         public OneDrive Provider { get; }
         public string DisplayName { get; }

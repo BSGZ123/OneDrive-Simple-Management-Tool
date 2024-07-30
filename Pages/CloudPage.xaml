@@ -11,6 +11,23 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     NavigationCacheMode="Enabled">
 
+    <Page.Resources>
+        <DataTemplate x:Key="DriveItemTemplate" x:DataType="viewmodels:DriveViewModel">
+            <Grid Tag="{Binding DisplayName}" DoubleTapped="NavigateToDrive">
+                <Grid.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem x:Uid="CloudPage_Flyout_GetCapacity" Command="{Binding GetCapacityCommand}" />
+                        <!--<MenuFlyoutItem x:Uid="CloudPage_Flyout_RemoveDrive" Command="{Binding Cloud.RemoveDriveCommand}" CommandParameter="{Binding}" />-->
+                    </MenuFlyout>
+                </Grid.ContextFlyout>
+
+                <TextBlock Text="{Binding DisplayName}" />
+                <TextBlock Text="{Binding StorageInfo}" HorizontalAlignment="Right" />
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>

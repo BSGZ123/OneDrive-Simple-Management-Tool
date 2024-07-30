@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using System.Diagnostics.CodeAnalysis;
 using OneDrive_Simple_Management_Tool.Views;
 using OneDrive_Simple_Management_Tool.ViewModels;
+using Microsoft.UI.Xaml.Input;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,6 +31,11 @@ namespace OneDrive_Simple_Management_Tool.Pages
                 DataContext = new CreateDriveViewModel(DataContext as CloudViewModel)
             };
             await createDriveDialog.ShowAsync();
+        }
+
+        private void NavigateToDrive(object sender,DoubleTappedRoutedEventArgs e)
+        {
+
         }
     }
 }

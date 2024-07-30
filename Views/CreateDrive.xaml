@@ -15,6 +15,6 @@
     CloseButtonText="Cancel">
 
     <Grid>
-        <TextBox x:Name="DriveName" Header="Display Name(Optional)" PlaceholderText="Drive Name" Text="正在开发中呢🤣" Margin="10,10,10,0" />
+        <TextBox x:Name="DriveName" Header="Display Name(Optional)" PlaceholderText="Drive Name" Text="{Binding DisplayName, Mode=TwoWay}" Margin="10,10,10,0" />
     </Grid>
 </ContentDialog>

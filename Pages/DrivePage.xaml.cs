@@ -15,6 +15,8 @@ using Microsoft.UI.Xaml.Navigation;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using OneDrive_Simple_Management_Tool.Views;
+using OneDrive_Simple_Management_Tool.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -61,8 +63,15 @@ namespace OneDrive_Simple_Management_Tool.Pages
         
         }
 
-        private void ShowSearchDialogAsync(object sender, RoutedEventArgs e)
+        private async void ShowSearchDialogAsync(object sender, RoutedEventArgs e)
         {
+            SearchView searchDiglog = new SearchView()
+            {
+                XamlRoot = XamlRoot,
+                DataContext=new SearchViewModel(DataContext as DriveViewModel)
+            };
+
+            await searchDiglog.ShowAsync();
 
         }
 

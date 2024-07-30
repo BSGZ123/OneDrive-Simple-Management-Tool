@@ -1,21 +1,16 @@
-﻿using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-    public class CloudViewModel : INotifyPropertyChanged
+    public partial class CloudViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
-        {
-            if (!(object.Equals(field, newValue)))
-            {
-                field = (newValue);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                return true;
-            }
 
-            return false;
-        }
+
+
+        private bool isCacheLoaded = false;
+        [ObservableProperty] private ObservableCollection<DriveViewModel> drives = [];
     }
 }
