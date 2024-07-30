@@ -15,6 +15,10 @@
     <RepositoryUrl>https://github.com/BSGZ123/OneDrive-Simple-Management-Tool</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\File.png" />
+    <Content Remove="Assets\Folder.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Pages\BookmarkPage.xaml" />
     <None Remove="Pages\CloudPage.xaml" />
     <None Remove="Pages\DrivePage.xaml" />
@@ -23,6 +27,7 @@
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
+    <None Remove="Views\Layout\GirdFileView.xaml" />
     <None Remove="Views\SearchView.xaml" />
   </ItemGroup>
 
@@ -129,5 +134,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Remove="Views\SearchView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Layout\GirdFileView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>

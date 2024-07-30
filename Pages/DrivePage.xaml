@@ -13,6 +13,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     NavigationCacheMode="Enabled">
 
+    <!--网盘文件页面，其中有进度条，右键菜单更改布局刷新功能-->
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>

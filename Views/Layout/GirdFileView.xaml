@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="OneDrive_Simple_Management_Tool.Views.Layout.GirdFileView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Layout"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    d:DataContext="{d:DesignInstance Type=viewmodels:FileViewModel}"
+    mc:Ignorable="d">
+
+    <Grid>
+        <!--网盘文件页面每条文件(目录)记录右键按下弹出菜单功能-->
+        <!--为控件定义专属的上下文菜单-->
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="Open" Command="" CommandParameter="{Binding}" IsEnabled="False"/>
+                <MenuFlyoutItem Text="Download" Command="" CommandParameter="{Binding}" IsEnabled="False"/>
+                <MenuFlyoutItem Text="Delete" Click="ShowDeleteFileDialogAsync">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Delete"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Convert" Click="ShowConverFiletDialogAsync" Visibility="{Binding ElementName,Converter={StaticResource BottomCornerRadiusFilterConverter}}"/>
+                <MenuFlyoutItem Text="Share" Click="ShowShareFileDialogAsync"/>
+                <MenuFlyoutItem Text="Rename" Click="ShowRenameFileDialogAsync"/>
+                <MenuFlyoutItem Text="Property" Click="ShowPropertyDialogAsync"/>
+            </MenuFlyout>
+        </Grid.ContextFlyout>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <!--这里需要注意辨别是文件还是目录，以显示不同的图标，之后进行绑定变量-->
+        <Image Grid.Row="0" Source="/Assets/Folder.png" Height="128" Width="128" Visibility="Visible" VerticalAlignment="Center"/>
+        <Image Grid.Row="0" Source="/Assets/File.png" Height="128" Width="128" Visibility="Visible" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="1" Text="这里绑定变量Name，以显示文件名" HorizontalAlignment="Center" />
+    </Grid>
+</UserControl>

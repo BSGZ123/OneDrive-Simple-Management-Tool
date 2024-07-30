@@ -11,6 +11,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     NavigationCacheMode="Enabled">
 
+    <!--这是网盘列表页面(其中可能有多个网盘)-->
     <Page.Resources>
         <DataTemplate x:Key="DriveItemTemplate" x:DataType="viewmodels:DriveViewModel">
             <Grid Tag="{Binding DisplayName}" DoubleTapped="NavigateToDrive">
