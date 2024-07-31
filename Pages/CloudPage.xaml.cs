@@ -33,9 +33,13 @@ namespace OneDrive_Simple_Management_Tool.Pages
             await createDriveDialog.ShowAsync();
         }
 
+        //双击网盘列表某一行后，将会根据网盘名获取网盘信息，跳转到网盘文件页面
         private void NavigateToDrive(object sender,DoubleTappedRoutedEventArgs e)
         {
-
+            string displayName=(sender as Grid).Tag.ToString();
+            DriveViewModel drive = (DataContext as CloudViewModel).GetDrive(displayName);
+            Type pageType = Type.GetType("OneDrive_Simple_Management_Tool.Pages.DrivePage");
+            //实现路由追踪跳转。。。
         }
     }
 }
