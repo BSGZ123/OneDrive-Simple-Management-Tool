@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using OneDrive_Simple_Management_Tool.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,6 +49,15 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
         private void ShowPropertyDialogAsync(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private async void OpenFolder(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            FileViewModel viewModel = DataContext as FileViewModel;
+            //if (viewModel.IsFolder)
+            //{
+            //    await viewModel.Drive.OpenFolder(viewModel);
+            //}
         }
     }
 }

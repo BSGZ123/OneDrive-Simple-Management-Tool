@@ -6,6 +6,7 @@ using OneDrive_Simple_Management_Tool.Helpers;
 using OneDrive_Simple_Management_Tool.Models;
 using OneDrive_Simple_Management_Tool.Services;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
@@ -20,19 +21,50 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             BreadcrumbItems.Add(new BreadcrumbItem { Name = "RootFileName".GetLocalized(), ItemId = "Root" });
         }
 
+        //默认第一次调用时从网盘根目录调取，后续接受特定路径参数
+        [RelayCommand]
+        public async Task GetFiles(string itemId = "Root")
+        {
+            IsLoading = Visibility.Visible;
+            _parentItemId = itemId;
+            DriveItemCollectionResponse files = await Provider.GetFiles(_parentItemId);
+            Files.Clear();
+            Images.Clear();
+            files.Value.ForEach(file =>
+            {
+                FileViewModel newFile = new(this, file);
+                Files.Add(newFile);
+                if (file.Image != null)
+                    Images.Add(newFile);
+            });
+            IsLoading = Visibility.Collapsed;
+        }
+
 
         [RelayCommand]
         public async Task Refresh()
         {
-            
+            await GetFiles(_parentItemId);
         }
 
+        public void FilterByName(string name)
+        {
+            var filesToRemove = Files.Where(file => !file.Name.Contains(name)).ToList();
+            foreach (var file in filesToRemove)
+            {
+                Files.Remove(file);
+                Images.Remove(file);
+            }
+        }
 
         [RelayCommand]
-        public async Task GetFiles(string itemId = "Root")
+        public async Task OpenFolder(FileViewModel file) 
         {
-
+            BreadcrumbItems.Add(new BreadcrumbItem { Name = file.Name, ItemId = file.Id });
+            await GetFiles(file.Id);
         }
+
+
 
         private string _parentItemId = "Root";
         [ObservableProperty] private Visibility _isLoading = Visibility.Collapsed;
@@ -40,7 +72,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
 
         public string ParentItemId => _parentItemId;
+        public ObservableCollection<FileViewModel> Files { get; } = new();
+        public ObservableCollection<FileViewModel> Images { get; } = new();
         public ObservableCollection<BreadcrumbItem> BreadcrumbItems { get; } = new();
+        public FileViewModel SelectedItem { get; set; }
         public OneDrive Provider { get; }
         public string DisplayName { get; }
     }

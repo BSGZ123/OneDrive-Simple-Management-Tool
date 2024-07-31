@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="OneDrive_Simple_Management_Tool.Views.Layout.ColumnFileView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Layout"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:converter="using:OneDrive_Simple_Management_Tool.Converters"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    d:DataContext="{d:DesignInstance Type=viewmodels:FileViewModel}"
+    mc:Ignorable="d">
+
+
+    <!--这里还有文件时间格式与文件名可见需要处理-->
+    <UserControl.Resources>
+        <converter:FileSizeConverter x:Key="FileSizeConverter" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <!--网盘文件页面每条文件(目录)记录右键按下弹出菜单功能-->
+    <!--为控件定义专属的上下文菜单-->
+    <Grid DoubleTapped="OpenFile">
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem 
+                x:Uid="FileView_Flyout_Open" 
+                Command="{Binding Drive.OpenFolderCommand}" 
+                CommandParameter="{Binding}" 
+                IsEnabled="{Binding IsFolder}" 
+                Visibility="{Binding IsFolder, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Enter" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem 
+                x:Uid="FileView_Flyout_Open"  
+                Click="ShowPreviewDialogAsync" 
+                IsEnabled="{Binding CanPreview}"
+                Visibility="{Binding CanPreview, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Download" Command="{Binding DownloadFileCommand}" CommandParameter="{Binding Id}" IsEnabled="{Binding IsFile}" />
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Delete" Click="ShowDeleteFileDialogAsync">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Delete" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Convert" Click="ShowConverFiletDialogAsync" Visibility="{Binding Name, Converter={StaticResource FileNameToCanConvertCommandVisible}}" />
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Share" Click="ShowShareFileDialogAsync" />
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Rename" Click="ShowRenameFileDialogAsync">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="F2" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Property" Click="ShowPropertyDialogAsync">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Menu" Key="Enter" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </Grid.ContextFlyout>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+        <SymbolIcon Grid.Row="0" Symbol="Folder" Margin="5 0 5 0" Visibility="{Binding IsFolder}" />
+        <SymbolIcon Grid.Row="0" Symbol="OpenFile" Margin="5 0 5 0" Visibility="{Binding IsFile}" />
+        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Name}" />
+        <TextBlock Grid.Column="2" Text="{Binding Size, Converter={StaticResource FileSizeConverter}}" />
+        <TextBlock Grid.Column="3" Text="{Binding ItemType}" />
+        <TextBlock Grid.Column="4" Text="{Binding Updated, Converter={StaticResource DateTimeOffsetToStringConverter}}" />
+    </Grid>
+</UserControl>

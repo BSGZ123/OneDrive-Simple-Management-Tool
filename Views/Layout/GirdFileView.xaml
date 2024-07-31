@@ -10,14 +10,16 @@
     d:DataContext="{d:DesignInstance Type=viewmodels:FileViewModel}"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid Width="180" DoubleTapped="OpenFolder">
+        <!--该页仅作测试学习使用-->
         <!--网盘文件页面每条文件(目录)记录右键按下弹出菜单功能-->
         <!--为控件定义专属的上下文菜单-->
         <Grid.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem Text="Open" Command="" CommandParameter="{Binding}" IsEnabled="False"/>
-                <MenuFlyoutItem Text="Download" Command="" CommandParameter="{Binding}" IsEnabled="False"/>
+                <MenuFlyoutItem Text="Open" Command="{Binding Drive.OpenFolderCommand}" CommandParameter="{Binding}" IsEnabled="False"/>
+                <MenuFlyoutItem Text="Download" Command="{Binding}" CommandParameter="{Binding}" IsEnabled="False"/>
                 <MenuFlyoutItem Text="Delete" Click="ShowDeleteFileDialogAsync">
+                    
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete"/>
                     </MenuFlyoutItem.KeyboardAccelerators>

@@ -27,6 +27,7 @@
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
+    <None Remove="Views\Layout\ColumnFileView.xaml" />
     <None Remove="Views\Layout\GirdFileView.xaml" />
     <None Remove="Views\SearchView.xaml" />
   </ItemGroup>
@@ -139,5 +140,11 @@
     <Page Update="Views\Layout\GirdFileView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomAdditionalCompileInputs Remove="Views\Layout\ColumnFileView.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Remove="Views\Layout\ColumnFileView.xaml" />
   </ItemGroup>
 </Project>
