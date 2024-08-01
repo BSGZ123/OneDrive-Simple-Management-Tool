@@ -24,5 +24,40 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
         {
             this.InitializeComponent();
         }
+
+        private void ShowDeleteFileDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShowConverFiletDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShowShareFileDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShowRenameFileDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShowPropertyDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShowPreviewDialogAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OpenFile(object sender, DoubleTappedRoutedEventArgs e)
+        {
+
+        }
     }
 }

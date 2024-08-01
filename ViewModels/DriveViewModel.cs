@@ -64,6 +64,14 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             await GetFiles(file.Id);
         }
 
+        //获取用户网盘的容量信息(字节表示)，本地处理展示
+        [RelayCommand]
+        private async Task GetCapacity()
+        {
+            Quota quota = await Provider.GetStorageInfo();
+            StorageInfo = Utils.ReadableFileSize(quota.Used) + " / " + Utils.ReadableFileSize(quota.Total);
+
+        }
 
 
         private string _parentItemId = "Root";

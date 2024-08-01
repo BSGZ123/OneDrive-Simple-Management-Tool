@@ -33,7 +33,7 @@
             IsSettingsVisible="True"
             IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
-            SelectionChanged="nvSample_SelectionChanged"
+            SelectionChanged="NvSample_SelectionChanged"
             PaneDisplayMode="Left"
             ExpandedModeThresholdWidth="500"
             SelectionFollowsFocus="Disabled"

@@ -38,7 +38,7 @@ namespace OneDrive_Simple_Management_Tool
         }
 
         //NavigationView 控件的导航功能
-        private void nvSample_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void NvSample_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             if(args.IsSettingsSelected)
             {
@@ -64,9 +64,5 @@ namespace OneDrive_Simple_Management_Tool
 
         public Frame Rootframe => contentFrame;
 
-        //private void myButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    myButton.Content = "Clicked";
-        //}
     }
 }

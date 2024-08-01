@@ -40,6 +40,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
             DriveViewModel drive = (DataContext as CloudViewModel).GetDrive(displayName);
             Type pageType = Type.GetType("OneDrive_Simple_Management_Tool.Pages.DrivePage");
             //实现路由追踪跳转。。。
+            (App.StartupWindow as MainWindow).Navigate(pageType,drive);
         }
     }
 }
