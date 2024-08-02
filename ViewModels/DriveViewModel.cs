@@ -21,7 +21,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             BreadcrumbItems.Add(new BreadcrumbItem { Name = "RootFileName".GetLocalized(), ItemId = "Root" });
         }
 
-        //默认第一次调用时从网盘根目录调取，后续接受特定路径参数
+        //默认第一次调用时从网盘根目录调取，后续接受特定路径参数,获取路径内的文件列表
         [RelayCommand]
         public async Task GetFiles(string itemId = "Root")
         {
