@@ -7,6 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:converter="using:OneDrive_Simple_Management_Tool.Converters"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     xmlns:models="using:OneDrive_Simple_Management_Tool.Models"
     d:DataContext="{d:DesignInstance Type=viewmodels:DriveViewModel}"
     mc:Ignorable="d"
@@ -14,6 +16,12 @@
     NavigationCacheMode="Enabled">
 
     <!--网盘文件页面，其中有进度条，右键菜单更改布局刷新功能-->
+
+    <Page.Resources>
+        <converter:FileSizeConverter x:Key="FileSizeConverter" />
+        <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter"/>
+        <converters:BoolToObjectConverter x:Key="BoolToObjectConverter" TrueValue="Collapsed" FalseValue="Visible" />
+    </Page.Resources>
     
     <Grid>
         <Grid.RowDefinitions>

@@ -35,6 +35,18 @@ namespace OneDrive_Simple_Management_Tool.Pages
             this.InitializeComponent();
         }
 
+        //在页面导航到时,设置该页面的数据上下文
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            //检查导航参数 e.Parameter 是否为 DriveViewModel类型，是就赋值给drive
+            if (e.Parameter is DriveViewModel drive)
+            {
+                //将drive设置为页面的数据上下文，这样就可以点击某个网盘导航到该网盘文件列表
+                DataContext= drive;
+            }
+        }
+
         private void CopyIcon_DragOver(object sender, DragEventArgs e)
         {
             //检查拖动的数据中是否包含 StorageItems 格式的数据
