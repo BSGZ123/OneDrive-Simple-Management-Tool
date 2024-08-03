@@ -13,9 +13,11 @@
     mc:Ignorable="d">
 
 
-    <!--这里还有文件时间格式与文件名可见需要处理-->
+
     <UserControl.Resources>
         <converter:FileSizeConverter x:Key="FileSizeConverter" />
+        <converter:FileNameToCanConvertCommandVisible x:Key="FileNameToCanConvertCommandVisible" />
+        <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </UserControl.Resources>
 

@@ -7,8 +7,17 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:converter="using:OneDrive_Simple_Management_Tool.Converters"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     d:DataContext="{d:DesignInstance Type=viewmodels:FileViewModel}"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converter:FileSizeConverter x:Key="FileSizeConverter" />
+        <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" />
+        <converter:FileNameToCanConvertCommandVisible x:Key="FileNameToCanConvertCommandVisible" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
 
     <Grid Width="180" DoubleTapped="OpenFolder">
         <!--该页仅作测试学习使用-->
@@ -16,15 +25,16 @@
         <!--为控件定义专属的上下文菜单-->
         <Grid.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem Text="Open" Command="{Binding Drive.OpenFolderCommand}" CommandParameter="{Binding}" IsEnabled="False"/>
-                <MenuFlyoutItem Text="Download" Command="{Binding}" CommandParameter="{Binding}" IsEnabled="False"/>
+                <MenuFlyoutItem Text="Open" Command="{Binding Drive.OpenFolderCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsFolder}"/>
+                <MenuFlyoutItem Text="Download" Command="{Binding DownloadFileCommand}" CommandParameter="{Binding Id}" IsEnabled="{Binding IsFile}"/>
                 <MenuFlyoutItem Text="Delete" Click="ShowDeleteFileDialogAsync">
                     
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
+                    
                 </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Convert" Click="ShowConverFiletDialogAsync" Visibility="{Binding ElementName,Converter={StaticResource BottomCornerRadiusFilterConverter}}"/>
+                <MenuFlyoutItem Text="Convert" Click="ShowConverFiletDialogAsync" Visibility="{Binding Name,Converter={StaticResource FileNameToCanConvertCommandVisible}}"/>
                 <MenuFlyoutItem Text="Share" Click="ShowShareFileDialogAsync"/>
                 <MenuFlyoutItem Text="Rename" Click="ShowRenameFileDialogAsync"/>
                 <MenuFlyoutItem Text="Property" Click="ShowPropertyDialogAsync"/>
@@ -37,8 +47,8 @@
         </Grid.RowDefinitions>
 
         <!--这里需要注意辨别是文件还是目录，以显示不同的图标，之后进行绑定变量-->
-        <Image Grid.Row="0" Source="/Assets/Folder.png" Height="128" Width="128" Visibility="Visible" VerticalAlignment="Center"/>
-        <Image Grid.Row="0" Source="/Assets/File.png" Height="128" Width="128" Visibility="Visible" VerticalAlignment="Center" />
-        <TextBlock Grid.Row="1" Text="这里绑定变量Name，以显示文件名" HorizontalAlignment="Center" />
+        <Image Grid.Row="0" Source="/Assets/Folder.png" Height="128" Width="128" Visibility="{Binding IsFolder}" VerticalAlignment="Center"/>
+        <Image Grid.Row="0" Source="/Assets/File.png" Height="128" Width="128" Visibility="{Binding IsFile}" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="1" Text="{Binding Name}" HorizontalAlignment="Center" />
     </Grid>
 </UserControl>

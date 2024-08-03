@@ -51,13 +51,14 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
 
         }
 
+        //打开文件夹
         private async void OpenFolder(object sender, DoubleTappedRoutedEventArgs e)
         {
             FileViewModel viewModel = DataContext as FileViewModel;
-            //if (viewModel.IsFolder)
-            //{
-            //    await viewModel.Drive.OpenFolder(viewModel);
-            //}
+            if (viewModel.IsFolder)
+            {
+                await viewModel.Drive.OpenFolder(viewModel);
+            }
         }
     }
 }
