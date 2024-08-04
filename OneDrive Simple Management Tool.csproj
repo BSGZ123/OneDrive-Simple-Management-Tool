@@ -157,6 +157,11 @@
     <Resource Remove="Views\Layout\ColumnCloudView.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="Views\Layout\ImageCloudView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

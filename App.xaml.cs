@@ -23,6 +23,9 @@ namespace OneDrive_Simple_Management_Tool
     /// </summary>
     public partial class App : Application
     {
+
+        //CloudFlow
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -38,10 +41,20 @@ namespace OneDrive_Simple_Management_Tool
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-
+            //加载设置
+            LoadSettings();
 
             m_window = new MainWindow();
             m_window.Activate();
+
+            MsalCacheHelper CacheHelper = GetCacheHelper().GetAwaiter().GetResult();
+            Ioc.Default.ConfigureServices(
+                new ServiceCollection()
+                    .AddSingleton<TaskManagerViewModel>()
+                    .AddSingleton(CacheHelper)
+                    .AddSingleton(BuildPublicApp())
+                    .BuildServiceProvider()
+            );
 
         }
 
@@ -69,7 +82,7 @@ namespace OneDrive_Simple_Management_Tool
         {
             string cacheFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "cache");
             var storageProperties =
-                    new StorageCreationPropertiesBuilder("OneDriveTokenCache.bin", cacheFolderPath)
+                    new StorageCreationPropertiesBuilder("CloudFlowTokenCache.bin", cacheFolderPath)
                     .WithLinuxKeyring(
                         "OneDriveSimTool.TokenCache",
                         MsalCacheHelper.LinuxKeyRingDefaultCollection,
