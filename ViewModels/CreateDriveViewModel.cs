@@ -20,16 +20,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         {
             OneDrive oneDrive = new();
             await oneDrive.Login();
+            MessageBox.Show("777777777");
             if (oneDrive.IsAuthenticated)
             {
                 DriveViewModel driveViewModel = new(oneDrive, DisplayName);
-                //_cloud.AddDrive(driveViewModel);
+                _cloud.AddDrive(driveViewModel);
             }
         }
 
 
         private readonly CloudViewModel _cloud;
-        //别忘了在页面前端绑定displayName
+        //别忘了在页面前端绑定displayName，以获取云盘别名
         [ObservableProperty] private string _displayName;
     }
 }

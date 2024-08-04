@@ -10,6 +10,7 @@
     xmlns:converter="using:OneDrive_Simple_Management_Tool.Converters"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     xmlns:models="using:OneDrive_Simple_Management_Tool.Models"
+    xmlns:views="using:OneDrive_Simple_Management_Tool.Views.Layout"
     d:DataContext="{d:DesignInstance Type=viewmodels:DriveViewModel}"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -21,6 +22,19 @@
         <converter:FileSizeConverter x:Key="FileSizeConverter" />
         <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter"/>
         <converters:BoolToObjectConverter x:Key="BoolToObjectConverter" TrueValue="Collapsed" FalseValue="Visible" />
+
+        <DataTemplate x:Key="ColumnViewTemplate">
+            <views:ColumnCloudView/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="GridViewTemplate">
+            <views:GridCloudView />
+        </DataTemplate>
+        
+        <DataTemplate x:Key="ImageViewTemplate">
+            <views:ImageCloudView DataContext="{Binding}" />
+        </DataTemplate>
+
     </Page.Resources>
     
     <Grid>
@@ -81,7 +95,7 @@
             x:Name="CloudControl"
             VerticalContentAlignment="Stretch"
             HorizontalContentAlignment="Stretch"
-            ContentTemplate="{StaticResource DefaultCompactErrorIconTemplate}"
+            ContentTemplate="{StaticResource ColumnViewTemplate}"
             AllowDrop="True"
             DragOver="CopyIcon_DragOver"
             Drop="ToUpload_Drop">

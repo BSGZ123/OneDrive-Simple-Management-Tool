@@ -16,9 +16,15 @@ namespace OneDrive_Simple_Management_Tool.Pages
     /// </summary>
     public sealed partial class CloudPage : Page
     {
+        //每当页面初始化时，应当加载本地缓存的云盘信息，利用Loaded
         public CloudPage()
         {
             InitializeComponent();
+            DataContext =new CloudViewModel();
+            Loaded += async (sender, args) =>
+            {
+                await (DataContext as CloudViewModel).LoadDrivesFromDisk();
+            };
         }
 
         private async void ShowCreateDriveDialogAsync(object sender, RoutedEventArgs e)

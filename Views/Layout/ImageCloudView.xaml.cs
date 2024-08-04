@@ -30,7 +30,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
             }
         }
 
-        private async void LoadAllImages(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void LoadAllImages(object sender, RoutedEventArgs e)
         {
             foreach (FileViewModel image in (DataContext as DriveViewModel).Images.ToList())
             {
