@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="OneDrive_Simple_Management_Tool.Views.Layout.ColumnCloudView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Layout"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:views="using:OneDrive_Simple_Management_Tool.Views.Layout"
+    d:DataContext="{d:DesignInstance Type=viewmodels:DriveViewModel}"
+    mc:Ignorable="d">
+    
+    <!--云端文件列表-->
+    <UserControl.Resources>
+        <DataTemplate x:Key="ListItemTemplate" x:DataType="viewmodels:FileViewModel">
+            <views:ColumnFileView DataContext="{Binding}" />
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <!--每一个文件或者目录都对应一个ColumnFileView，提供右键菜单功能以及显示文件信息-->
+    <ListView ItemsSource="{Binding Files}" ItemTemplate="{StaticResource ListItemTemplate}" />
+</UserControl>
