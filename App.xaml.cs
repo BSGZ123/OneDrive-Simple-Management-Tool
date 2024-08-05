@@ -80,6 +80,9 @@ namespace OneDrive_Simple_Management_Tool
 
         private static async Task<MsalCacheHelper> GetCacheHelper()
         {
+            //获取当前目录的路径，并在其下构建一个名为 cache 的子目录路径
+            //但是出现了新状况，开发阶段是本地开发目录部署，调试发现运行到此阶段无权限创建目录，需管理员权限运行
+            //先暂且搁置，也没有找到详细的文档，即使管理员运行也没找到cache目录。。。。。。 很神奇的问题
             string cacheFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "cache");
             var storageProperties =
                     new StorageCreationPropertiesBuilder("CloudFlowTokenCache.bin", cacheFolderPath)

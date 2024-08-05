@@ -17,6 +17,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
     public sealed partial class CloudPage : Page
     {
         //每当页面初始化时，应当加载本地缓存的云盘信息，利用Loaded
+        [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
         public CloudPage()
         {
             InitializeComponent();

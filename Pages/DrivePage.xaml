@@ -76,9 +76,9 @@
                 </BreadcrumbBar.KeyboardAccelerators>
 
             </BreadcrumbBar>
-            
+
             <!--导航条功能按钮-->
-            <StackPanel Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True">
+            <StackPanel Orientation="Horizontal" RelativePanel.AlignRightWithPanel="True">
                 <Button Margin="0 0 5 0" Click="ShowSearchDialogAsync">
                     <FontIcon Glyph="&#xE721;" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Center" />
                 </Button>
@@ -87,6 +87,7 @@
                     <FontIcon Glyph="&#xE72C;" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Center" />
                 </Button>
             </StackPanel>
+
         </RelativePanel>
 
         <!--网盘文件列表区域，支持右键菜单，拖放上传，快捷键等-->
