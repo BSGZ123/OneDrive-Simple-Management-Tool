@@ -20,10 +20,13 @@ OneDrive简单管理工具，使用WinUI3开发
 
 
 ## 出现的问题
-- [X] 文件列表导航工具栏未居右侧(2024-08-04)
+### 2024-08-04
+- [X] 文件列表导航工具栏未居右侧
+
 应为RelativePanel.AlignRightWithPanel
 
-- [X] 需要管理员权限启动应用(2024-08-04)
+- [X] 需要管理员权限启动应用
+
 已确定问题，首先程序启动需获取(创建)身份令牌缓存文件，package打包部署时，文件的读写位置在常规权限无法覆盖的区域(疑似)。Unpackaged方式部署时，一切操作都在程序所在目录，即不再需要管理员权限读写特权目录了。
 
 ## 预期
@@ -46,29 +49,3 @@ OneDrive简单管理工具，使用WinUI3开发
 - [ ] 多账户
 - [ ] 语言国际化
 - [ ] 工具页 
-
-
-<style>
-  .date-divider {
-    margin: 20px 0;
-    position: relative;
-  }
-
-  .date-divider:before {
-    content: "";
-    display: inline-block;
-    width: 5%;
-    border-top: 1px solid #000;
-    margin: 0 10px;
-    vertical-align: middle;
-  }
-
-  .date-divider:after {
-    content: "";
-    display: inline-block;
-    width: 25%;
-    border-top: 1px solid #000;
-    margin: 0 10px;
-    vertical-align: middle;
-  }
-</style>

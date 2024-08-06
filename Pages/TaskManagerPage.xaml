@@ -7,11 +7,53 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     d:DataContext="{d:DesignInstance Type=viewmodels:TaskManagerViewModel}"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+
+
+    <!--传输任务管理页面，两个标签页，分别为上传与下载-->
     <Grid>
-        <TextBlock>255555555555</TextBlock>
+        <Grid.Resources>
+
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BoolToObjectConverter x:Key="BoolToObjectConverter" TrueValue="Collapsed" FalseValue="Visible" />
+            <converters:FileSizeToFriendlyStringConverter x:Key="FileSizeToFriendlyStringConverter" />
+
+            <!--下载任务页数据模板-->
+            <DataTemplate x:Key="DownloadTaskTemplate">
+                <Grid>
+                    
+                </Grid>
+            </DataTemplate>
+
+            <!--上传任务页数据模板-->
+            <DataTemplate x:Key="UploadTaskTemplate">
+                <Grid>
+
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+
+        <Pivot x:Uid="TaskManagerPage_Pivot_Title">
+            <PivotItem x:Uid="TaskManagerPage_Pivot_Download">
+                <TextBlock Text="all emails go here." />
+            </PivotItem>
+            <PivotItem x:Uid="TaskManagerPage_Pivot_Upload">
+                <TextBlock Text="unread emails go here." />
+            </PivotItem>
+        </Pivot>
+
+        <!--为什么不使用AppSDK1.5 SelectBar呢？因为SettingsControls Nuget包与其不兼容，降级或者替换类似组件，所以等待修复吧-->
+        <!--<SelectorBar x:Name="SelectorBar1">
+                <SelectorBarItem x:Name="SelectorBarItemRecent" Text="Recent" Icon="Clock" />
+                <SelectorBarItem x:Name="SelectorBarItemShared" Text="Shared" Icon="Share" />
+                <SelectorBarItem x:Name="SelectorBarItemFavorites" Text="Favorites" Icon="Favorite" />
+         </SelectorBar>-->
+
+        
+
     </Grid>
 </Page>

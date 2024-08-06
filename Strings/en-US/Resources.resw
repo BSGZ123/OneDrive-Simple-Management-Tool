@@ -285,6 +285,9 @@
   <data name="TaskManagerPage_Pivot_Download.Header" xml:space="preserve">
     <value>Download</value>
   </data>
+  <data name="TaskManagerPage_Pivot_Title.Title" xml:space="preserve">
+    <value>Task Center</value>
+  </data>
   <data name="TaskManagerPage_Pivot_Upload.Header" xml:space="preserve">
     <value>Upload</value>
   </data>

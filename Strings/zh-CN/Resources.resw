@@ -285,6 +285,9 @@
   <data name="TaskManagerPage_Pivot_Download.Header" xml:space="preserve">
     <value>下载</value>
   </data>
+  <data name="TaskManagerPage_Pivot_Title.Title" xml:space="preserve">
+    <value>任务中心</value>
+  </data>
   <data name="TaskManagerPage_Pivot_Upload.Header" xml:space="preserve">
     <value>上传</value>
   </data>
