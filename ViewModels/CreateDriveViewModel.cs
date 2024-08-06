@@ -20,7 +20,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         {
             OneDrive oneDrive = new();
             await oneDrive.Login();
-            MessageBox.Show("777777777");
+            //MessageBox.Show("777777777");
             if (oneDrive.IsAuthenticated)
             {
                 DriveViewModel driveViewModel = new(oneDrive, DisplayName);
