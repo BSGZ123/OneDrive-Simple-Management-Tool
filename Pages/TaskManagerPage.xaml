@@ -23,16 +23,96 @@
             <converters:FileSizeToFriendlyStringConverter x:Key="FileSizeToFriendlyStringConverter" />
 
             <!--下载任务页数据模板-->
-            <DataTemplate x:Key="DownloadTaskTemplate">
-                <Grid>
+            <DataTemplate x:Key="DownloadTaskTemplate" x:DataType="viewmodels:DownloadTaskViewModel">
+                <Grid Margin="0 10 0 10">
+                    <!--Grid组件的上下文菜单，提供右键功能-->
+                    <Grid.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Remove"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_OpenFolder"/>
+                        </MenuFlyout>
+                    </Grid.ContextFlyout>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--下载条目面板-->
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Test" FontSize="20" Margin="0 5 0 5" />
+                        <!--下载进度条-->
+                        <ProgressBar Value="" Visibility="Collapsed" />
+                        
+                        <!--下载参数-->
+                        <TextBlock>
+                            <!--下载字节-->
+                            <Run Text=" " />
+                            <Run Text=" / " />
+                            <!--下载总字节-->
+                            <Run Text=" " />
+                            <Run Text=" " />
+                            <!--下载速度-->
+                            <Run Text=" " />
+                            <Run Text="/s" />
+                        </TextBlock>
+
+                        <!--下载完成后显示，所以可见属性下载完显示-->
+                        <TextBlock Text="Download completed" Visibility="Visible" />
+                    </StackPanel>
+
+                    <!--功能按钮，如下载 暂停 取消-->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
+                        <Button Margin="0 0 10 0" >
+                            <FontIcon Glyph="&#xE769;" FontSize="10" />
+                        </Button>
+
+                        <Button Margin="0 0 10 0">
+                            <FontIcon Glyph="&#xE768;" FontSize="10" />
+                        </Button>
+
+                        <Button>
+                            <FontIcon Glyph="&#xE711;" FontSize="10" />
+                        </Button>
+                    </StackPanel>
                     
                 </Grid>
             </DataTemplate>
 
             <!--上传任务页数据模板-->
-            <DataTemplate x:Key="UploadTaskTemplate">
-                <Grid>
+            <DataTemplate x:Key="UploadTaskTemplate" x:DataType="viewmodels:UploadTaskViewModel">
+                <Grid Margin="0 10 0 10">
+                    <Grid.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" />
+                        </MenuFlyout>
+                    </Grid.ContextFlyout>
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--上传进度-->
+                    <StackPanel Orientation="Vertical">
+                        
+                        <TextBlock Text="这里获取上传文件名" FontSize="20" Margin="0 5 0 5" />
+                        <ProgressBar Value="绑定进度" Visibility="Collapsed" />
+                        <TextBlock Text="Upload completed" Visibility="Collapsed" />
+                    </StackPanel>
+
+                    <!--上传功能按钮-->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
+                        <Button Margin="0 0 10 0" Visibility="Collapsed" Command="">
+                            <FontIcon Glyph="&#xE769;" FontSize="10" />
+                        </Button>
+
+                        <Button Command="">
+                            <FontIcon Glyph="&#xE711;" FontSize="10" />
+                        </Button>
+                    </StackPanel>
+                    
                 </Grid>
             </DataTemplate>
         </Grid.Resources>
