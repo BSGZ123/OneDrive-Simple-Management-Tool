@@ -28,7 +28,7 @@
                     <!--Grid组件的上下文菜单，提供右键功能-->
                     <Grid.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" Command="{Binding ResumeDownloadCommand }"/>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_Remove"/>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_OpenFolder"/>
                         </MenuFlyout>
@@ -41,20 +41,20 @@
 
                     <!--下载条目面板-->
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Test" FontSize="20" Margin="0 5 0 5" />
+                        <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
                         <!--下载进度条-->
-                        <ProgressBar Value="" Visibility="Collapsed" />
+                        <ProgressBar Value="{Binding Progress}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
                         
                         <!--下载参数-->
                         <TextBlock>
                             <!--下载字节-->
-                            <Run Text=" " />
+                            <Run Text="{Binding DownloadedBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
                             <Run Text=" / " />
                             <!--下载总字节-->
-                            <Run Text=" " />
+                            <Run Text="{Binding TotalBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
                             <Run Text=" " />
                             <!--下载速度-->
-                            <Run Text=" " />
+                            <Run Text="{Binding DownloadSpeed,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
                             <Run Text="/s" />
                         </TextBlock>
 
