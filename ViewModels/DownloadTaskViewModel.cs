@@ -72,6 +72,42 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             IsDownloading= false;
         }
 
+        [RelayCommand]
+        public async Task ResumeDownload()
+        {
+            IsPaused = false;
+            IsDownloading = true;
+
+            //如果检测到暂停时间大于等于1个小时，就重新获取下载链接
+            if ((DateTime.Now - StartTime).TotalHours >= 1)
+            {
+                //刷新下载链接
+                DriveItem item = await Drive.Provider.GetItem(_itemId);
+                string downloadUrl = item.AdditionalData["@microsoft.graph.downloadUrl"].ToString();
+                _pack.Address = downloadUrl;
+            }
+            if(_pack != null)
+            {
+                await _downloader.DownloadFileTaskAsync(_pack);
+            }
+            else
+            {
+                _downloader.Resume();
+            }
+        }
+
+
+        public async Task CancelTaskAsync()
+        {
+            if (!Completed)
+            {
+                _downloader.CancelAsync();
+                await _file.DeleteAsync();
+            }
+            //这里还要对传输任务管理器删除对应下载任务
+            //
+        }
+
 
         //分片大小为1MB
         public static readonly int chunkSize = 1024 * 1024;

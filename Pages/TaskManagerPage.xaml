@@ -68,11 +68,11 @@
                             <FontIcon Glyph="&#xE769;" FontSize="10" />
                         </Button>
 
-                        <Button Margin="0 0 10 0">
+                        <Button Margin="0 0 10 0" Visibility="{Binding IsPaused ,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding ResumeDownloadCommand}">
                             <FontIcon Glyph="&#xE768;" FontSize="10" />
                         </Button>
 
-                        <Button>
+                        <Button Command="{Binding CancelTaskCommand}">
                             <FontIcon Glyph="&#xE711;" FontSize="10" />
                         </Button>
                     </StackPanel>
