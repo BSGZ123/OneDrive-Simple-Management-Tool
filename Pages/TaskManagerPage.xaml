@@ -28,9 +28,9 @@
                     <!--Grid组件的上下文菜单，提供右键功能-->
                     <Grid.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" Command="{Binding ResumeDownloadCommand }"/>
-                            <MenuFlyoutItem x:Uid="TaskManagerPage_Remove"/>
-                            <MenuFlyoutItem x:Uid="TaskManagerPage_OpenFolder"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" Command="{Binding ResumeDownloadCommand }" IsEnabled="{Binding IsPaused}"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Remove" Command="{Binding CancelTaskCommand}"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_OpenFolder" Command="{Binding OpenFolderCommand}"/>
                         </MenuFlyout>
                     </Grid.ContextFlyout>
 
@@ -59,12 +59,12 @@
                         </TextBlock>
 
                         <!--下载完成后显示，所以可见属性下载完显示-->
-                        <TextBlock Text="Download completed" Visibility="Visible" />
+                        <TextBlock Text="Download completed" Visibility="{Binding Completed,Converter={StaticResource BoolToVisibilityConverter}}" />
                     </StackPanel>
 
                     <!--功能按钮，如下载 暂停 取消-->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button Margin="0 0 10 0" >
+                        <Button Margin="0 0 10 0" Visibility="{Binding IsDownloading,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseDownloadCommand}">
                             <FontIcon Glyph="&#xE769;" FontSize="10" />
                         </Button>
 

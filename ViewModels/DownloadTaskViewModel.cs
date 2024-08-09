@@ -6,6 +6,8 @@ using Microsoft.UI.Dispatching;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Microsoft.Graph.Models;
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
@@ -21,6 +23,53 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public async Task StartDownload()
         {
             DriveItem item = await Drive.Provider.GetItem(_itemId);
+            //从获取的 DriveItem 对象中提取下载 URL
+            string downloadUrl = item.AdditionalData["@microsoft.graph.downloadUrl"].ToString();
+
+            StartTime = DateTime.Now;
+            _downloader = new();
+            _downloader.DownloadFileCompleted += DownloadFileCompleted;
+            _downloader.DownloadProgressChanged += DownloadProgressChanged;
+            await _downloader.DownloadFileTaskAsync(downloadUrl,_file.Path);
+        }
+
+        private void DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            _dispatcher.TryEnqueue(() =>
+            {
+                // 更新状态变量
+                if (_downloader.Status == DownloadStatus.Completed)
+                {
+                    Completed = true;
+                    IsDownloading = false;
+                }
+            });
+        }
+
+        private void DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            // 根据 _updateInterval 控制更新频率，防止频繁更新导致界面卡顿
+            if (DateTime.Now - _lastUpdate >= _updateInterval)
+            {
+                _lastUpdate = DateTime.Now;
+                // 如果这里使用了double数据类型，会导致进度控件需要处理额外的数据，从而导致页面卡住。
+                _dispatcher.TryEnqueue(() =>
+                {
+                    Progress = (int)e.ProgressPercentage;
+                    DownloadedBytes = e.ReceivedBytesSize;
+                    TotalBytes = e.TotalBytesToReceive;
+                    DownloadSpeed = (long)e.BytesPerSecondSpeed;
+                });
+            }
+        }
+
+        [RelayCommand]
+        public void PauseDownload()
+        {
+            _downloader.Pause();
+            _pack=_downloader.Package;
+            IsPaused = true;
+            IsDownloading= false;
         }
 
 
