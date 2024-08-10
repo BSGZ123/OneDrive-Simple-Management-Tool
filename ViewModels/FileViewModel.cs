@@ -47,8 +47,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             if (file != null)
             {
                 //将下载任务添加到任务管理器进行下载
-                //TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
-                //await manager.AddDownloadTask(Drive, itemId, file);
+                TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
+                await manager.AddDownloadTask(Drive, itemId, file);
             }
         }
 

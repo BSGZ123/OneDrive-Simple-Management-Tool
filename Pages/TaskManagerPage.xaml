@@ -104,11 +104,11 @@
 
                     <!--上传功能按钮-->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button Margin="0 0 10 0" Visibility="Collapsed" Command="">
+                        <Button Margin="0 0 10 0" Visibility="Collapsed" >
                             <FontIcon Glyph="&#xE769;" FontSize="10" />
                         </Button>
 
-                        <Button Command="">
+                        <Button >
                             <FontIcon Glyph="&#xE711;" FontSize="10" />
                         </Button>
                     </StackPanel>

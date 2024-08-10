@@ -96,7 +96,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             }
         }
 
-
+        [RelayCommand]
         public async Task CancelTaskAsync()
         {
             if (!Completed)
@@ -105,7 +105,14 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 await _file.DeleteAsync();
             }
             //这里还要对传输任务管理器删除对应下载任务
+            _manager.RemoveSelectedDownloadTasks(this);
+        }
+
+        [RelayCommand]
+        public void OpenFolder()
+        {
             //
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{_file.Path}\"");
         }
 
 

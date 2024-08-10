@@ -10,11 +10,32 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public ObservableCollection<DownloadTaskViewModel> DownloadTasks { get; } = new();
         public ObservableCollection<UploadTaskViewModel> UploadTasks { get; } = new();
 
-        public async Task AddDownloadTask(DriveViewModel drive,string itemId,StorageFile file)
+        public async Task AddDownloadTask(DriveViewModel drive, string itemId, StorageFile file)
         {
             DownloadTaskViewModel downloadTask = new(drive, itemId, file);
             DownloadTasks.Add(downloadTask);
             await downloadTask.StartDownload();
         }
+
+        //重新开始所有下载任务
+        public async Task StartAllDownloadTasks()
+        {
+            foreach (var task in DownloadTasks)
+            {
+                if (!task.Completed)
+                {
+                    await task.ResumeDownload();
+                }
+            }
+        }
+
+
+        public void RemoveSelectedDownloadTasks(DownloadTaskViewModel task)
+        {
+            DownloadTasks.Remove(task);
+        }
+
+
+
     }
 }
