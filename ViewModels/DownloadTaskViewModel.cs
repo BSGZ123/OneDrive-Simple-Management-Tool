@@ -111,7 +111,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [RelayCommand]
         public void OpenFolder()
         {
-            //
+            //下载完成后查看文件所在目录
             System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{_file.Path}\"");
         }
 

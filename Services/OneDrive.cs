@@ -82,7 +82,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             Stream stream = await file.OpenStreamForReadAsync();
             if ((await file.GetBasicPropertiesAsync()).Size == 0)
             {
-                // Upload an empty file
+                // 上传一个空文件
                 await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(new MemoryStream());
                 return;
             }

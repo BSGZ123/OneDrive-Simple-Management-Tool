@@ -97,18 +97,18 @@
                     <!--上传进度-->
                     <StackPanel Orientation="Vertical">
                         
-                        <TextBlock Text="这里获取上传文件名" FontSize="20" Margin="0 5 0 5" />
-                        <ProgressBar Value="绑定进度" Visibility="Collapsed" />
-                        <TextBlock Text="Upload completed" Visibility="Collapsed" />
+                        <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
+                        <ProgressBar Value="{Binding Progress}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                        <TextBlock Text="Upload completed" Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </StackPanel>
 
                     <!--上传功能按钮-->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button Margin="0 0 10 0" Visibility="Collapsed" >
+                        <Button Margin="0 0 10 0" Visibility="{Binding IsUploading, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseUploadCommand}" >
                             <FontIcon Glyph="&#xE769;" FontSize="10" />
                         </Button>
 
-                        <Button >
+                        <Button Command="{Binding CancelTaskCommand}">
                             <FontIcon Glyph="&#xE711;" FontSize="10" />
                         </Button>
                     </StackPanel>
@@ -119,10 +119,10 @@
 
         <Pivot x:Uid="TaskManagerPage_Pivot_Title">
             <PivotItem x:Uid="TaskManagerPage_Pivot_Download">
-                <TextBlock Text="all emails go here." />
+                <ListView ItemsSource="{Binding DownloadTasks}" ItemTemplate="{StaticResource DownloadTaskTemplate}"/>
             </PivotItem>
             <PivotItem x:Uid="TaskManagerPage_Pivot_Upload">
-                <TextBlock Text="unread emails go here." />
+                <ListView ItemsSource="{Binding UploadTasks}" ItemTemplate="{StaticResource UploadTaskTemplate}" />
             </PivotItem>
         </Pivot>
 

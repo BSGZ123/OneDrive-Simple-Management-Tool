@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using Windows.Storage;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
@@ -33,6 +34,15 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public void RemoveSelectedDownloadTasks(DownloadTaskViewModel task)
         {
             DownloadTasks.Remove(task);
+        }
+
+        //移除完成下载项
+        public void RemoveCompletedDownloadTasks() 
+        {
+            foreach(var completedTask in DownloadTasks.Where(x => x.Completed).ToList())
+            {
+                DownloadTasks.Remove(completedTask);
+            }
         }
 
 
