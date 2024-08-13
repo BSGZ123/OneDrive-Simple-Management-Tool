@@ -45,7 +45,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             }
         }
 
+        public async Task AddUploadTask(DriveViewModel drive, string itemId,IStorageItem item )
+        {
+            UploadTaskViewModel uploadTasks = new(drive, itemId, item);
+            UploadTasks.Add(uploadTasks);
+            await uploadTasks.StartUpload();
+        }
 
+        public void RemoveSelectedUploadTasks(UploadTaskViewModel task)
+        {
+            UploadTasks.Remove(task);
+        }
 
     }
 }

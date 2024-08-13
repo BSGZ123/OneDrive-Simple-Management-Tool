@@ -19,6 +19,8 @@ using OneDrive_Simple_Management_Tool.Views;
 using OneDrive_Simple_Management_Tool.ViewModels;
 using System.Collections.ObjectModel;
 using OneDrive_Simple_Management_Tool.Models;
+using Windows.Storage;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -57,9 +59,21 @@ namespace OneDrive_Simple_Management_Tool.Pages
             }
         }
 
-        private void ToUpload_Drop(object sender, DragEventArgs e)
+        private async void ToUpload_Drop(object sender, DragEventArgs e)
         {
+            //检查Dataview中是否包含文件数据
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                //获取拖放于窗口上的文件或文件夹项，IStorageItem可表示文件或文件夹项
+                IReadOnlyList<IStorageItem> items = await e.DataView.GetStorageItemsAsync();
 
+                DriveViewModel driveViewModel = (DriveViewModel)DataContext;
+                TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
+                //将拖放项转换为上传任务
+                var tasks = items.Select(item => manager.AddUploadTask(driveViewModel, driveViewModel.ParentItemId, item));
+                await Task.WhenAll(tasks);
+                await driveViewModel.Refresh();
+            }
         }
 
         private void CreateFolderDialogAsync(object sender, RoutedEventArgs e)

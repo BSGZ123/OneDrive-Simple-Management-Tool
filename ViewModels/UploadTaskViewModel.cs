@@ -62,7 +62,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             // https://github.com/microsoftgraph/msgraph-sdk-dotnet/issues/1678
             // Microsoft Graph v4 不支持取消上传，而 CommunityToolkit.Graph 仍在使用此版本。
             // 所以在工具库更新到 v5 之前，只能从列表中删除该任务。
-            //_manager.RemoveSelectedUploadTasks(this);
+            _manager.RemoveSelectedUploadTasks(this);
         }
 
 
