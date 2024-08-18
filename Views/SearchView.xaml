@@ -8,6 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
     d:DataContext="{d:DesignInstance Type=viewmodels:SearchViewModel}"
+    PrimaryButtonText="OK"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary"
+    PrimaryButtonCommand="{Binding SearchCommand}"
     mc:Ignorable="d">
 
     <StackPanel>
@@ -16,6 +20,6 @@
             <ComboBoxItem Content="Global"/>
         </ComboBox>
 
-        <TextBox/>
+        <TextBox x:Uid="SearchView_FileName" Text="{Binding FileName, Mode=TwoWay}" />
     </StackPanel>
 </ContentDialog>

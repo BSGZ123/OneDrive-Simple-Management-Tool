@@ -58,6 +58,24 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
         [RelayCommand]
+        public async Task SearchFile(string fileName)
+        {
+            IsLoading = Visibility.Visible;
+            var files = await Provider.SearchGlobalItems(fileName);
+            Files.Clear();
+            Images.Clear();
+            files.Value.ForEach(file =>
+            {
+                FileViewModel newFile = new(this, file);
+                Files.Add(newFile);
+                if (file.Image != null)
+                    Images.Add(newFile);
+            });
+            IsLoading = Visibility.Collapsed;
+        }
+
+
+        [RelayCommand]
         public async Task OpenFolder(FileViewModel file) 
         {
             BreadcrumbItems.Add(new BreadcrumbItem { Name = file.Name, ItemId = file.Id });
