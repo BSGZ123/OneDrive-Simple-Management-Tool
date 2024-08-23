@@ -12,10 +12,10 @@
     Title="Create Folder"
     PrimaryButtonText="OK"
     CloseButtonText="Cancel"
-    PrimaryButtonCommand=""
+    PrimaryButtonCommand="{Binding CreateFolderCommand}"
     DefaultButton="Primary">
 
     <Grid>
-        
+        <TextBox Header="Type name of new folder:" PlaceholderText="Folder Name" Text="{Binding FolderName, Mode=TwoWay}" />
     </Grid>
 </ContentDialog>

@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-    public class CreateFolderViewModel : ObservableObject
+    public partial class CreateFolderViewModel : ObservableObject
     {
         public CreateFolderViewModel(DriveViewModel drive) 
         {
@@ -10,6 +12,14 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
 
+        [RelayCommand]
+        private async Task CreateFolder()
+        {
+            await Drive.Provider.CreateFolder(Drive.ParentItemId, FolderName);
+            await Drive.Refresh();
+        }
+
+        [ObservableProperty] private string _folderName;
         public DriveViewModel Drive;
     }
 }
