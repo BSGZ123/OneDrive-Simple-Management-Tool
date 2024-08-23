@@ -77,9 +77,10 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].Items[itemId].PatchAsync(requestBody);
         }
 
+        //这里通过SDK上传是有问题的，估摸着还得用Api上传
         public async Task UploadFileAsync(StorageFile file, string itemId, IProgress<long> progress = null)
         {
-            Stream stream = await file.OpenStreamForReadAsync();
+            using Stream stream = await file.OpenStreamForReadAsync();
             if ((await file.GetBasicPropertiesAsync()).Size == 0)
             {
                 // 上传一个空文件
@@ -96,11 +97,30 @@ namespace OneDrive_Simple_Management_Tool.Services
                     },
                 },
             };
-            UploadSession uploadSession = await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).CreateUploadSession.PostAsync(uploadSessionRequestBody);
+            UploadSession uploadSession = await graphClient
+                .Drives[DriveId]
+                .Items[itemId]
+                .ItemWithPath(file.Name)
+                .CreateUploadSession
+                .PostAsync(uploadSessionRequestBody);
+
             int maxChunckSize = 320 * 1024;
             LargeFileUploadTask<DriveItem> fileUploadTask = new(uploadSession, stream, maxChunckSize, graphClient.RequestAdapter);
 
-            await fileUploadTask.UploadAsync(progress);
+            try
+            {
+               var uploadResult= await fileUploadTask.UploadAsync(progress);
+                Console.WriteLine(uploadResult.ItemResponse.ToString());
+                Console.WriteLine(uploadResult.UploadSucceeded ?
+                $"Upload complete, item ID: {uploadResult.ItemResponse.Id}" :
+                "Upload failed");
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"Error uploading: {ex.Message}");
+            }
+
+            
         }
 
         public async Task UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null)
@@ -277,7 +297,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         private static IPublicClientApplication PublicClientApp;
-        private readonly string[] scopes = new string[] { "User.Read", "Files.ReadWrite.All" };
+        private readonly string[] scopes = ["User.Read", "Files.ReadWrite.All"];
         private static AuthenticationResult authResult;
         private GraphServiceClient graphClient;
 

@@ -76,9 +76,15 @@ namespace OneDrive_Simple_Management_Tool.Pages
             }
         }
 
-        private void CreateFolderDialogAsync(object sender, RoutedEventArgs e)
+        private async void CreateFolderDialogAsync(object sender, RoutedEventArgs e)
         {
+            CreateFolderView createFolder = new CreateFolderView()
+            {
+                XamlRoot = XamlRoot,
+                DataContext = new CreateFolderViewModel(DataContext as DriveViewModel)
+            };
 
+            await createFolder.ShowAsync();
         }
 
         private void ChangeLayout(object sender, RoutedEventArgs e)

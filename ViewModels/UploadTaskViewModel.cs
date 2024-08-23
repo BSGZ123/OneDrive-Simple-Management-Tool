@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using System;
 using System.Threading.Tasks;
+using System.Windows;
 using Windows.Storage;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
@@ -36,7 +37,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
             if (_item is StorageFile file)
             {
-
+                MessageBox.Show("" + _itemId);
                 await Drive.Provider.UploadFileAsync(file, _itemId, progress);
             }
             else if (_item is StorageFolder folder)
@@ -45,7 +46,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             }
             Completed = true;
             IsUploading = false;
-
+            
             //任务完成
             await Task.CompletedTask;
         }

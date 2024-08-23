@@ -30,6 +30,7 @@
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
+    <None Remove="Views\CreateFolderView.xaml" />
     <None Remove="Views\Layout\ColumnCloudView.xaml" />
     <None Remove="Views\Layout\ColumnFileView.xaml" />
     <None Remove="Views\Layout\GirdFileView.xaml" />
@@ -56,9 +57,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Graph" Version="5.56.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.62.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.62.0" />
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="8.0.7" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.63.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.63.0" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="8.0.8" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240627000" />
     <PackageReference Include="Net.Codecrete.QrCodeGenerator" Version="2.0.5" />
@@ -163,6 +164,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\CreateFolderView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Layout\ImageCloudView.xaml">
