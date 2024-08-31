@@ -20,9 +20,15 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
             this.InitializeComponent();
         }
 
-        private void ShowDeleteFileDialogAsync(object sender, RoutedEventArgs e)
+        private async void ShowDeleteFileDialogAsync(object sender, RoutedEventArgs e)
         {
-
+            FileViewModel file = DataContext as FileViewModel;
+            DeleteFileView dialog = new DeleteFileView() 
+            {
+                XamlRoot=XamlRoot,
+                DataContext = new DeleteFileViewModel(file)
+            };
+            await dialog.ShowAsync();
         }
 
         private void ShowConverFiletDialogAsync(object sender, RoutedEventArgs e)

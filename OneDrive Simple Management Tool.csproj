@@ -31,6 +31,7 @@
     <None Remove="Pages\ToolPage.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
     <None Remove="Views\CreateFolderView.xaml" />
+    <None Remove="Views\DeleteFileView.xaml" />
     <None Remove="Views\Layout\ColumnCloudView.xaml" />
     <None Remove="Views\Layout\ColumnFileView.xaml" />
     <None Remove="Views\Layout\GirdFileView.xaml" />
@@ -165,6 +166,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\DeleteFileView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\RenameFileView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
