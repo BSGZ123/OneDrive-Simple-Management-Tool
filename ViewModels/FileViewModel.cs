@@ -84,6 +84,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public long? Size { get => _file.Size; }
         public bool IsFile { get => _file.Folder == null; }
         public bool IsFolder { get => !IsFile; }
+        public int? ChildrenCount { get => _file.Folder?.ChildCount; }
         public DriveViewModel Drive { get; }
         public string ItemType { get; }
         public DateTimeOffset? Updated { get => _file.LastModifiedDateTime; }

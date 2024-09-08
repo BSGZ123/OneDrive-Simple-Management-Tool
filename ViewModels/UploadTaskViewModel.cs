@@ -54,7 +54,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [RelayCommand]
         public static void PauseUpload()
         {
-            // Microsoft Graph API 暂时不支持暂停上传。
+            // Microsoft Graph API 暂时不支持暂停上传。支持但是实现有问题
         }
 
         [RelayCommand]

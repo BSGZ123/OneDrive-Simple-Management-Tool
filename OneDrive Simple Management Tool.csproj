@@ -37,6 +37,7 @@
     <None Remove="Views\Layout\GirdFileView.xaml" />
     <None Remove="Views\Layout\GridCloudView.xaml" />
     <None Remove="Views\Layout\ImageCloudView.xaml" />
+    <None Remove="Views\PropertyView.xaml" />
     <None Remove="Views\RenameFileView.xaml" />
     <None Remove="Views\SearchView.xaml" />
   </ItemGroup>
@@ -166,6 +167,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\PropertyView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\DeleteFileView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

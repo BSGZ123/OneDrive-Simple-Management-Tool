@@ -87,6 +87,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(new MemoryStream());
                 return;
             }
+
             var uploadSessionRequestBody = new Microsoft.Graph.Drives.Item.Items.Item.CreateUploadSession.CreateUploadSessionPostRequestBody
             {
                 Item = new DriveItemUploadableProperties
@@ -222,16 +223,11 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].SearchWithQ(query).GetAsSearchWithQGetResponseAsync();
         }
 
-        private class TokenProvider : IAccessTokenProvider
+        //获取受限资源的访问令牌，委托getTokenDelegate，scopes限定权限范围
+        private class TokenProvider(Func<string[], Task<string>> getTokenDelegate, string[] scopes) : IAccessTokenProvider
         {
-            private readonly Func<string[], Task<string>> getTokenDelegate;
-            private readonly string[] scopes;
-
-            public TokenProvider(Func<string[], Task<string>> getTokenDelegate, string[] scopes)
-            {
-                this.getTokenDelegate = getTokenDelegate;
-                this.scopes = scopes;
-            }
+            private readonly Func<string[], Task<string>> getTokenDelegate = getTokenDelegate;
+            private readonly string[] scopes = scopes;
 
             public Task<string> GetAuthorizationTokenAsync(Uri uri, Dictionary<string, object> additionalAuthenticationContext = default,
                 CancellationToken cancellationToken = default)
@@ -250,6 +246,7 @@ namespace OneDrive_Simple_Management_Tool.Services
 
                 try
                 {
+                    //尝试使用静默方式获取令牌 (AcquireTokenSilent)，如果失败则尝试交互式方式获取令牌 (AcquireTokenInteractive)
                     authResult = await PublicClientApp
                                     .AcquireTokenSilent(scopes, accounts.First(account => account.HomeAccountId.Identifier == HomeAccountId))
                                     .ExecuteAsync();
@@ -271,11 +268,13 @@ namespace OneDrive_Simple_Management_Tool.Services
                 }
                 if (authResult != null)
                 {
+                    //身份验证通过
                     IsAuthenticated = true;
                 }
                 HomeAccountId = authResult?.Account.HomeAccountId.Identifier;
                 return authResult?.AccessToken;
             }, scopes);
+
             BaseBearerTokenAuthenticationProvider authProvider = new(tokenProvider);
             graphClient = new(authProvider);
             await Task.FromResult(graphClient);
