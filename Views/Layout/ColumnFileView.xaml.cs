@@ -52,8 +52,16 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
             await dialog.ShowAsync();
         }
 
-        private void ShowPropertyDialogAsync(object sender, RoutedEventArgs e)
+        private async void ShowPropertyDialogAsync(object sender, RoutedEventArgs e)
         {
+            FileViewModel file = DataContext as FileViewModel;
+            PropertyView dialog = new()
+            {
+                XamlRoot = XamlRoot,
+                DataContext = new PropertyViewModel(file)
+            };
+
+            await dialog.ShowAsync();
 
         }
 

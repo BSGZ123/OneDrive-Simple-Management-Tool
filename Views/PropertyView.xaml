@@ -8,7 +8,20 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
     d:DataContext="{d:DesignInstance Type=viewmodels:PropertyViewModel}"
-    mc:Ignorable="d">
+    xmlns:converter="using:OneDrive_Simple_Management_Tool.Converters"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    mc:Ignorable="d"
+    Title="{Binding Name}"
+    PrimaryButtonText="OK"
+    DefaultButton="Primary"
+    CloseButtonText="Cancel">
+
+    <ContentDialog.Resources>
+        <converter:FileSizeConverter x:Key="FileSizeConverter" />
+        <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </ContentDialog.Resources>
+
 
     <Grid>
 
@@ -19,18 +32,18 @@
 
          <!--文件信息列-->
         <StackPanel Orientation="Vertical">
-            <TextBlock  Text="Name"/>
-            <TextBlock  Text="Size"/>
-            <TextBlock  Text="UpDate"/>
-            <TextBlock  Text="ChildCount"/>
+            <TextBlock  Text="Name" FontWeight="Bold" />
+            <TextBlock  Text="Size" FontWeight="Bold" />
+            <TextBlock  Text="UpDate" FontWeight="Bold"/>
+            <TextBlock  Text="ChildCount" FontWeight="Bold" Visibility="{Binding IsFolder,Converter={StaticResource BoolToVisibilityConverter}}"/>
         </StackPanel>
 
         <!--文件信息内容-->
         <StackPanel Grid.Column="1">
-            <TextBlock Text="{Binding}"/>
-            <TextBlock Text="{Binding}"/>
-            <TextBlock Text="{Binding}"/>
-            <TextBlock Text="{Binding}"/>
+            <TextBlock Text="{Binding Name}"/>
+            <TextBlock Text="{Binding Size,Converter={StaticResource FileSizeConverter}}"/>
+            <TextBlock Text="{Binding UpDated,Converter={StaticResource DateTimeOffsetToStringConverter}}"/>
+            <TextBlock Text="{Binding ChildrenCount}" Visibility="{Binding IsFolder,Converter={StaticResource BoolToVisibilityConverter}}"/>
         </StackPanel>
     </Grid>
 </ContentDialog>
