@@ -10,12 +10,86 @@
         
         <UserControl>
             <Grid x:Name="controlRoot"
-                  Width="360"
+                  Width="300"
                   Height="90"
-                  Padding="8">
-                
+                  Padding="8"
+                  HorizontalAlignment="Stretch"
+                  Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  CornerRadius="{StaticResource ControlCornerRadius}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!--定义视觉状态组-->
+                <VisualStateManager.VisualStateGroups>
+                    <!--根据窗口大小或设备方向定义不同的视觉状态-->
+                    <VisualStateGroup x:Name="LayoutVisualStates">
+                        <!--窗口宽度大于等于 640 像素的情况-->
+                        <VisualState x:Name="WideLayout">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="{StaticResource Breakpoint640Plus}" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters />
+                        </VisualState>
+                        <!--窗口宽度小于 640 像素的情况-->
+                        <VisualState x:Name="NarrowLayout">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="0" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="controlRoot.Width" Value="Auto" />
+                                <Setter Target="controlRoot.Height" Value="120" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+
+                <!--工具卡片中工具图标-->
+                <Grid Width="72" CornerRadius="{ThemeResource ControlCornerRadius}">
+                    <Image 
+                        x:Name="gridImage"
+                        Width="48"
+                        VerticalAlignment="Center"
+                        Source="{x:Bind ImagePath}"
+                        Stretch="Uniform"/>
+                </Grid>
+
+                <StackPanel
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Margin="16 0 0 0"
+                    VerticalAlignment="Center"
+                    Orientation="Vertical"
+                    Spacing="2">
+
+                    <TextBlock
+                        x:Name="titleText"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind Name}"
+                        TextLineBounds="TrimToCapHeight"
+                        TextWrapping="NoWrap" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        RelativePanel.Below="titleText"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Description}"
+                        TextTrimming="CharacterEllipsis" />
+
+                </StackPanel>
+
+                <InfoBadge Grid.Column="2"
+                           Width="10"
+                           Margin="4"
+                           VerticalAlignment="Top"
+                           Visibility="Collapsed"/>
+
             </Grid>
-            
+
         </UserControl>
         
     </DataTemplate>
