@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    x:Class="OneDrive_Simple_Management_Tool.Controls.ItemCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:OneDrive_Simple_Management_Tool.Controls"
+    xmlns:data="using:OneDrive_Simple_Management_Tool.Models">
+
+    <DataTemplate x:Key="CardItemControlTemplate" x:DataType="data:ToolItem">
+        
+        <UserControl>
+            <Grid x:Name="controlRoot"
+                  Width="360"
+                  Height="90"
+                  Padding="8">
+                
+            </Grid>
+            
+        </UserControl>
+        
+    </DataTemplate>
+</ResourceDictionary>

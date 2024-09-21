@@ -22,6 +22,7 @@
     <Content Remove="Assets\Folder.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Controls\ItemCard.xaml" />
     <None Remove="Pages\BookmarkPage.xaml" />
     <None Remove="Pages\CloudPage.xaml" />
     <None Remove="Pages\DrivePage.xaml" />
@@ -80,9 +81,6 @@
   -->
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\ProjectData\OneDrive Simple Management Tool\cloud.png">
@@ -167,6 +165,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Controls\ItemCard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\PropertyView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
