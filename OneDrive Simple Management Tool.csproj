@@ -162,6 +162,11 @@
     <Resource Remove="Views\Layout\ColumnCloudView.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="Assets\link-share.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

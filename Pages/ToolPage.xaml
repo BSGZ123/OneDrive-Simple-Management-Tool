@@ -6,14 +6,24 @@
     xmlns:local="using:OneDrive_Simple_Management_Tool.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:OneDrive_Simple_Management_Tool.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        
+        <controls:ItemCard />
     </Page.Resources>
     
-    <Grid>
-        <TextBlock>27777777777777777777</TextBlock>
+    <Grid x:Name="headerGrid" CornerRadius="8 0 0 0">
+        <GridView
+            Padding="24 36 24 36"
+            IsItemClickEnabled="True"
+            IsSwipeEnabled="False"
+            ItemTemplate="{StaticResource CardItemControlTemplate}"
+            ItemsSource="{x:Bind Items, Mode=OneWay }"
+            ItemClick="GridView_ItemClick"
+            SelectionMode="None"
+            />
+         <!--单击组件时不会出现视觉选择指示符-->
     </Grid>
 </Page>
