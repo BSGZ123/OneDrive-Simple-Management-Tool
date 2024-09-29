@@ -16,7 +16,7 @@
                   HorizontalAlignment="Stretch"
                   Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                   BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                  BorderThickness="1"
+                  BorderThickness="2"
                   CornerRadius="{StaticResource ControlCornerRadius}">
 
                 <Grid.ColumnDefinitions>

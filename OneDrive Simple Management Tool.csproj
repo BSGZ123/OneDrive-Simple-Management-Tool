@@ -30,6 +30,7 @@
     <None Remove="Pages\SettingPage.xaml" />
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
+    <None Remove="Pages\Tools\ShareCommunity.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
     <None Remove="Views\CreateFolderView.xaml" />
     <None Remove="Views\DeleteFileView.xaml" />
@@ -170,6 +171,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\Tools\ShareCommunity.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Controls\ItemCard.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
