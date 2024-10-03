@@ -6,12 +6,41 @@
     xmlns:local="using:OneDrive_Simple_Management_Tool.Pages.Tools"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels"
+    xmlns:models="using:OneDrive_Simple_Management_Tool.Models"
     d:DataContext="{d:DesignInstance Type=viewmodels:ShareCommunityViewModel}"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Loaded="Page_Loaded">
+
+    <Page.Resources>
+        <DataTemplate x:Key="LinkTemplate" x:DataType="models:Link">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding title}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding expire_date}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="{Binding views}" VerticalAlignment="Center" />
+                <Button Grid.Column="3" x:Uid="ShareCommunityPage_Details" Style="{StaticResource AccentButtonStyle}" Click="ShowLinkDetailsDialogAsync" />
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
 
     <Grid>
-
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem x:Uid="ShareCommunityPage_Flyout_Refresh" Command="{Binding RefreshCommand}" />
+                <MenuFlyoutItem x:Uid="ShareCommunityPage_Flyout_CreateLink" Click="ShowCreateLinkDialogAsync" />
+            </MenuFlyout>
+        </Grid.ContextFlyout>
+        <ListView
+            ItemsSource="{Binding Links}"
+            ItemTemplate="{StaticResource LinkTemplate}" />
     </Grid>
 </Page>
