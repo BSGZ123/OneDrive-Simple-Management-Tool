@@ -26,6 +26,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         [ObservableProperty] private IEnumerable<Link> links;
         private readonly HttpClient _client = new();
+        //获取配置文件中的分享服务地址(需要单独部署)
         private readonly string _apiUrl = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("Tools:ShareCommunity:Url").Value;
     }
 }

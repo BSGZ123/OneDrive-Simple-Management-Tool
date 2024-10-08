@@ -42,6 +42,7 @@
     <None Remove="Views\PropertyView.xaml" />
     <None Remove="Views\RenameFileView.xaml" />
     <None Remove="Views\SearchView.xaml" />
+    <None Remove="Views\Tools\LinkDetails.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -171,6 +172,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\Tools\LinkDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\Tools\ShareCommunity.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
