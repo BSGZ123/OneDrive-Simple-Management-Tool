@@ -6,7 +6,7 @@
     xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Tools"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
     d:DataContext="{d:DesignInstance Type=viewmodels:LinkDetailsViewModel}"
     mc:Ignorable="d">
 
