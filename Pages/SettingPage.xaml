@@ -15,19 +15,71 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Page.Resources>
 
-    <Grid>
+    <Grid Padding="36 0 36 0">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <TextBlock>9999999999999999999999999</TextBlock>
-        <TextBlock>9999999999999999999999999</TextBlock>
 
-        <StackPanel>
-            
+        <TextBlock x:Uid="SettingPage_Title" FontSize="20" FontWeight="Medium"  Margin="0 20 0 0"/>
+        <TextBlock Grid.Row="1" x:Uid="SettingPage_AppearanceTitle" FontWeight="Bold"  Margin="0 10 0 10"/>
+
+        <StackPanel Grid.Row="2" Orientation="Vertical">
+
+            <!--系统主题明暗或系统跟随-->
+            <controls:SettingsCard x:Uid="SettingPage_AppTheme">
+
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE790;"/>
+                </controls:SettingsCard.HeaderIcon>
+
+                <ComboBox x:Name="themeMode" SelectionChanged="themeMode_SelectionChanged">
+                    <ComboBoxItem x:Uid="SettingPage_Theme_Default" Tag="Default" />
+                    <ComboBoxItem x:Uid="SettingPage_Theme_Light" Tag="Light" />
+                    <ComboBoxItem x:Uid="SettingPage_Theme_Dark" Tag="Dark" />
+                </ComboBox>
+                
+            </controls:SettingsCard>
+
+            <!--系统主题颜色切换-->
+            <controls:SettingsCard Header="Material">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE790;" />
+                </controls:SettingsCard.HeaderIcon>
+                <ComboBox x:Name="materialMode" SelectionChanged="materialMode_SelectionChanged">
+                    <ComboBoxItem Content="Mica" Tag="Mica" />
+                    <ComboBoxItem Content="MicaAlt" Tag="MicaAlt" />
+                    <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
+                    <ComboBoxItem Content="Default" Tag="Default" />
+                </ComboBox>
+            </controls:SettingsCard>
+
+            <TextBlock x:Uid="SettingPage_AboutTitle" FontWeight="Bold" Margin="0 10 0 10" />
+
+            <!--程序的版权更新简要信息-->
+            <controls:SettingsExpander Header="OneDrive Simple Management Tool" Description="It's totally free for you ! ">
+
+                <controls:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xE753;" />
+                </controls:SettingsExpander.HeaderIcon>
+
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextSelectionEnabled="True"
+                           Text="{x:Bind }"/>
+
+                <controls:SettingsExpander.Items>
+                    <controls:SettingsCard Header="Github">
+                        <HyperlinkButton Content="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool" NavigateUri="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool" />
+                    </controls:SettingsCard>
+
+                    <controls:SettingsCard Header="Update" Visibility="Visible">
+                        <HyperlinkButton Content="Update" NavigateUri="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool/releases/latest" />
+                    </controls:SettingsCard>
+                </controls:SettingsExpander.Items>
+
+            </controls:SettingsExpander>
         </StackPanel>
     </Grid>
 </Page>

@@ -27,5 +27,15 @@ namespace OneDrive_Simple_Management_Tool.Pages
         {
             this.InitializeComponent();
         }
+
+        private void themeMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void materialMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }
