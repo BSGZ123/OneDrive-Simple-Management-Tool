@@ -28,7 +28,7 @@ namespace OneDrive_Simple_Management_Tool.Pages.Tools
             await (DataContext as ShareCommunityViewModel).Refresh();
         }
 
-        private  async void ShowLinkDetailsDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void ShowLinkDetailsDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             LinkDetails dialog = new LinkDetails()
             {
@@ -39,7 +39,7 @@ namespace OneDrive_Simple_Management_Tool.Pages.Tools
             await dialog.ShowAsync();
         }
 
-        private  async void ShowCreateLinkDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void ShowCreateLinkDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             CreateLink dialog = new()
             {
