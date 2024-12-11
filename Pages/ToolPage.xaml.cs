@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using OneDrive_Simple_Management_Tool.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -13,11 +14,11 @@ namespace OneDrive_Simple_Management_Tool.Pages
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public  partial class ToolPage : Page,INotifyPropertyChanged
+    public  partial class ToolPage : Page, INotifyPropertyChanged
     {
         public ToolPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         //用于设置属性并通知 UI 更改
@@ -30,10 +31,12 @@ namespace OneDrive_Simple_Management_Tool.Pages
             return true;
         }
 
-        protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null) 
+        { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); }
 
-        //这个后续添加只能手动了
-        private IEnumerable<ToolItem> _items =new List<ToolItem> {
+        //这个后续添加只能手动了 
+        //IEnumerable 并没有机制通知 UI 它的内容已经改变,它本身并不支持修改集合的内容,只会读取一次初始内容。
+        private ObservableCollection<ToolItem> _items = new ObservableCollection<ToolItem> {
         
             new() {
                 Name = "Share Community",
@@ -43,7 +46,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
             },
         };
 
-        public IEnumerable<ToolItem> Items
+        public ObservableCollection<ToolItem> Items
         {
             get => _items;
             set => SetProperty(ref _items, value);

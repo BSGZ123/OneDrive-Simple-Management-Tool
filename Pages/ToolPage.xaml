@@ -8,19 +8,20 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:OneDrive_Simple_Management_Tool.Controls"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    >
 
     <Page.Resources>
         <controls:ItemCard />
     </Page.Resources>
     
-    <Grid x:Name="headerGrid" CornerRadius="8 0 0 0">
+    <Grid x:Name="HeaderGrid" CornerRadius="8 0 0 0">
         <GridView
             Padding="24 36 24 36"
             IsItemClickEnabled="True"
             IsSwipeEnabled="False"
             ItemTemplate="{StaticResource CardItemControlTemplate}"
-            ItemsSource="{x:Bind Items, Mode=OneWay }"
+            ItemsSource="{x:Bind Items, Mode=OneWay}"
             ItemClick="GridView_ItemClick"
             SelectionMode="None"
             />
