@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentDialog
-    x:Class="OneDrive_Simple_Management_Tool.Views.Tools.LinkDetails"
+    x:Class="OneDrive_Simple_Management_Tool.Views.Tools.CreateLink"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Tools"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
-    d:DataContext="{d:DesignInstance Type=viewmodels:LinkDetailsViewModel}"
-    mc:Ignorable="d">
+    xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
+    d:DataContext="{d:DesignInstance Type=tools:CreateLinkViewModel}"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock>7777777777777777</TextBlock>
+        <TextBlock>888888888888888888888888888</TextBlock>
     </Grid>
 </ContentDialog>

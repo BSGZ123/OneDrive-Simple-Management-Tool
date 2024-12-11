@@ -1,6 +1,10 @@
 using Microsoft.UI.Xaml.Controls;
 using OneDrive_Simple_Management_Tool.Models;
 using OneDrive_Simple_Management_Tool.ViewModels;
+using OneDrive_Simple_Management_Tool.ViewModels.Tools;
+using OneDrive_Simple_Management_Tool.Views.Tools;
+using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -24,14 +28,25 @@ namespace OneDrive_Simple_Management_Tool.Pages.Tools
             await (DataContext as ShareCommunityViewModel).Refresh();
         }
 
-        private  void ShowLinkDetailsDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private  async void ShowLinkDetailsDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            MessageBox.Show("还没准备好呢~");
+            LinkDetails dialog = new LinkDetails()
+            {
+                XamlRoot = XamlRoot,
+                DataContext = new LinkDetailsViewModel((sender as Button).DataContext as Link)
+            };
+
+            await dialog.ShowAsync();
         }
 
-        private  void ShowCreateLinkDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private  async void ShowCreateLinkDialogAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            MessageBox.Show("还没准备好呢~");
+            CreateLink dialog = new()
+            {
+                XamlRoot = XamlRoot,
+                DataContext = new CreateLinkViewModel(DataContext as ShareCommunityViewModel)
+            };
+            await dialog.ShowAsync();
         }
     }
 }
