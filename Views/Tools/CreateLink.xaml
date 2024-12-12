@@ -9,9 +9,18 @@
     xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
     d:DataContext="{d:DesignInstance Type=tools:CreateLinkViewModel}"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Title="Share You Link"
+    PrimaryButtonText="OK"
+    PrimaryButtonCommand="{Binding  }"
+    CloseButtonText="Close"
+    DefaultButton="Primary">
 
-    <Grid>
-        <TextBlock>888888888888888888888888888</TextBlock>
-    </Grid>
+    <StackPanel Orientation="Vertical">
+        <TextBox />
+        <TextBox />
+        <TextBox />
+        <CalendarDatePicker />
+        <ComboBox />
+    </StackPanel>
 </ContentDialog>
