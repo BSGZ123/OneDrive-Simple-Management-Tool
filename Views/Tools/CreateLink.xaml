@@ -12,15 +12,15 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Title="Share You Link"
     PrimaryButtonText="OK"
-    PrimaryButtonCommand="{Binding  }"
+    PrimaryButtonCommand="{Binding CreateLinkCommand}"
     CloseButtonText="Close"
     DefaultButton="Primary">
 
     <StackPanel Orientation="Vertical">
-        <TextBox />
-        <TextBox />
-        <TextBox />
-        <CalendarDatePicker />
-        <ComboBox />
+        <TextBox x:Uid="ShareCommunityCreateLinkPage_Title" PlaceholderText="My photos" Text="{Binding Title,Mode=TwoWay}" />
+        <TextBox x:Uid="ShareCommunityCreateLinkPage_Content" Height="100" TextWrapping="Wrap" Text="{Binding Content,Mode=TwoWay}" />
+        <TextBox x:Uid="ShareCommunityCreateLinkPage_Password" Text="{Binding Password,Mode=TwoWay}" />
+        <CalendarDatePicker x:Uid="ShareCommunityCreateLinkPage_ExpirationDate" PlaceholderText="Pick a date" MinDate="{Binding Today}" Date="{Binding Expiration,Mode=TwoWay}" />
+        <ComboBox x:Uid="ShareCommunityCreateLinkPage_Category" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category,Mode=TwoWay}" />
     </StackPanel>
 </ContentDialog>
