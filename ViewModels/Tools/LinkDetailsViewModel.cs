@@ -14,7 +14,6 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
         {
         }
 
-        [ObservableProperty] private Link _link;
         public string Title => Link.title;
         public string Content => Link.content;
         public string Password => Link.password;
@@ -22,5 +21,6 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
         public string CreatedAt => Link.CreatedAt.ToString();
         public string UpdatedAt => Link.UpdatedAt.ToString();
         public int Views => Link.views;
+        [ObservableProperty] private Link _link;
     }
 }

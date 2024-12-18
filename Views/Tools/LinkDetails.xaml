@@ -8,9 +8,37 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
     d:DataContext="{d:DesignInstance Type=viewmodels:LinkDetailsViewModel}"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    PrimaryButtonText="OK"
+    DefaultButton="Primary"
+    CloseButtonText="Cancel">
 
-    <Grid>
-        <TextBlock>7777777777777777</TextBlock>
+    <Grid HorizontalAlignment="Stretch">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Vertical" Margin="0 0 10 0">
+            <TextBlock x:Uid="LinkDetails_Title" FontWeight="Bold" />
+            <TextBlock x:Uid="LinkDetails_Content" FontWeight="Bold" Margin="0 0 0 100" />
+            <TextBlock x:Uid="LinkDetails_Password" FontWeight="Bold" />
+            <TextBlock x:Uid="LinkDetails_Created" FontWeight="Bold" />
+            <TextBlock x:Uid="LinkDetails_Updated" FontWeight="Bold" />
+            <TextBlock x:Uid="LinkDetails_Expired" FontWeight="Bold" />
+            <TextBlock x:Uid="LinkDetails_Views" FontWeight="Bold" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="{Binding Title}" />
+            <TextBox Text="{Binding Content}" TextWrapping="Wrap" IsReadOnly="True" Height="120" />
+            <TextBlock Text="{Binding Password}" />
+            <TextBlock Text="{Binding CreatedAt}" />
+            <TextBlock Text="{Binding UpdatedAt}" />
+            <TextBlock Text="{Binding ExpireDate}" />
+            <TextBlock Text="{Binding Views}" />
+        </StackPanel>
+
     </Grid>
 </ContentDialog>

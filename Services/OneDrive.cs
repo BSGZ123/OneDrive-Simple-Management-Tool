@@ -176,7 +176,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         {
             Stream result = await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync(requestConfiguration =>
             {
-                // The document is written like this, but there is an error. Upon reviewing the source code, I found that there is no definition for "QueryParameters."
+                // 文档上是这么写的，但是有个错误，查看源码发现，QueryParameters没有定义
                 // requestConfiguration.QueryParameters.Format = format;
                 requestConfiguration.Headers.Add("Format", format);
             });
@@ -200,7 +200,7 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task<DriveItem> RestoreItem(string itemId)
         {
-            // Restore the original name by default.
+            // 恢复默认原名
             RestorePostRequestBody requestBody = new()
             {
                 ParentReference = new ItemReference
@@ -213,8 +213,8 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task<SearchWithQGetResponse> SearchLocalItems(string query, string itemId)
         {
-            // According to code, Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQResponse
-            // is same as Microsoft.Graph.Drives.Item.SearchWithQ.SearchWithQResponse, so why Microsoft do this?
+            // 根据代码，Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQResponse
+            // 与 Microsoft.Graph.Drives.Item.SearchWithQ.SearchWithQResponse 相同，那么微软为什么这样做？
             return await graphClient.Drives[DriveId].Items[itemId].SearchWithQ(query).GetAsSearchWithQGetResponseAsync();
         }
 
@@ -303,7 +303,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public string DriveId;
         public bool IsAuthenticated = false;
         public string ClientId;
-        // used for identify account for now
+        // 暂时用来识别账户
         public string HomeAccountId;
     }
 }
