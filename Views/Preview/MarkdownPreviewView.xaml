@@ -7,10 +7,17 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     d:DataContext="{d:DesignInstance Type=tools:PreviewViewModel}"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Loaded="LoadTextContentAsync"
+    PrimaryButtonText="Close">
 
     <Grid>
-        <TextBlock>00000000000000000000000</TextBlock>
+        <!--无法确认进度的进度条，禁止用户操作-->
+        <ProgressRing IsActive="{Binding }" Background="LightGray"/>
+        <ScrollView>
+            <controls:MarkdownTextBlock />
+        </ScrollView>
     </Grid>
 </ContentDialog>

@@ -24,5 +24,10 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
         {
             this.InitializeComponent();
         }
+
+        private void LoadTextContentAsync(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
