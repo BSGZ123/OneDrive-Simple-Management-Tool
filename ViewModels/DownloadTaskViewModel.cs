@@ -84,7 +84,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 //刷新下载链接
                 DriveItem item = await Drive.Provider.GetItem(_itemId);
                 string downloadUrl = item.AdditionalData["@microsoft.graph.downloadUrl"].ToString();
-                _pack.Address = downloadUrl;
+                //_pack.Address = downloadUrl;
+                _pack.Urls[0] = downloadUrl;//暂时这样吧 毕竟只获取一个下载链接
             }
             if(_pack != null)
             {
