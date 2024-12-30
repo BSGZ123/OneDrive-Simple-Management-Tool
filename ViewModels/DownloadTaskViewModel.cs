@@ -11,9 +11,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-   public partial class DownloadTaskViewModel: ObservableObject
+    public partial class DownloadTaskViewModel : ObservableObject
     {
-        public DownloadTaskViewModel(DriveViewModel drive,  string itemId , StorageFile file)
+        public DownloadTaskViewModel(DriveViewModel drive, string itemId, StorageFile file)
         {
             _itemId = itemId;
             _file = file;
@@ -30,7 +30,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _downloader = new();
             _downloader.DownloadFileCompleted += DownloadFileCompleted;
             _downloader.DownloadProgressChanged += DownloadProgressChanged;
-            await _downloader.DownloadFileTaskAsync(downloadUrl,_file.Path);
+            await _downloader.DownloadFileTaskAsync(downloadUrl, _file.Path);
         }
 
         private void DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -67,9 +67,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public void PauseDownload()
         {
             _downloader.Pause();
-            _pack=_downloader.Package;
+            _pack = _downloader.Package;
             IsPaused = true;
-            IsDownloading= false;
+            IsDownloading = false;
         }
 
         [RelayCommand]
@@ -87,7 +87,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 //_pack.Address = downloadUrl;
                 _pack.Urls[0] = downloadUrl;//暂时这样吧 毕竟只获取一个下载链接
             }
-            if(_pack != null)
+            if (_pack != null)
             {
                 await _downloader.DownloadFileTaskAsync(_pack);
             }
