@@ -15,9 +15,9 @@
 
     <Grid>
         <!--无法确认进度的进度条，禁止用户操作-->
-        <ProgressRing IsActive="{Binding }" Background="LightGray"/>
+        <ProgressRing IsActive="{Binding IsLoading}" Background="LightGray"/>
         <ScrollView>
-            <controls:MarkdownTextBlock />
+            <controls:MarkdownTextBlock Text="{Binding Text}" Padding="18" Background="Transparent"/>
         </ScrollView>
     </Grid>
 </ContentDialog>
