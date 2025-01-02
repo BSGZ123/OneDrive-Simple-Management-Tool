@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using OneDrive_Simple_Management_Tool.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,12 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
         public ImagePreviewView()
         {
             this.InitializeComponent();
+        }
+
+        private void LoadImageContentAsync(object sender, RoutedEventArgs e)
+        {
+            PreviewViewModel viewModel = DataContext as PreviewViewModel;
+            _ = viewModel.LoadImageContent();
         }
     }
 }

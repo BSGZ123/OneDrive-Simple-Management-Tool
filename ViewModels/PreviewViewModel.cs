@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -19,9 +21,15 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
             IsLoading = false;
         }
 
+        internal object LoadImageContent()
+        {
+            throw new NotImplementedException();
+        }
+
         private readonly FileViewModel _file;
         [ObservableProperty]private bool _isLoading;
-        [ObservableProperty]private string _text;
+        [ObservableProperty] private string _text;
+        [ObservableProperty]private BitmapImage _image;
 
     }
 }
