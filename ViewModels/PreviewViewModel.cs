@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
 {
@@ -21,9 +22,22 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
             IsLoading = false;
         }
 
-        internal object LoadImageContent()
+        [RelayCommand]
+        public async Task LoadImageContent()
         {
-            throw new NotImplementedException();
+            IsLoading= true;
+            Stream stream = await _file.Drive.Provider.GetItemContent(_file.Id);
+            //提供对存储在内存而不是磁盘上的输入和输出流中的数据的随机访问
+            InMemoryRandomAccessStream inMemoryRandomAccess = new();
+            //将之前从文件获取的 stream 对象转换为 IInputStream 接口  将输入流的内容复制到另一个输出流
+            await RandomAccessStream.CopyAsync(stream.AsInputStream(),inMemoryRandomAccess);
+            //将inMemoryRandomAccess流的当前位置设为开头，因为将流复制到另外一个流中后，流位置会移动到末尾
+            inMemoryRandomAccess.Seek(0);
+            BitmapImage image = new();
+            await image.SetSourceAsync(inMemoryRandomAccess);
+            Image = image;
+            IsLoading = false;
+
         }
 
         private readonly FileViewModel _file;
