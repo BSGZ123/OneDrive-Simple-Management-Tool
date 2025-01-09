@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.Media.Core;
 using Windows.Storage.Streams;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
@@ -40,10 +41,22 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
 
         }
 
+        //MediaSource 用于访问媒体数据的通用模型，而不需考虑基础媒体格式
+        public void LoadMediaSource()
+        {
+            IsLoading= true;
+            string downloadurl=_file.DownloadUrl;
+            MediaSource mediaSource = MediaSource.CreateFromUri(new Uri(downloadurl));
+            Media= mediaSource;
+            IsLoading= false;
+
+        }
+
         private readonly FileViewModel _file;
         [ObservableProperty]private bool _isLoading;
         [ObservableProperty] private string _text;
         [ObservableProperty]private BitmapImage _image;
+        [ObservableProperty]private MediaSource _media;
 
     }
 }

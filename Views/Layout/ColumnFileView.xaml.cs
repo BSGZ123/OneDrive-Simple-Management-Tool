@@ -99,6 +99,17 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
                         await dialog.ShowAsync();
                         break;
                     }
+                case FileType.Media:
+                    {
+                        MediaPreviewView dialog = new()
+                        {
+                            XamlRoot = XamlRoot,
+                            DataContext = new PreviewViewModel(viewModel)
+                        };
+                        await dialog.ShowAsync();
+                        break;
+                    }
+                 
             }
         }
 

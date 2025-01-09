@@ -13,6 +13,6 @@
     Loaded="LoadDonwloadUrlAsync">
 
     <Grid>
-        <MediaPlayerElement Name="Player" AreTransportControlsEnabled="True" Source="{Binding }" />
+        <MediaPlayerElement Name="Player" AreTransportControlsEnabled="True" Source="{Binding Media}" />
     </Grid>
 </ContentDialog>
