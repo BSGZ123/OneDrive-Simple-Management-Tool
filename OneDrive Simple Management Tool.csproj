@@ -31,6 +31,7 @@
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
     <None Remove="Pages\Tools\ShareCommunity.xaml" />
+    <None Remove="Views\ConvertFileFormatView.xaml" />
     <None Remove="Views\CreateDrive.xaml" />
     <None Remove="Views\CreateFolderView.xaml" />
     <None Remove="Views\DeleteFileView.xaml" />
@@ -177,6 +178,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\ConvertFileFormatView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\Preview\MediaPreviewView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

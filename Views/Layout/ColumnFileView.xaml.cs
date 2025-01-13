@@ -123,7 +123,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
             else 
             {
                 //这里后续是打开文件后常见格式文件直接预览
-                
+                await ShowPreviewDialogFromViewModel(fileView);
             }
         }
     }
