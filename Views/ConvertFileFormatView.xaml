@@ -11,6 +11,23 @@
     mc:Ignorable="d">
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="0 0 0 10" TextWrapping="Wrap">
+            <Run Text="The currently supported file formats include " />
+        </TextBlock>
+
+        <RelativePanel Grid.Row="1">
+            
+        </RelativePanel>
+
+        <RelativePanel Grid.Row="2">
+            
+        </RelativePanel>
 
     </Grid>
 </ContentDialog>

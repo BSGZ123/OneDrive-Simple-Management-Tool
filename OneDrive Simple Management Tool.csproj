@@ -27,6 +27,7 @@
     <None Remove="Pages\CloudPage.xaml" />
     <None Remove="Pages\DrivePage.xaml" />
     <None Remove="Pages\HomePage.xaml" />
+    <None Remove="Pages\ReaderPage.xaml" />
     <None Remove="Pages\SettingPage.xaml" />
     <None Remove="Pages\TaskManagerPage.xaml" />
     <None Remove="Pages\ToolPage.xaml" />
@@ -178,6 +179,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\ReaderPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Views\ConvertFileFormatView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
