@@ -20,7 +20,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         private const string PdfDocumentDescription = "PDF Document";
         private const string PdfExtension = ".pdf";
 
-        public ConvertFileFormatViewModel(FileViewModel file) 
+        public ConvertFileFormatViewModel(FileViewModel file)
         {
             _file = file;
         }
@@ -30,16 +30,16 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             Window _downloadPathSelectWindow = new Window();
             //临时的 Window 对象，用于获取句柄，以便正确显示文件选择对话框
             IntPtr windowHandle = WindowNative.GetWindowHandle(_downloadPathSelectWindow);
-            FileSavePicker fileSavePicker = new() 
+            FileSavePicker fileSavePicker = new()
             {
-                SuggestedStartLocation=PickerLocationId.Downloads
+                SuggestedStartLocation = PickerLocationId.Downloads
             };
             fileSavePicker.FileTypeChoices.Add(PdfDocumentDescription,[PdfExtension]);
             //设置默认保存文件名，使用原始文件名（不带扩展名）
-            fileSavePicker.SuggestedFileName= Path.GetFileNameWithoutExtension(_file.Name);
+            fileSavePicker.SuggestedFileName = Path.GetFileNameWithoutExtension(_file.Name);
             InitializeWithWindow.Initialize(fileSavePicker, windowHandle);
 
-            StorageFile file=await fileSavePicker.PickSaveFileAsync();
+            StorageFile file = await fileSavePicker.PickSaveFileAsync();
             SavedFilePath = file?.Path;
             string fileExtension = Path.GetExtension(_file.Name).ToLower();
 
@@ -51,7 +51,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
         private readonly FileViewModel _file;
-        private readonly OneDrive oneDrive =Ioc.Default.GetService<OneDrive>();
+        private readonly OneDrive oneDrive = Ioc.Default.GetService<OneDrive>();
         private static readonly string[] allowedExtensions = { ".csv", ".doc", ".docx", ".odp", ".ods", ".odt", ".pot", ".potm", ".potx", ".pps", ".ppsx", ".ppsxm", ".ppt", ".pptm", ".pptx", ".rtf", ".xls", ".xlsx" };
         [ObservableProperty] private string _selectedFormat = "pdf";
         [ObservableProperty] private string _savedFilePath;
