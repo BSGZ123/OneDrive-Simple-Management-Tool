@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Graph.Models;
 using Microsoft.UI.Xaml;
 using OneDrive_Simple_Management_Tool.Services;
@@ -25,6 +26,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _file = file;
         }
 
+        [RelayCommand]
         public async Task ConvertFileFormat()
         {
             Window _downloadPathSelectWindow = new Window();

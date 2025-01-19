@@ -27,8 +27,13 @@
             <ComboBox ItemsSource="{Binding TargetFormats}" SelectedIndex="0" SelectedItem="{Binding SelectedFormat,Mode=TwoWay}" RelativePanel.AlignRightWithPanel="True"/>
         </RelativePanel>
 
+        <!--这里有点疑惑-->
         <RelativePanel Grid.Row="2">
-            
+            <TextBlock Text="Save Path" FontWeight="Bold" RelativePanel.AlignLeftWithPanel="True"/>
+            <StackPanel Orientation="Horizontal" RelativePanel.AlignRightWithPanel="True">
+                <TextBlock Text="{Binding SavedFilePath}"/>
+                <Button Content="Browser" Command="{Binding ConvertFileFormatCommand}" />
+            </StackPanel>
         </RelativePanel>
 
     </Grid>

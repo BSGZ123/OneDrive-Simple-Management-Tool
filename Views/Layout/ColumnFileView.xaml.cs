@@ -33,9 +33,18 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
             await dialog.ShowAsync();
         }
 
-        private void ShowConverFiletDialogAsync(object sender, RoutedEventArgs e)
+        private async void ShowConverFiletDialogAsync(object sender, RoutedEventArgs e)
         {
-
+            FileViewModel converFile = DataContext as FileViewModel;
+            if (converFile.IsFile)
+            {
+                ConvertFileFormatView view = new()
+                {
+                    XamlRoot = XamlRoot,
+                    DataContext= new ConvertFileFormatViewModel(converFile)
+                };
+                await view.ShowAsync();
+            }
         }
 
         private void ShowShareFileDialogAsync(object sender, RoutedEventArgs e)
