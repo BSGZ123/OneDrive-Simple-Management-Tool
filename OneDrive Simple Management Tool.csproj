@@ -73,7 +73,7 @@
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.65.0" />
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="8.0.10" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.241107002" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.250108004" />
     <PackageReference Include="Net.Codecrete.QrCodeGenerator" Version="2.0.6" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="QRCoder.Xaml" Version="1.6.0" />

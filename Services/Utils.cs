@@ -91,6 +91,6 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         public static readonly string[] ImageType = { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tiff", ".ico", ".svg" };
-        public static readonly string[] MediaType = { "mp3", ".mp4", ".wma", ".3gp", ".aac", ".flac", ".wax", ".wav", ".wmx", ".wpl", ".avi" };
+        public static readonly string[] MediaType = { ".mp3", ".mp4", ".wma", ".3gp", ".aac", ".flac", ".wax", ".wav", ".wmx", ".wpl", ".avi" };
     }
 }
