@@ -87,7 +87,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public static string GetVersion()
         {
             Version version = Assembly.GetEntryAssembly().GetName().Version;
-            return string.Format("{0}.{1},{2}",version.Major,version.Minor,version.Build);
+            return string.Format("{0}.{1},{2}", version.Major, version.Minor, version.Build);
         }
 
         public static readonly string[] ImageType = { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tiff", ".ico", ".svg" };
