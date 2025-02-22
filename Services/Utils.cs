@@ -57,6 +57,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             {
                 ".txt" => FileType.Text,
                 ".md" => FileType.Markdown,
+                ".pdf" => FileType.Pdf,
                 //https://learn.microsoft.com/zh-cn/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.controls.image?view=windows-app-sdk-1.5#image-file-formats
                 string _ when ImageType.Contains(ext) => FileType.Image,
                 string _ when MediaType.Contains(ext) => FileType.Media,
@@ -92,6 +93,5 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public static readonly string[] ImageType = { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tiff", ".ico", ".svg" };
         public static readonly string[] MediaType = { ".mp3", ".mp4", ".wma", ".3gp", ".aac", ".flac", ".wax", ".wav", ".wmx", ".wpl", ".avi" };
-        public static readonly string[] EBookType = { ".epub", ".pdf" };
     }
 }

@@ -118,6 +118,11 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
                         await dialog.ShowAsync();
                         break;
                     }
+                case FileType.Pdf:
+                    {
+
+                        break;
+                    }
                  
             }
         }

@@ -13,6 +13,8 @@ namespace OneDrive_Simple_Management_Tool.Models
         Code,
         Image,
         Media,
+        Pdf,
+        Epub,
         Office,
         Unknown
     }

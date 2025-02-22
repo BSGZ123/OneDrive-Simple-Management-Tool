@@ -44,6 +44,7 @@
     <None Remove="Views\Preview\ImagePreviewView.xaml" />
     <None Remove="Views\Preview\MarkdownPreviewView.xaml" />
     <None Remove="Views\Preview\MediaPreviewView.xaml" />
+    <None Remove="Views\Preview\PdfPreviewView.xaml" />
     <None Remove="Views\PropertyView.xaml" />
     <None Remove="Views\RenameFileView.xaml" />
     <None Remove="Views\SearchView.xaml" />
@@ -179,6 +180,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\Preview\PdfPreviewView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\ReaderPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
