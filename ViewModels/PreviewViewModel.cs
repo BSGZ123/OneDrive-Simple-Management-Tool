@@ -52,11 +52,21 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
 
         }
 
+        //试试能不能利用WebView2预览PDF
+        public void GetPreviewPDFSource()
+        {
+            IsLoading = true;
+            string downloadurl = _file.DownloadUrl;
+            PdfUrl=downloadurl;
+            IsLoading=false;
+        }
+
         private readonly FileViewModel _file;
         [ObservableProperty]private bool _isLoading;
         [ObservableProperty] private string _text;
         [ObservableProperty]private BitmapImage _image;
         [ObservableProperty]private MediaSource _media;
+        [ObservableProperty]private string _pdfUrl;
 
     }
 }
