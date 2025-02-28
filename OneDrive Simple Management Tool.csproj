@@ -69,9 +69,9 @@
     <PackageReference Include="Downloader" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Graph" Version="5.62.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.65.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.65.0" />
+    <PackageReference Include="Microsoft.Graph" Version="5.63.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.66.2" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.66.2" />
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="8.0.10" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.250108004" />
