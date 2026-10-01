@@ -174,18 +174,18 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task ConvertFileFormat(string itemId, StorageFile file, string format = "pdf")
         {
-            Stream result = await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync(requestConfiguration =>
-            {
-                // 文档上是这么写的，但是有个错误，查看源码发现，QueryParameters没有定义
-                // requestConfiguration.QueryParameters.Format = format;
-                requestConfiguration.Headers.Add("Format", format);
-            });
+            if (!IsAuthenticated) await Login();
+            // 转换格式必须通过查询参数 ?format=pdf 传递，放在请求头里服务端会忽略
+            // SDK 自带的 QueryParameters.Format 生成的是 $format，与文档不一致，这里手动拼接 URL
+            var contentRequest = graphClient.Drives[DriveId].Items[itemId].Content;
+            string url = $"{contentRequest.ToGetRequestInformation().URI}?format={Uri.EscapeDataString(format)}";
+            using Stream result = await contentRequest.WithUrl(url).GetAsync()
+                ?? throw new InvalidOperationException("转换结果为空");
             using Stream fileStream = await file.OpenStreamForWriteAsync();
-            if (result.CanSeek)
-            {
-                result.Seek(0, SeekOrigin.Begin);
-            }
+            // 覆盖已有文件时先清空，避免残留旧内容
+            fileStream.SetLength(0);
             await result.CopyToAsync(fileStream);
+            await fileStream.FlushAsync();
         }
 
         public async Task DeleteItem(string itemId)
