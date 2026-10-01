@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Graph.Models;
 using Microsoft.UI.Xaml;
@@ -29,6 +28,13 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [RelayCommand]
         public async Task ConvertFileFormat()
         {
+            string fileExtension = Path.GetExtension(_file.Name).ToLower();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                StatusMessage = $"Unsupported file format: {fileExtension}";
+                return;
+            }
+
             Window _downloadPathSelectWindow = new Window();
             //临时的 Window 对象，用于获取句柄，以便正确显示文件选择对话框
             IntPtr windowHandle = WindowNative.GetWindowHandle(_downloadPathSelectWindow);
@@ -42,21 +48,28 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             InitializeWithWindow.Initialize(fileSavePicker, windowHandle);
 
             StorageFile file=await fileSavePicker.PickSaveFileAsync();
-            SavedFilePath = file?.Path;
-            string fileExtension = Path.GetExtension(_file.Name).ToLower();
+            //用户取消了选择
+            if (file == null) return;
+            SavedFilePath = file.Path;
 
-            if (allowedExtensions.Contains(fileExtension))
+            try
             {
-                await oneDrive.ConvertFileFormat(_file.Id, file);
+                StatusMessage = "Converting...";
+                //OneDrive 实例未注册到 Ioc，需使用文件所属账户的 Provider
+                await _file.Drive.Provider.ConvertFileFormat(_file.Id, file, SelectedFormat ?? "pdf");
+                StatusMessage = "Conversion completed";
             }
-
+            catch (Exception ex)
+            {
+                StatusMessage = $"Conversion failed: {ex.Message}";
+            }
         }
 
         private readonly FileViewModel _file;
-        private readonly OneDrive oneDrive =Ioc.Default.GetService<OneDrive>();
         private static readonly string[] allowedExtensions = { ".csv", ".doc", ".docx", ".odp", ".ods", ".odt", ".pot", ".potm", ".potx", ".pps", ".ppsx", ".ppsxm", ".ppt", ".pptm", ".pptx", ".rtf", ".xls", ".xlsx" };
         [ObservableProperty] private string _selectedFormat = "pdf";
         [ObservableProperty] private string _savedFilePath;
+        [ObservableProperty] private string _statusMessage;
         public static IEnumerable<string> TargetFormats => ["pdf"];
         public string FormattedExtensions => string.Join(", ", allowedExtensions.Select(ext => ext.TrimStart('.')));
     }
