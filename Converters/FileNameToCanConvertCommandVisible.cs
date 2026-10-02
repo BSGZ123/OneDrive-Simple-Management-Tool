@@ -22,7 +22,7 @@ namespace OneDrive_Simple_Management_Tool.Converters
             if(value is string fileName)
             {
                 //要注意将获取的后缀名转换为小写。。。
-                string fileExtension=Path.GetExtension(fileName).ToLower();
+                string fileExtension=Path.GetExtension(fileName).ToLowerInvariant();
                 if (allowedExtensions.Contains(fileExtension)) { return Visibility.Visible; }
 
             }

@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+ï»¿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using OneDrive_Simple_Management_Tool.Models;
@@ -76,7 +76,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
 
         }
 
-        //µ¯³öÔ¤ÀÀÒ³Ãæ(´¦ÀíÑ¡ÖĞÎÄ¼şviewmodel)
+        //å¼¹å‡ºé¢„è§ˆé¡µé¢(å¤„ç†é€‰ä¸­æ–‡ä»¶viewmodel)
         private async void ShowPreviewDialogAsync(object sender, RoutedEventArgs e)
         {
             FileViewModel viewModel = DataContext as FileViewModel;
@@ -85,8 +85,8 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
 
         private async Task ShowPreviewDialogFromViewModel(FileViewModel viewModel)
         {
-            //»ñµÃÑ¡ÖĞÎÄ¼şÂ·¾¶×Ö·û´®µÄÀ©Õ¹Ãû(×ªÎªĞ¡Ğ´)²¢ÅĞ¶ÏÎÄ¼şÀàĞÍ ºÏÊÊµÄ½øĞĞÔ¤ÀÀ
-            switch (Utils.GetFileType(Path.GetExtension(viewModel.Name).ToLower()))
+            //è·å¾—é€‰ä¸­æ–‡ä»¶è·¯å¾„å­—ç¬¦ä¸²çš„æ‰©å±•å(è½¬ä¸ºå°å†™)å¹¶åˆ¤æ–­æ–‡ä»¶ç±»å‹ åˆé€‚çš„è¿›è¡Œé¢„è§ˆ
+            switch (Utils.GetFileType(Path.GetExtension(viewModel.Name).ToLowerInvariant()))
             {
                 case FileType.Markdown:
                     {
@@ -141,7 +141,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
             }
             else 
             {
-                //ÕâÀïºóĞøÊÇ´ò¿ªÎÄ¼şºó³£¼û¸ñÊ½ÎÄ¼şÖ±½ÓÔ¤ÀÀ
+                //è¿™é‡Œåç»­æ˜¯æ‰“å¼€æ–‡ä»¶åå¸¸è§æ ¼å¼æ–‡ä»¶ç›´æ¥é¢„è§ˆ
                 await ShowPreviewDialogFromViewModel(fileView);
             }
         }
