@@ -43,7 +43,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
             StorageFile file=await fileSavePicker.PickSaveFileAsync();
             SavedFilePath = file?.Path;
-            string fileExtension = Path.GetExtension(_file.Name).ToLower();
+            string fileExtension = Path.GetExtension(_file.Name).ToLowerInvariant();
 
             if (allowedExtensions.Contains(fileExtension))
             {
