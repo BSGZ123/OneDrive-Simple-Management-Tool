@@ -62,9 +62,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels.Tools
         }
 
         private readonly FileViewModel _file;
-        [ObservableProperty]private bool _isLoading;
+        [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private string _text;
-        [ObservableProperty]private BitmapImage _image;
+        [ObservableProperty] private BitmapImage _image;
         [ObservableProperty]private MediaSource _media;
         [ObservableProperty]private string _pdfUrl;
 

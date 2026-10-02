@@ -10,13 +10,13 @@ namespace OneDrive_Simple_Management_Tool.Helpers
 {
     public static class ThemeHelper
     {
-        private static Window currentApplicationWindow =App.StartupWindow;
+        private static Window currentApplicationWindow = App.StartupWindow;
 
         /// <summary>
         /// 根据根元素所请求的主题获取应用程序的当前实际主题，
         /// 或者如果该值为默认值，则获取应用程序所请求的主题。
         /// </summary>
-        public static ElementTheme ActualTheme 
+        public static ElementTheme ActualTheme
         {
             get
             {
