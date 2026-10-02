@@ -110,18 +110,18 @@ namespace OneDrive_Simple_Management_Tool.Services
 
             try
             {
-               var uploadResult= await fileUploadTask.UploadAsync(progress);
+                var uploadResult = await fileUploadTask.UploadAsync(progress);
                 Console.WriteLine(uploadResult.ItemResponse.ToString());
                 Console.WriteLine(uploadResult.UploadSucceeded ?
                 $"Upload complete, item ID: {uploadResult.ItemResponse.Id}" :
                 "Upload failed");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Console.WriteLine($"Error uploading: {ex.Message}");
             }
 
-            
+
         }
 
         public async Task UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null)
