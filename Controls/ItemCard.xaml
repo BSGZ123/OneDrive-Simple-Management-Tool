@@ -32,7 +32,7 @@
                         <!--窗口宽度大于等于 640 像素的情况-->
                         <VisualState x:Name="WideLayout">
                             <VisualState.StateTriggers>
-                                <AdaptiveTrigger MinWindowWidth="{StaticResource Breakpoint640Plus}" />
+                                <AdaptiveTrigger MinWindowWidth="640" />
                             </VisualState.StateTriggers>
                             <VisualState.Setters />
                         </VisualState>

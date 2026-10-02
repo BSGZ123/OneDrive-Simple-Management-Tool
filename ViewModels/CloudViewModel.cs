@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OneDrive_Simple_Management_Tool.Models.DTO;
 using OneDrive_Simple_Management_Tool.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -50,7 +51,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 drives.Add(driveDTO);
             }
             string jsonData = JsonSerializer.Serialize(drives, DriveDTOSourceGenerationContext.Default.ListDriveDTO);
-            string cachePath = Path.Combine(Directory.GetCurrentDirectory(), "cache");
+            string cachePath = Path.Combine(AppContext.BaseDirectory, "cache");
             Directory.CreateDirectory(cachePath);
             await File.WriteAllTextAsync(cacheFilePath, jsonData);
         }
@@ -71,7 +72,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             isCacheLoaded = true;
         }
 
-        private readonly string cacheFilePath = Path.Combine(Directory.GetCurrentDirectory(), "cache", "drives.json");
+        private readonly string cacheFilePath = Path.Combine(AppContext.BaseDirectory, "cache", "drives.json");
         private bool isCacheLoaded = false;
         [ObservableProperty] private ObservableCollection<DriveViewModel> _drives = [];
     }
