@@ -9,10 +9,11 @@
     xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=tools:PreviewViewModel}"
-    PrimaryButtonText="Close"
+    x:Uid="FilePreview_Dialog"
     Loaded="LoadDonwloadUrlAsync">
 
     <Grid>
         <MediaPlayerElement Name="Player" AreTransportControlsEnabled="True" Source="{Binding Media}" />
+        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" VerticalAlignment="Top" />
     </Grid>
 </ContentDialog>

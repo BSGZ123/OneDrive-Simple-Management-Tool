@@ -9,10 +9,11 @@
     xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
     d:DataContext="{d:DesignInstance Type=tools:PreviewViewModel}"
     mc:Ignorable="d"
-    PrimaryButtonText="Close"
+    x:Uid="FilePreview_Dialog"
     Loaded="LoadPreviewUrlAsync">
 
     <Grid>
         <WebView2  Source="{Binding PdfUrl}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="200" MinWidth="200" />
+        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" VerticalAlignment="Top" />
     </Grid>
 </ContentDialog>

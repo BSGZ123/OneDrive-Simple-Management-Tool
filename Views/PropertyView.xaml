@@ -12,9 +12,8 @@
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     mc:Ignorable="d"
     Title="{Binding Name}"
-    PrimaryButtonText="OK"
-    DefaultButton="Primary"
-    CloseButtonText="Cancel">
+    x:Uid="FileProperty_Dialog"
+    DefaultButton="Primary">
 
     <ContentDialog.Resources>
         <converter:FileSizeConverter x:Key="FileSizeConverter" />
@@ -32,10 +31,10 @@
 
          <!--文件信息列-->
         <StackPanel Orientation="Vertical">
-            <TextBlock  Text="Name" FontWeight="Bold" />
-            <TextBlock  Text="Size" FontWeight="Bold" />
-            <TextBlock  Text="UpDate" FontWeight="Bold"/>
-            <TextBlock  Text="ChildCount" FontWeight="Bold" Visibility="{Binding IsFolder,Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <TextBlock x:Uid="FileProperty_Name" FontWeight="Bold" />
+            <TextBlock x:Uid="FileProperty_Size" FontWeight="Bold" />
+            <TextBlock x:Uid="FileProperty_Updated" FontWeight="Bold"/>
+            <TextBlock x:Uid="FileProperty_Children" FontWeight="Bold" Visibility="{Binding IsFolder,Converter={StaticResource BoolToVisibilityConverter}}"/>
         </StackPanel>
 
         <!--文件信息内容-->

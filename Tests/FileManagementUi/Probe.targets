@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <StartupObject>FileManagementUiProbe</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\FileManagementUi\Probe.cs" />
+  </ItemGroup>
+</Project>

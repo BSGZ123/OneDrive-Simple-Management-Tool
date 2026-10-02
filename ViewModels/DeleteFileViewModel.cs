@@ -1,36 +1,28 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-    public partial class DeleteFileViewModel : ObservableObject
+    public partial class DeleteFileViewModel : FileOperationViewModel
     {
-        public DeleteFileViewModel(FileViewModel file) 
-        {
-            _drive=file.Drive;
-            File = file;
-        }
+        public DeleteFileViewModel(FileViewModel file) => File = file;
 
         [RelayCommand]
-        public async Task DeleteFile()
+        public Task DeleteFile() => RunAsync(File.Drive, async () =>
         {
             if (PermanentDelete)
-            {
-                await _drive.Provider.PermanentDeleteItem(File.Id);
-            }
+                await File.Drive.Provider.PermanentDeleteItem(File.Id);
             else
-            {
-                await _drive.Provider.DeleteItem(File.Id);
-            }
+                await File.Drive.Provider.DeleteItem(File.Id);
 
-            await File.Drive.Refresh();
-        }
-
-
-        private readonly DriveViewModel _drive;
+            // Remove the deleted item even if the subsequent refresh fails.
+            File.Drive.Files.Remove(File);
+            File.Drive.Images.Remove(File);
+            if (File.Drive.SelectedItem?.Id == File.Id) File.Drive.SelectedItem = null;
+        });
 
         [ObservableProperty] private bool _permanentDelete;
-        public FileViewModel File;
+        public FileViewModel File { get; }
     }
 }

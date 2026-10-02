@@ -62,6 +62,29 @@ dotnet run --project Tests/UploadRegression/UploadRegression.csproj
 | 分享已有权限的测试文件 | 原有权限仍保留 | 请求参数回归通过，真实账户权限保留未单独确认 |
 
 
+## 列表与网格的基础文件操作
+
+右上角“布局”按钮和空白处右键菜单可切换列表/网格。两种视图共用文件集合、单选状态、操作菜单和弹窗；切换保留当前目录、筛选结果和选中项，不额外请求云端。图片模式暂未开放，多选、批量操作、移动和复制不在本次范围内。
+
+- 文件夹可双击或按 Enter 打开；Markdown、图片、媒体和 PDF 使用已有预览。未支持的预览类型禁用“打开”。
+- 下载、重命名、删除、分享、属性和符合条件的 PDF 转换在两种布局中使用相同入口。文件夹下载保持禁用。
+- 快捷键：Enter 打开、F2 重命名、Delete 删除、Alt+Enter 属性、F5 刷新、Ctrl+Shift+N 新建文件夹、Backspace/Alt+Left 返回上级。文本编辑和弹窗期间不会触发页面文件操作。
+- 新建与重命名校验名称；请求期间禁用重复提交。失败保留输入并显示中英文错误，成功后刷新列表。若操作已成功但刷新失败，会提示只需刷新，不重复提交已完成的操作。普通删除默认不勾选永久删除。
+- PDF 转换使用所选文件所属网盘，并通过 `format=pdf` 查询参数请求；取消保存不再发起转换。支持列表收敛到原有格式中仍受 [Microsoft Graph PDF 转换接口](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content-format?view=graph-rest-1.0)支持的扩展名，不新增转换格式。
+- 修复返回上级、网格图标打包，以及测试输出资源被主应用重复收集的问题。布局选择在当前应用会话内保留，不新增设置持久化。
+
+运行文件管理回归：
+
+```powershell
+dotnet run --project Tests/FileManagementRegression/FileManagementRegression.csproj
+```
+
+2026-10-03 本次验证：Debug/x64、Release/x64 构建通过；17 项文件管理、10 项分享、18 项上传检查通过。保留原有 `ShareCommunityViewModel.Refresh` 的 `CS1998` 警告。环境中的 NuGet 在线还原不可用，使用已缓存依赖完成构建：还原时可按本机情况指定 `RestorePackagesPath`、`RestoreIgnoreFailedSources=true` 与 `NuGetAudit=false`，未修改项目的常规还原配置。
+
+WinUI 使用生产页面与内存 Graph 响应验证了列表重命名、切换网格后保留选中项、F2、网格文件夹导航及返回、Ctrl+Shift+N、名称校验、权限错误反馈、网格图标与 Markdown 预览，以及无扩展名文件的保存选择器打开/取消。具体步骤、可重现的界面测试入口和截图见 [界面回归记录](Tests/FileManagementUi/README.md)。
+
+2026-10-03 用户完成测试并确认本轮验证通过，同意提交至远端主分支。具体账户、文件类型和异常场景未逐项记录；上述自动化与本地模拟覆盖情况保留，供后续专项回归参考。
+
 ********
 
 

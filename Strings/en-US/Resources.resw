@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -133,7 +133,7 @@
     <value>Layout</value>
   </data>
   <data name="CloudPage_Layout_Column.Text" xml:space="preserve">
-    <value>Column</value>
+    <value>List</value>
   </data>
   <data name="CloudPage_Layout_Grid.Text" xml:space="preserve">
     <value>Grid</value>
@@ -365,5 +365,143 @@
   </data>
   <data name="ShareFile_CopyFailed" xml:space="preserve">
     <value>Could not copy the link. Try again, or select the link and copy it manually.</value>
+  </data>
+  <data name="FileOperation_AuthenticationFailed" xml:space="preserve">
+    <value>Please sign in again, then retry.</value>
+  </data>
+  <data name="FileOperation_AccessDenied" xml:space="preserve">
+    <value>You do not have permission to perform this operation.</value>
+  </data>
+  <data name="FileOperation_NotFound" xml:space="preserve">
+    <value>The item no longer exists. Refresh the folder and try again.</value>
+  </data>
+  <data name="FileOperation_NameConflict" xml:space="preserve">
+    <value>An item with this name already exists. Choose another name.</value>
+  </data>
+  <data name="FileOperation_TooManyRequests" xml:space="preserve">
+    <value>Too many requests. Please try again later.</value>
+  </data>
+  <data name="FileOperation_NetworkFailed" xml:space="preserve">
+    <value>The connection failed. Check your network and retry.</value>
+  </data>
+  <data name="FileOperation_InvalidResponse" xml:space="preserve">
+    <value>The server returned an incomplete response. Refresh to check the result before retrying.</value>
+  </data>
+  <data name="FileOperation_Failed" xml:space="preserve">
+    <value>The operation failed. Please try again.</value>
+  </data>
+  <data name="FileOperation_RefreshFailed" xml:space="preserve">
+    <value>The operation succeeded, but the list could not be refreshed. Refresh the list; do not repeat the operation.</value>
+  </data>
+  <data name="FileOperation_ErrorBar.Title" xml:space="preserve">
+    <value>File operation</value>
+  </data>
+  <data name="FileOperation_NameHint.Text" xml:space="preserve">
+    <value>Enter a name without leading/trailing spaces or these characters: &quot; * : &lt; &gt; ? / \ |</value>
+  </data>
+  <data name="FileItem_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="FileItem_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="FilePicker_FileType" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="CreateFolder_Dialog.Title" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="CreateFolder_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="CreateFolder_Dialog.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CreateFolder_Name.Header" xml:space="preserve">
+    <value>Folder name</value>
+  </data>
+  <data name="CreateFolder_Name.PlaceholderText" xml:space="preserve">
+    <value>Enter a folder name</value>
+  </data>
+  <data name="RenameFile_Dialog.Title" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="RenameFile_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="RenameFile_Dialog.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="RenameFile_Name.Header" xml:space="preserve">
+    <value>New name</value>
+  </data>
+  <data name="RenameFile_Name.PlaceholderText" xml:space="preserve">
+    <value>Enter a new name</value>
+  </data>
+  <data name="DeleteFile_Dialog.Title" xml:space="preserve">
+    <value>Delete item</value>
+  </data>
+  <data name="DeleteFile_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteFile_Dialog.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DeleteFile_Question.Text" xml:space="preserve">
+    <value>Delete this item?</value>
+  </data>
+  <data name="DeleteFile_Permanent.Content" xml:space="preserve">
+    <value>Permanently delete (cannot be undone)</value>
+  </data>
+  <data name="FileConvert_Dialog.Title" xml:space="preserve">
+    <value>Convert to PDF</value>
+  </data>
+  <data name="FileConvert_Dialog.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="FileConvert_Description.Text" xml:space="preserve">
+    <value>Choose where to save the PDF. Supported source extensions:</value>
+  </data>
+  <data name="FileConvert_Save.Content" xml:space="preserve">
+    <value>Convert and save…</value>
+  </data>
+  <data name="FileConvert_Completed" xml:space="preserve">
+    <value>Conversion completed.</value>
+  </data>
+  <data name="Drive_Search.AutomationProperties.Name" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Drive_Search.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Drive_Refresh.AutomationProperties.Name" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Drive_Refresh.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Refresh (F5)</value>
+  </data>
+  <data name="Drive_Layout.AutomationProperties.Name" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Drive_Layout.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Switch layout</value>
+  </data>
+  <data name="FileProperty_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="FileProperty_Name.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="FileProperty_Size.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="FileProperty_Updated.Text" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="FileProperty_Children.Text" xml:space="preserve">
+    <value>Child items</value>
+  </data>
+  <data name="FilePreview_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>Close</value>
   </data>
 </root>

@@ -214,13 +214,14 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task ConvertFileFormat(string itemId, StorageFile file, string format = "pdf")
         {
-            Stream result = await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync(requestConfiguration =>
-            {
-                // 文档上是这么写的，但是有个错误，查看源码发现，QueryParameters没有定义
-                // requestConfiguration.QueryParameters.Format = format;
-                requestConfiguration.Headers.Add("Format", format);
-            });
+            ArgumentNullException.ThrowIfNull(file);
+            var content = graphClient.Drives[DriveId].Items[itemId].Content;
+            // Graph SDK 5.80 does not expose the format query parameter on this builder.
+            string url = content.ToGetRequestInformation().URI.GetLeftPart(UriPartial.Path);
+            using Stream result = await content.WithUrl(url + "?format=" + Uri.EscapeDataString(format)).GetAsync();
+            if (result == null) throw new InvalidDataException("The server returned no converted content.");
             using Stream fileStream = await file.OpenStreamForWriteAsync();
+            fileStream.SetLength(0);
             if (result.CanSeek)
             {
                 result.Seek(0, SeekOrigin.Begin);

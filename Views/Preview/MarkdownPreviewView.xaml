@@ -11,7 +11,7 @@
     d:DataContext="{d:DesignInstance Type=tools:PreviewViewModel}"
     mc:Ignorable="d"
     Loaded="LoadTextContentAsync"
-    PrimaryButtonText="Close">
+    x:Uid="FilePreview_Dialog">
 
     <Grid>
         <!--无法确认进度的进度条，禁止用户操作-->
@@ -19,5 +19,6 @@
         <ScrollView>
             <controls:MarkdownTextBlock Text="{Binding Text}" Padding="18" Background="Transparent"/>
         </ScrollView>
+        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" VerticalAlignment="Top" />
     </Grid>
 </ContentDialog>

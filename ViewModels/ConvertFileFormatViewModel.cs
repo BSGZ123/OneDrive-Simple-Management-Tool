@@ -1,63 +1,61 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Graph.Models;
-using Microsoft.UI.Xaml;
-using OneDrive_Simple_Management_Tool.Services;
+using OneDrive_Simple_Management_Tool.Helpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT.Interop;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
     public partial class ConvertFileFormatViewModel : ObservableObject
     {
+        private readonly FileViewModel _file;
+        private readonly Func<Task<StorageFile>> _pickFile;
 
-        private const string PdfDocumentDescription = "PDF Document";
-        private const string PdfExtension = ".pdf";
-
-        public ConvertFileFormatViewModel(FileViewModel file)
+        public ConvertFileFormatViewModel(FileViewModel file, Func<Task<StorageFile>> pickFile = null)
         {
             _file = file;
+            _pickFile = pickFile ?? (() => SaveFilePickerHelper.PickAsync(Path.GetFileNameWithoutExtension(file.Name), ".pdf"));
         }
 
-        [RelayCommand]
+        public bool CanConvert => !IsBusy && _file.CanConvert;
+        public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+        public string FormattedExtensions => string.Join(", ", FileConversionRules.Extensions.Select(extension => extension.TrimStart('.')));
+
+        [RelayCommand(CanExecute = nameof(CanConvert))]
         public async Task ConvertFileFormat()
         {
-            Window _downloadPathSelectWindow = new Window();
-            //临时的 Window 对象，用于获取句柄，以便正确显示文件选择对话框
-            IntPtr windowHandle = WindowNative.GetWindowHandle(_downloadPathSelectWindow);
-            FileSavePicker fileSavePicker = new()
+            if (!CanConvert) return;
+            IsBusy = true;
+            ErrorMessage = string.Empty;
+            StatusMessage = string.Empty;
+            try
             {
-                SuggestedStartLocation = PickerLocationId.Downloads
-            };
-            fileSavePicker.FileTypeChoices.Add(PdfDocumentDescription,[PdfExtension]);
-            //设置默认保存文件名，使用原始文件名（不带扩展名）
-            fileSavePicker.SuggestedFileName = Path.GetFileNameWithoutExtension(_file.Name);
-            InitializeWithWindow.Initialize(fileSavePicker, windowHandle);
-
-            StorageFile file = await fileSavePicker.PickSaveFileAsync();
-            SavedFilePath = file?.Path;
-            string fileExtension = Path.GetExtension(_file.Name).ToLowerInvariant();
-
-            if (allowedExtensions.Contains(fileExtension))
-            {
-                await oneDrive.ConvertFileFormat(_file.Id, file);
+                StorageFile file = await _pickFile();
+                if (file == null) return;
+                await _file.Drive.Provider.ConvertFileFormat(_file.Id, file);
+                SavedFilePath = file.Path;
+                StatusMessage = "FileConvert_Completed".GetLocalized();
             }
-
+            catch (Exception exception)
+            {
+                ErrorMessage = FileOperationErrors.GetMessage(exception);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
-        private readonly FileViewModel _file;
-        private readonly OneDrive oneDrive = Ioc.Default.GetService<OneDrive>();
-        private static readonly string[] allowedExtensions = { ".csv", ".doc", ".docx", ".odp", ".ods", ".odt", ".pot", ".potm", ".potx", ".pps", ".ppsx", ".ppsxm", ".ppt", ".pptm", ".pptx", ".rtf", ".xls", ".xlsx" };
-        [ObservableProperty] private string _selectedFormat = "pdf";
-        [ObservableProperty] private string _savedFilePath;
-        public static IEnumerable<string> TargetFormats => ["pdf"];
-        public string FormattedExtensions => string.Join(", ", allowedExtensions.Select(ext => ext.TrimStart('.')));
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(ConvertFileFormatCommand))]
+        private bool _isBusy;
+        [ObservableProperty] private string _savedFilePath = string.Empty;
+        [ObservableProperty] private string _statusMessage = string.Empty;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasError))]
+        private string _errorMessage = string.Empty;
     }
 }

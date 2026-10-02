@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using OneDrive_Simple_Management_Tool.Helpers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,12 +19,11 @@ namespace OneDrive_Simple_Management_Tool.Converters
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             //允许的后缀名
-            string[] allowedExtensions = { ".csv", ".doc", ".docx", ".odp", ".ods", ".odt", ".pot", ".potm", ".potx", ".pps", ".ppsx", ".ppsxm", ".ppt", ".pptm", ".pptx", ".rtf", ".xls", ".xlsx" };
             if(value is string fileName)
             {
                 //要注意将获取的后缀名转换为小写。。。
                 string fileExtension=Path.GetExtension(fileName).ToLowerInvariant();
-                if (allowedExtensions.Contains(fileExtension)) { return Visibility.Visible; }
+                if (FileConversionRules.Supports(fileName)) { return Visibility.Visible; }
 
             }
             return Visibility.Collapsed;

@@ -1,25 +1,33 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OneDrive_Simple_Management_Tool.Helpers;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-    public partial class CreateFolderViewModel : ObservableObject
+    public partial class CreateFolderViewModel : FileOperationViewModel
     {
-        public CreateFolderViewModel(DriveViewModel drive) 
+        private readonly string _parentItemId;
+
+        public CreateFolderViewModel(DriveViewModel drive)
         {
             Drive = drive;
+            _parentItemId = drive.ParentItemId;
         }
-
 
         [RelayCommand]
-        private async Task CreateFolder()
+        public Task CreateFolder() => RunAsync(Drive, async () =>
         {
-            await Drive.Provider.CreateFolder(Drive.ParentItemId, FolderName);
-            await Drive.Refresh();
-        }
+            var result = await Drive.Provider.CreateFolder(_parentItemId, FolderName);
+            if (string.IsNullOrWhiteSpace(result?.Id)) throw new InvalidDataException();
+        });
 
-        [ObservableProperty] private string _folderName;
-        public DriveViewModel Drive;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSubmit))]
+        private string _folderName = string.Empty;
+
+        public override bool CanSubmit => base.CanSubmit && FileNameRules.IsValid(FolderName);
+        public DriveViewModel Drive { get; }
     }
 }

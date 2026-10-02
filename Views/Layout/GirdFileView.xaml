@@ -3,52 +3,18 @@
     x:Class="OneDrive_Simple_Management_Tool.Views.Layout.GirdFileView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Layout"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
-    xmlns:converter="using:OneDrive_Simple_Management_Tool.Converters"
-    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
-    d:DataContext="{d:DesignInstance Type=viewmodels:FileViewModel}"
-    mc:Ignorable="d">
-
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters">
     <UserControl.Resources>
-        <converter:FileSizeConverter x:Key="FileSizeConverter" />
-        <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" />
-        <converter:FileNameToCanConvertCommandVisible x:Key="FileNameToCanConvertCommandVisible" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </UserControl.Resources>
-
-    <Grid Width="180" DoubleTapped="OpenFolder">
-        <!--该页仅作测试学习使用-->
-        <!--网盘文件页面每条文件(目录)记录右键按下弹出菜单功能-->
-        <!--为控件定义专属的上下文菜单-->
-        <Grid.ContextFlyout>
-            <MenuFlyout>
-                <MenuFlyoutItem Text="Open" Command="{Binding Drive.OpenFolderCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsFolder}"/>
-                <MenuFlyoutItem Text="Download" Command="{Binding DownloadFileCommand}" CommandParameter="{Binding Id}" IsEnabled="{Binding IsFile}"/>
-                <MenuFlyoutItem Text="Delete" Click="ShowDeleteFileDialogAsync">
-                    
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="Delete"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                    
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Convert" Click="ShowConverFiletDialogAsync" Visibility="{Binding Name,Converter={StaticResource FileNameToCanConvertCommandVisible}}"/>
-                <MenuFlyoutItem x:Uid="FileView_Flyout_Share" Click="ShowShareFileDialogAsync"/>
-                <MenuFlyoutItem Text="Rename" Click="ShowRenameFileDialogAsync"/>
-                <MenuFlyoutItem Text="Property" Click="ShowPropertyDialogAsync"/>
-            </MenuFlyout>
-        </Grid.ContextFlyout>
-
+    <Grid Width="180" Background="Transparent" Padding="8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition />
+            <RowDefinition Height="128" />
+            <RowDefinition Height="48" />
         </Grid.RowDefinitions>
-
-        <!--这里需要注意辨别是文件还是目录，以显示不同的图标，之后进行绑定变量-->
-        <Image Grid.Row="0" Source="/Assets/Folder.png" Height="128" Width="128" Visibility="{Binding IsFolder}" VerticalAlignment="Center"/>
-        <Image Grid.Row="0" Source="/Assets/File.png" Height="128" Width="128" Visibility="{Binding IsFile}" VerticalAlignment="Center" />
-        <TextBlock Grid.Row="1" Text="{Binding Name}" HorizontalAlignment="Center" />
+        <Image Source="/Assets/Folder.png" Height="128" Width="128" Visibility="{Binding IsFolder, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <Image Source="/Assets/File.png" Height="128" Width="128" Visibility="{Binding IsFile, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <TextBlock Grid.Row="1" Text="{Binding Name}" HorizontalAlignment="Center" TextAlignment="Center"
+                   TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
     </Grid>
 </UserControl>

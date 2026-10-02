@@ -23,6 +23,9 @@ namespace Windows.Storage
     public sealed class StorageFile(string name, int size) : IStorageItem
     {
         public string Name { get; } = name;
+        public string Path => Name;
+        private MemoryStream _writtenContent = new();
+        public byte[] WrittenContent => _writtenContent.ToArray();
         public Exception OpenError { get; init; }
         public Exception PropertiesError { get; init; }
 
@@ -30,7 +33,11 @@ namespace Windows.Storage
             ? Task.FromResult<Stream>(new MemoryStream(new byte[size]))
             : Task.FromException<Stream>(OpenError);
 
-        public Task<Stream> OpenStreamForWriteAsync() => Task.FromResult<Stream>(new MemoryStream());
+        public Task<Stream> OpenStreamForWriteAsync()
+        {
+            _writtenContent = new MemoryStream();
+            return Task.FromResult<Stream>(_writtenContent);
+        }
 
         public Task<BasicProperties> GetBasicPropertiesAsync() => PropertiesError == null
             ? Task.FromResult(new BasicProperties { Size = (ulong)size })
@@ -121,10 +128,12 @@ namespace Microsoft.UI.Dispatching
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
+#if !FILE_MANAGEMENT_REGRESSION
     public sealed class DriveViewModel(OneDrive provider)
     {
         public OneDrive Provider { get; } = provider;
     }
+#endif
 
     public sealed class TaskManagerViewModel
     {

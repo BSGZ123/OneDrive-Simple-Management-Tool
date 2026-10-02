@@ -17,11 +17,11 @@
     <RepositoryUrl>https://github.com/BSGZ123/OneDrive-Simple-Management-Tool</RepositoryUrl>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <PublishTrimmed>False</PublishTrimmed>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Tests\**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Tests\**\*.cs" />
-    <Content Remove="Assets\File.png" />
-    <Content Remove="Assets\Folder.png" />
+    <PRIResource Remove="Tests\**\*" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Controls\ItemCard.xaml" />

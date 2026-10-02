@@ -1,77 +1,47 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using OneDrive_Simple_Management_Tool.Helpers;
+using OneDrive_Simple_Management_Tool.Models;
+using OneDrive_Simple_Management_Tool.ViewModels;
+using OneDrive_Simple_Management_Tool.Views;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
-using OneDrive_Simple_Management_Tool.Views;
-using OneDrive_Simple_Management_Tool.ViewModels;
-using System.Collections.ObjectModel;
-using OneDrive_Simple_Management_Tool.Models;
-using OneDrive_Simple_Management_Tool.Helpers;
 using Windows.Storage;
-using CommunityToolkit.Mvvm.DependencyInjection;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Windows.System;
 
 namespace OneDrive_Simple_Management_Tool.Pages
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class DrivePage : Page
     {
-        public DrivePage()
-        {
-            this.InitializeComponent();
-        }
+        public DrivePage() => InitializeComponent();
 
-        //在页面导航到时,设置该页面的数据上下文
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            //检查导航参数 e.Parameter 是否为 DriveViewModel类型，是就赋值给drive
-            if (e.Parameter is DriveViewModel drive)
-            {
-                //将drive设置为页面的数据上下文，这样就可以点击某个网盘导航到该网盘文件列表
-                DataContext= drive;
-            }
+            if (e.Parameter is DriveViewModel drive) DataContext = drive;
         }
 
         private void CopyIcon_DragOver(object sender, DragEventArgs e)
         {
-            //检查拖动的数据中是否包含 StorageItems 格式的数据
-            if (e.DataView.Contains(StandardDataFormats.StorageItems))
-            {
-                //允许执行拖放操作
+            if (!FileActions.IsDialogOpen(XamlRoot) && e.DataView.Contains(StandardDataFormats.StorageItems))
                 e.AcceptedOperation = DataPackageOperation.Copy;
-            }
         }
 
         private async void ToUpload_Drop(object sender, DragEventArgs e)
         {
             try
             {
-                if (!e.DataView.Contains(StandardDataFormats.StorageItems))
-                {
-                    return;
-                }
-
+                if (FileActions.IsDialogOpen(XamlRoot) || !e.DataView.Contains(StandardDataFormats.StorageItems)) return;
                 UploadErrorInfoBar.IsOpen = false;
-                DriveViewModel driveViewModel = (DriveViewModel)DataContext;
-                string parentItemId = driveViewModel.ParentItemId;
+                DriveViewModel drive = (DriveViewModel)DataContext;
+                string parentItemId = drive.ParentItemId;
                 IReadOnlyList<IStorageItem> items;
                 var deferral = e.GetDeferral();
                 try
@@ -80,89 +50,79 @@ namespace OneDrive_Simple_Management_Tool.Pages
                 }
                 finally
                 {
-                    // Release the drag source after reading its data, before network transfers.
                     deferral.Complete();
                 }
 
                 TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
-                var tasks = items.Select(item => manager.AddUploadTask(driveViewModel, parentItemId, item));
-                await Task.WhenAll(tasks);
-
-                try
+                await Task.WhenAll(items.Select(item => manager.AddUploadTask(drive, parentItemId, item)));
+                if (!await drive.TryRefresh())
                 {
-                    await driveViewModel.Refresh();
-                }
-                catch (Exception ex)
-                {
-                    driveViewModel.IsLoading = Visibility.Collapsed;
                     UploadErrorInfoBar.Title = "UploadRefreshFailedTitle".GetLocalized();
-                    UploadErrorInfoBar.Message = ex.Message;
+                    UploadErrorInfoBar.Message = drive.ErrorMessage;
                     UploadErrorInfoBar.IsOpen = true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 UploadErrorInfoBar.Title = "UploadRequestFailedTitle".GetLocalized();
-                UploadErrorInfoBar.Message = ex.Message;
+                UploadErrorInfoBar.Message = FileOperationErrors.GetMessage(exception);
                 UploadErrorInfoBar.IsOpen = true;
             }
         }
 
-        private async void CreateFolderDialogAsync(object sender, RoutedEventArgs e)
+        private async Task ShowCreateFolder()
         {
-            CreateFolderView createFolder = new CreateFolderView()
+            if (DataContext is not DriveViewModel drive || drive.IsLoading == Visibility.Visible) return;
+            try
             {
-                XamlRoot = XamlRoot,
-                DataContext = new CreateFolderViewModel(DataContext as DriveViewModel)
-            };
-
-            await createFolder.ShowAsync();
+                await FileActions.ShowDialogAsync(this, new CreateFolderView { DataContext = new CreateFolderViewModel(drive) });
+            }
+            catch (Exception exception) { drive.ErrorMessage = FileOperationErrors.GetMessage(exception); }
         }
+
+        private async void CreateFolderDialogAsync(object sender, RoutedEventArgs e) => await ShowCreateFolder();
 
         private void ChangeLayout(object sender, RoutedEventArgs e)
         {
-
+            if (DataContext is DriveViewModel drive && sender is MenuFlyoutItem item &&
+                Enum.TryParse<FileLayout>(item.Tag?.ToString(), out var layout))
+                drive.Layout = layout;
         }
 
-        //返回上级目录功能
-        private async void BackToLastFolder(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        private async void OnFileAccelerator(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
-
-            var items = BreadcrumbBar.ItemsSource as ObservableCollection<BreadcrumbItem>;
-            //检查是否有上级目录，没有就无动作
-            if (items.Count <= 1) 
+            if (!FileActions.CanUseShortcuts(this) || DataContext is not DriveViewModel drive) return;
+            // Enter must still activate a focused toolbar or breadcrumb control.
+            if (sender.Key == VirtualKey.Enter && sender.Modifiers == VirtualKeyModifiers.None &&
+                FocusManager.GetFocusedElement(XamlRoot) is ButtonBase or BreadcrumbBarItem) return;
+            args.Handled = true;
+            switch (sender.Key)
             {
-                return;
+                case VirtualKey.F5: await drive.Refresh(); break;
+                case VirtualKey.N: await ShowCreateFolder(); break;
+                case VirtualKey.Back:
+                case VirtualKey.Left: await drive.GoUp(); break;
+                case VirtualKey.F2: await FileActions.ExecuteAsync(FileAction.Rename, this, drive.SelectedItem); break;
+                case VirtualKey.Delete: await FileActions.ExecuteAsync(FileAction.Delete, this, drive.SelectedItem); break;
+                case VirtualKey.Enter:
+                    await FileActions.ExecuteAsync(sender.Modifiers == VirtualKeyModifiers.Menu ? FileAction.Property : FileAction.Open, this, drive.SelectedItem);
+                    break;
             }
-
-            await (DataContext as DriveViewModel).GetFiles(items.Last().ItemId);
-
         }
 
         private async void ShowSearchDialogAsync(object sender, RoutedEventArgs e)
         {
-            SearchView searchDiglog = new SearchView()
+            if (DataContext is not DriveViewModel drive || drive.IsLoading == Visibility.Visible) return;
+            try
             {
-                XamlRoot = XamlRoot,
-                DataContext=new SearchViewModel(DataContext as DriveViewModel)
-            };
-
-            await searchDiglog.ShowAsync();
-
+                await FileActions.ShowDialogAsync(this, new SearchView { DataContext = new SearchViewModel(drive) });
+            }
+            catch (Exception exception) { drive.ErrorMessage = FileOperationErrors.GetMessage(exception); }
         }
 
-        //点击导航栏某一条路径，进入所点击的文件路径
         private async void BreadcrumbBar_ItemClicked(BreadcrumbBar sender, BreadcrumbBarItemClickedEventArgs args)
         {
-            var items = BreadcrumbBar.ItemsSource as ObservableCollection<BreadcrumbItem>;
-            //循环删除导航栏中被点击项之后的所有项
-            for(int i = items.Count - 1; i >= args.Index + 1; i--)
-            {
-                items.RemoveAt(i);
-            }
-
-            string itemId = (args.Item as BreadcrumbItem).ItemId;
-            await (DataContext as DriveViewModel).GetFiles(itemId);
+            if (DataContext is DriveViewModel drive) await drive.NavigateToBreadcrumb(args.Index);
         }
     }
 }

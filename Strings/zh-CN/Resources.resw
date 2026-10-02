@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -133,10 +133,10 @@
     <value>布局</value>
   </data>
   <data name="CloudPage_Layout_Column.Text" xml:space="preserve">
-    <value>详细</value>
+    <value>列表</value>
   </data>
   <data name="CloudPage_Layout_Grid.Text" xml:space="preserve">
-    <value>缩略图</value>
+    <value>网格</value>
   </data>
   <data name="CloudPage_Layout_Image.Text" xml:space="preserve">
     <value>看图</value>
@@ -365,5 +365,143 @@
   </data>
   <data name="ShareFile_CopyFailed" xml:space="preserve">
     <value>复制失败，请重试，或选中链接后手动复制。</value>
+  </data>
+  <data name="FileOperation_AuthenticationFailed" xml:space="preserve">
+    <value>请重新登录后重试。</value>
+  </data>
+  <data name="FileOperation_AccessDenied" xml:space="preserve">
+    <value>你没有执行此操作的权限。</value>
+  </data>
+  <data name="FileOperation_NotFound" xml:space="preserve">
+    <value>项目已不存在，请刷新目录后重试。</value>
+  </data>
+  <data name="FileOperation_NameConflict" xml:space="preserve">
+    <value>已存在同名项目，请使用其他名称。</value>
+  </data>
+  <data name="FileOperation_TooManyRequests" xml:space="preserve">
+    <value>请求过于频繁，请稍后重试。</value>
+  </data>
+  <data name="FileOperation_NetworkFailed" xml:space="preserve">
+    <value>连接失败，请检查网络后重试。</value>
+  </data>
+  <data name="FileOperation_InvalidResponse" xml:space="preserve">
+    <value>服务器返回的信息不完整，请先刷新确认结果，再决定是否重试。</value>
+  </data>
+  <data name="FileOperation_Failed" xml:space="preserve">
+    <value>操作失败，请重试。</value>
+  </data>
+  <data name="FileOperation_RefreshFailed" xml:space="preserve">
+    <value>操作已成功，但列表刷新失败。请刷新列表，无需重复提交操作。</value>
+  </data>
+  <data name="FileOperation_ErrorBar.Title" xml:space="preserve">
+    <value>文件操作</value>
+  </data>
+  <data name="FileOperation_NameHint.Text" xml:space="preserve">
+    <value>名称首尾不能有空格，也不能包含以下字符：&quot; * : &lt; &gt; ? / \ |</value>
+  </data>
+  <data name="FileItem_File" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="FileItem_Folder" xml:space="preserve">
+    <value>文件夹</value>
+  </data>
+  <data name="FilePicker_FileType" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="CreateFolder_Dialog.Title" xml:space="preserve">
+    <value>新建文件夹</value>
+  </data>
+  <data name="CreateFolder_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>创建</value>
+  </data>
+  <data name="CreateFolder_Dialog.CloseButtonText" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="CreateFolder_Name.Header" xml:space="preserve">
+    <value>文件夹名称</value>
+  </data>
+  <data name="CreateFolder_Name.PlaceholderText" xml:space="preserve">
+    <value>输入文件夹名称</value>
+  </data>
+  <data name="RenameFile_Dialog.Title" xml:space="preserve">
+    <value>重命名</value>
+  </data>
+  <data name="RenameFile_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="RenameFile_Dialog.CloseButtonText" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="RenameFile_Name.Header" xml:space="preserve">
+    <value>新名称</value>
+  </data>
+  <data name="RenameFile_Name.PlaceholderText" xml:space="preserve">
+    <value>输入新名称</value>
+  </data>
+  <data name="DeleteFile_Dialog.Title" xml:space="preserve">
+    <value>删除项目</value>
+  </data>
+  <data name="DeleteFile_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="DeleteFile_Dialog.CloseButtonText" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="DeleteFile_Question.Text" xml:space="preserve">
+    <value>确定删除此项目？</value>
+  </data>
+  <data name="DeleteFile_Permanent.Content" xml:space="preserve">
+    <value>永久删除（无法撤销）</value>
+  </data>
+  <data name="FileConvert_Dialog.Title" xml:space="preserve">
+    <value>转换为 PDF</value>
+  </data>
+  <data name="FileConvert_Dialog.CloseButtonText" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="FileConvert_Description.Text" xml:space="preserve">
+    <value>选择 PDF 保存位置。支持的源文件扩展名：</value>
+  </data>
+  <data name="FileConvert_Save.Content" xml:space="preserve">
+    <value>转换并保存…</value>
+  </data>
+  <data name="FileConvert_Completed" xml:space="preserve">
+    <value>转换完成。</value>
+  </data>
+  <data name="Drive_Search.AutomationProperties.Name" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Drive_Search.ToolTipService.ToolTip" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Drive_Refresh.AutomationProperties.Name" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Drive_Refresh.ToolTipService.ToolTip" xml:space="preserve">
+    <value>刷新 (F5)</value>
+  </data>
+  <data name="Drive_Layout.AutomationProperties.Name" xml:space="preserve">
+    <value>布局</value>
+  </data>
+  <data name="Drive_Layout.ToolTipService.ToolTip" xml:space="preserve">
+    <value>切换布局</value>
+  </data>
+  <data name="FileProperty_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="FileProperty_Name.Text" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="FileProperty_Size.Text" xml:space="preserve">
+    <value>大小</value>
+  </data>
+  <data name="FileProperty_Updated.Text" xml:space="preserve">
+    <value>修改时间</value>
+  </data>
+  <data name="FileProperty_Children.Text" xml:space="preserve">
+    <value>子项目数量</value>
+  </data>
+  <data name="FilePreview_Dialog.PrimaryButtonText" xml:space="preserve">
+    <value>关闭</value>
   </data>
 </root>

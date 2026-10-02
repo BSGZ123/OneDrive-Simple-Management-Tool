@@ -9,11 +9,12 @@
     xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
     d:DataContext="{d:DesignInstance Type=tools:PreviewViewModel}"
     mc:Ignorable="d"
-    PrimaryButtonText="Close"
+    x:Uid="FilePreview_Dialog"
     Loaded="LoadImageContentAsync">
 
     <Grid>
         <ProgressRing IsActive="{Binding IsLoading}" Background="LightGray" />
         <Image Source="{Binding Image}"/>
+        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" VerticalAlignment="Top" />
     </Grid>
 </ContentDialog>

@@ -1,21 +1,4 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using OneDrive_Simple_Management_Tool.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace OneDrive_Simple_Management_Tool.Views.Layout
 {
@@ -23,44 +6,8 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
     {
         public GirdFileView()
         {
-            this.InitializeComponent();
-        }
-
-        private void ShowDeleteFileDialogAsync(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void ShowConverFiletDialogAsync(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private async void ShowShareFileDialogAsync(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is not FileViewModel file) return;
-            ShareFileView dialog = new(file) { XamlRoot = XamlRoot };
-            await dialog.ShowAsync();
-        }
-
-        private void ShowRenameFileDialogAsync(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void ShowPropertyDialogAsync(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        //打开文件夹
-        private async void OpenFolder(object sender, DoubleTappedRoutedEventArgs e)
-        {
-            FileViewModel viewModel = DataContext as FileViewModel;
-            if (viewModel.IsFolder)
-            {
-                await viewModel.Drive.OpenFolder(viewModel);
-            }
+            InitializeComponent();
+            FileActions.Attach(this);
         }
     }
 }
