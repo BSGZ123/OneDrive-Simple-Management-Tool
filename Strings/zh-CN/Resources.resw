@@ -297,4 +297,16 @@
   <data name="TaskManagerPage_Resume.Text" xml:space="preserve">
     <value>恢复</value>
   </data>
+  <data name="TaskManagerPage_UploadCompleted.Text" xml:space="preserve">
+    <value>上传完成</value>
+  </data>
+  <data name="TaskManagerPage_UploadFailed.Text" xml:space="preserve">
+    <value>上传失败，部分文件可能已上传。</value>
+  </data>
+  <data name="UploadRequestFailedTitle" xml:space="preserve">
+    <value>无法开始上传</value>
+  </data>
+  <data name="UploadRefreshFailedTitle" xml:space="preserve">
+    <value>上传任务已结束，但刷新文件列表失败</value>
+  </data>
 </root>

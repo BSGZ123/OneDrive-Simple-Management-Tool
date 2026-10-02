@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  <!-- Run this console project with dotnet run. -->
+  <!-- Exercise production sources with storage/UI fakes and a loopback upload server. -->
+  <ItemGroup>
+    <Compile Include="../../Services/OneDrive.cs" Link="Production/OneDrive.cs" />
+    <Compile Include="../../Services/Utils.cs" Link="Production/Utils.cs" />
+    <Compile Include="../../Helpers/UploadProgressTracker.cs" Link="Production/UploadProgressTracker.cs" />
+    <Compile Include="../../Models/FileType.cs" Link="Production/FileType.cs" />
+    <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
+    <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+  </ItemGroup>
+</Project>

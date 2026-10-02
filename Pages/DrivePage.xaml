@@ -41,6 +41,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -90,9 +91,11 @@
 
         </RelativePanel>
 
+        <InfoBar x:Name="UploadErrorInfoBar" Grid.Row="2" Severity="Error" IsOpen="False" IsClosable="True" Margin="10 0 10 5" />
+
         <!--网盘文件列表区域，支持右键菜单，拖放上传，快捷键等-->
         <ContentControl
-            Grid.Row="2"
+            Grid.Row="3"
             x:Name="CloudControl"
             VerticalContentAlignment="Stretch"
             HorizontalContentAlignment="Stretch"

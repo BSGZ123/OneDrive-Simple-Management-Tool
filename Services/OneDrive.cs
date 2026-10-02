@@ -6,6 +6,7 @@ using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Kiota.Abstractions.Authentication;
+using OneDrive_Simple_Management_Tool.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,14 +78,16 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].Items[itemId].PatchAsync(requestBody);
         }
 
-        //这里通过SDK上传是有问题的，估摸着还得用Api上传
+        // Progress reports uploaded bytes for both files and folders.
         public async Task UploadFileAsync(StorageFile file, string itemId, IProgress<long> progress = null)
         {
             using Stream stream = await file.OpenStreamForReadAsync();
-            if ((await file.GetBasicPropertiesAsync()).Size == 0)
+            if (stream.Length == 0)
             {
-                // 上传一个空文件
-                await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(new MemoryStream());
+                // Empty files cannot use an upload session.
+                DriveItem emptyItem = await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(stream);
+                EnsureUploadedItem(emptyItem);
+                progress?.Report(0);
                 return;
             }
 
@@ -105,43 +108,63 @@ namespace OneDrive_Simple_Management_Tool.Services
                 .CreateUploadSession
                 .PostAsync(uploadSessionRequestBody);
 
-            int maxChunckSize = 320 * 1024;
-            LargeFileUploadTask<DriveItem> fileUploadTask = new(uploadSession, stream, maxChunckSize, graphClient.RequestAdapter);
-
-            try
+            if (string.IsNullOrWhiteSpace(uploadSession?.UploadUrl))
             {
-                var uploadResult = await fileUploadTask.UploadAsync(progress);
-                Console.WriteLine(uploadResult.ItemResponse.ToString());
-                Console.WriteLine(uploadResult.UploadSucceeded ?
-                $"Upload complete, item ID: {uploadResult.ItemResponse.Id}" :
-                "Upload failed");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error uploading: {ex.Message}");
+                throw new InvalidOperationException("The server did not return an upload session.");
             }
 
+            int maxChunkSize = 320 * 1024;
+            // The session URL is preauthenticated. Let the SDK use its anonymous adapter.
+            LargeFileUploadTask<DriveItem> fileUploadTask = new(uploadSession, stream, maxChunkSize);
+            var uploadResult = await fileUploadTask.UploadAsync(progress == null ? null : new UploadSliceProgress(progress));
+            if (!uploadResult.UploadSucceeded)
+            {
+                throw new InvalidOperationException("The server did not confirm the upload.");
+            }
 
+            EnsureUploadedItem(uploadResult.ItemResponse);
+            progress?.Report(stream.Length);
+        }
+
+        private sealed class UploadSliceProgress(IProgress<long> progress) : IProgress<long>
+        {
+            public void Report(long lastByteOffset)
+            {
+                // Graph.Core 3.2.4 reports a zero-based last-byte offset, not a byte count.
+                progress.Report(checked(lastByteOffset + 1));
+            }
+        }
+
+        private static void EnsureUploadedItem(DriveItem item)
+        {
+            if (string.IsNullOrWhiteSpace(item?.Id))
+            {
+                throw new InvalidOperationException("The server did not return the uploaded item.");
+            }
         }
 
         public async Task UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null)
         {
-            ulong totalSize = await Utils.GetFolderSize(folder);
-            ulong uploadedSize = 0;
+            var tracker = new UploadProgressTracker(progress);
+            await UploadFolderCoreAsync(folder, itemId, tracker);
+        }
+
+        private async Task UploadFolderCoreAsync(StorageFolder folder, string itemId, UploadProgressTracker tracker)
+        {
             var files = await folder.GetFilesAsync();
             DriveItem cloudFolder = await CreateFolder(itemId, folder.Name);
-
-            IEnumerable<Task> uploadTasks = files.Select(async file =>
+            if (string.IsNullOrWhiteSpace(cloudFolder?.Id))
             {
-                await UploadFileAsync(file, cloudFolder.Id, progress);
-                ulong fileSize = (await file.GetBasicPropertiesAsync()).Size;
-                Interlocked.Add(ref uploadedSize, fileSize);
-                progress?.Report((long)(uploadedSize / totalSize));
-            });
+                throw new InvalidOperationException("The server did not return the created folder.");
+            }
+
+            IEnumerable<Task> uploadTasks = files.Select(file =>
+                UploadFileAsync(file, cloudFolder.Id, tracker.CreateFileProgress()));
             await Task.WhenAll(uploadTasks);
 
             IReadOnlyList<StorageFolder> subfolders = await folder.GetFoldersAsync();
-            IEnumerable<Task> subfolderTasks = subfolders.Select(subfolder => UploadFolderAsync(subfolder, cloudFolder.Id, progress));
+            IEnumerable<Task> subfolderTasks = subfolders.Select(subfolder =>
+                UploadFolderCoreAsync(subfolder, cloudFolder.Id, tracker));
             await Task.WhenAll(subfolderTasks);
         }
 

@@ -98,8 +98,12 @@
                     <StackPanel Orientation="Vertical">
                         
                         <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
-                        <ProgressBar Value="{Binding Progress}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
-                        <TextBlock Text="Upload completed" Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <ProgressBar Value="{Binding Progress}" ShowError="{Binding HasFailed}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                        <TextBlock x:Uid="TaskManagerPage_UploadCompleted" Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <StackPanel Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock x:Uid="TaskManagerPage_UploadFailed" />
+                            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Left" />
+                        </StackPanel>
                     </StackPanel>
 
                     <!--上传功能按钮-->

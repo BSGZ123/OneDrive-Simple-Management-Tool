@@ -19,6 +19,7 @@ using OneDrive_Simple_Management_Tool.Views;
 using OneDrive_Simple_Management_Tool.ViewModels;
 using System.Collections.ObjectModel;
 using OneDrive_Simple_Management_Tool.Models;
+using OneDrive_Simple_Management_Tool.Helpers;
 using Windows.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
 
@@ -61,18 +62,49 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private async void ToUpload_Drop(object sender, DragEventArgs e)
         {
-            //检查Dataview中是否包含文件数据
-            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            try
             {
-                //获取拖放于窗口上的文件或文件夹项，IStorageItem可表示文件或文件夹项
-                IReadOnlyList<IStorageItem> items = await e.DataView.GetStorageItemsAsync();
+                if (!e.DataView.Contains(StandardDataFormats.StorageItems))
+                {
+                    return;
+                }
 
+                UploadErrorInfoBar.IsOpen = false;
                 DriveViewModel driveViewModel = (DriveViewModel)DataContext;
+                string parentItemId = driveViewModel.ParentItemId;
+                IReadOnlyList<IStorageItem> items;
+                var deferral = e.GetDeferral();
+                try
+                {
+                    items = await e.DataView.GetStorageItemsAsync();
+                }
+                finally
+                {
+                    // Release the drag source after reading its data, before network transfers.
+                    deferral.Complete();
+                }
+
                 TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
-                //将拖放项转换为上传任务
-                var tasks = items.Select(item => manager.AddUploadTask(driveViewModel, driveViewModel.ParentItemId, item));
+                var tasks = items.Select(item => manager.AddUploadTask(driveViewModel, parentItemId, item));
                 await Task.WhenAll(tasks);
-                await driveViewModel.Refresh();
+
+                try
+                {
+                    await driveViewModel.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    driveViewModel.IsLoading = Visibility.Collapsed;
+                    UploadErrorInfoBar.Title = "UploadRefreshFailedTitle".GetLocalized();
+                    UploadErrorInfoBar.Message = ex.Message;
+                    UploadErrorInfoBar.IsOpen = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                UploadErrorInfoBar.Title = "UploadRequestFailedTitle".GetLocalized();
+                UploadErrorInfoBar.Message = ex.Message;
+                UploadErrorInfoBar.IsOpen = true;
             }
         }
 

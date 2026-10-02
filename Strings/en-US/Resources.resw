@@ -297,4 +297,16 @@
   <data name="TaskManagerPage_Resume.Text" xml:space="preserve">
     <value>Resume</value>
   </data>
+  <data name="TaskManagerPage_UploadCompleted.Text" xml:space="preserve">
+    <value>Upload completed</value>
+  </data>
+  <data name="TaskManagerPage_UploadFailed.Text" xml:space="preserve">
+    <value>Upload failed. Some files may already have been uploaded.</value>
+  </data>
+  <data name="UploadRequestFailedTitle" xml:space="preserve">
+    <value>Could not start the upload</value>
+  </data>
+  <data name="UploadRefreshFailedTitle" xml:space="preserve">
+    <value>Upload tasks finished, but the file list could not be refreshed</value>
+  </data>
 </root>
