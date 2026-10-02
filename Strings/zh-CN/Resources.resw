@@ -309,4 +309,61 @@
   <data name="UploadRefreshFailedTitle" xml:space="preserve">
     <value>上传任务已结束，但刷新文件列表失败</value>
   </data>
+  <data name="ShareFileView.Title" xml:space="preserve">
+    <value>共享文件或文件夹</value>
+  </data>
+  <data name="ShareFileView.CloseButtonText" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="ShareFileView_Description.Text" xml:space="preserve">
+    <value>任何持有此链接的人都可查看该文件或文件夹，无需登录。</value>
+  </data>
+  <data name="ShareFileView_Generate.Content" xml:space="preserve">
+    <value>生成链接</value>
+  </data>
+  <data name="ShareFileView_Link.Header" xml:space="preserve">
+    <value>共享链接</value>
+  </data>
+  <data name="ShareFileView_Copy.Content" xml:space="preserve">
+    <value>复制链接</value>
+  </data>
+  <data name="ShareFileView_CloseHint.Text" xml:space="preserve">
+    <value>关闭窗口不会撤销已生成的共享链接。</value>
+  </data>
+  <data name="ShareFile_Generating" xml:space="preserve">
+    <value>正在生成链接…</value>
+  </data>
+  <data name="ShareFile_Ready" xml:space="preserve">
+    <value>链接已就绪，可以复制。</value>
+  </data>
+  <data name="ShareFile_Copied" xml:space="preserve">
+    <value>链接已复制。</value>
+  </data>
+  <data name="ShareFile_AccessDenied" xml:space="preserve">
+    <value>无法共享此项目：权限不足，或所在组织禁止匿名共享链接。</value>
+  </data>
+  <data name="ShareFile_NotFound" xml:space="preserve">
+    <value>此文件或文件夹已不可用，请刷新文件列表后重试。</value>
+  </data>
+  <data name="ShareFile_AuthenticationFailed" xml:space="preserve">
+    <value>登录失败或已失效，请重新登录此网盘后重试。</value>
+  </data>
+  <data name="ShareFile_TooManyRequests" xml:space="preserve">
+    <value>请求过于频繁，请稍后重试。</value>
+  </data>
+  <data name="ShareFile_NetworkFailed" xml:space="preserve">
+    <value>网络请求失败或超时，请检查连接后重试。</value>
+  </data>
+  <data name="ShareFile_InvalidResponse" xml:space="preserve">
+    <value>服务器未返回有效的共享链接，请重试。</value>
+  </data>
+  <data name="ShareFile_InvalidItem" xml:space="preserve">
+    <value>此项目无法共享，请刷新文件列表后重试。</value>
+  </data>
+  <data name="ShareFile_Failed" xml:space="preserve">
+    <value>无法生成链接，请重试，或重新登录此网盘。</value>
+  </data>
+  <data name="ShareFile_CopyFailed" xml:space="preserve">
+    <value>复制失败，请重试，或选中链接后手动复制。</value>
+  </data>
 </root>

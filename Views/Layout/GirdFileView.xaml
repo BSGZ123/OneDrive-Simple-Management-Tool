@@ -35,7 +35,7 @@
                     
                 </MenuFlyoutItem>
                 <MenuFlyoutItem Text="Convert" Click="ShowConverFiletDialogAsync" Visibility="{Binding Name,Converter={StaticResource FileNameToCanConvertCommandVisible}}"/>
-                <MenuFlyoutItem Text="Share" Click="ShowShareFileDialogAsync"/>
+                <MenuFlyoutItem x:Uid="FileView_Flyout_Share" Click="ShowShareFileDialogAsync"/>
                 <MenuFlyoutItem Text="Rename" Click="ShowRenameFileDialogAsync"/>
                 <MenuFlyoutItem Text="Property" Click="ShowPropertyDialogAsync"/>
             </MenuFlyout>

@@ -309,4 +309,61 @@
   <data name="UploadRefreshFailedTitle" xml:space="preserve">
     <value>Upload tasks finished, but the file list could not be refreshed</value>
   </data>
+  <data name="ShareFileView.Title" xml:space="preserve">
+    <value>Share file or folder</value>
+  </data>
+  <data name="ShareFileView.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ShareFileView_Description.Text" xml:space="preserve">
+    <value>Anyone with this link can view this file or folder without signing in.</value>
+  </data>
+  <data name="ShareFileView_Generate.Content" xml:space="preserve">
+    <value>Generate link</value>
+  </data>
+  <data name="ShareFileView_Link.Header" xml:space="preserve">
+    <value>Sharing link</value>
+  </data>
+  <data name="ShareFileView_Copy.Content" xml:space="preserve">
+    <value>Copy link</value>
+  </data>
+  <data name="ShareFileView_CloseHint.Text" xml:space="preserve">
+    <value>Closing this window does not revoke the sharing link.</value>
+  </data>
+  <data name="ShareFile_Generating" xml:space="preserve">
+    <value>Generating link…</value>
+  </data>
+  <data name="ShareFile_Ready" xml:space="preserve">
+    <value>Link ready. You can copy it now.</value>
+  </data>
+  <data name="ShareFile_Copied" xml:space="preserve">
+    <value>Link copied.</value>
+  </data>
+  <data name="ShareFile_AccessDenied" xml:space="preserve">
+    <value>Cannot share this item. You may lack permission, or your organization may prohibit anonymous links.</value>
+  </data>
+  <data name="ShareFile_NotFound" xml:space="preserve">
+    <value>This file or folder is no longer available. Refresh the file list and try again.</value>
+  </data>
+  <data name="ShareFile_AuthenticationFailed" xml:space="preserve">
+    <value>Sign-in failed or expired. Sign in to this drive again and retry.</value>
+  </data>
+  <data name="ShareFile_TooManyRequests" xml:space="preserve">
+    <value>Too many requests. Wait a moment and try again.</value>
+  </data>
+  <data name="ShareFile_NetworkFailed" xml:space="preserve">
+    <value>The request failed or timed out. Check your connection and try again.</value>
+  </data>
+  <data name="ShareFile_InvalidResponse" xml:space="preserve">
+    <value>The server did not return a valid sharing link. Please try again.</value>
+  </data>
+  <data name="ShareFile_InvalidItem" xml:space="preserve">
+    <value>This item cannot be shared. Refresh the file list and try again.</value>
+  </data>
+  <data name="ShareFile_Failed" xml:space="preserve">
+    <value>Could not generate a link. Try again, or sign in to this drive again.</value>
+  </data>
+  <data name="ShareFile_CopyFailed" xml:space="preserve">
+    <value>Could not copy the link. Try again, or select the link and copy it manually.</value>
+  </data>
 </root>

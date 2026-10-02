@@ -36,9 +36,11 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
 
         }
 
-        private void ShowShareFileDialogAsync(object sender, RoutedEventArgs e)
+        private async void ShowShareFileDialogAsync(object sender, RoutedEventArgs e)
         {
-
+            if (DataContext is not FileViewModel file) return;
+            ShareFileView dialog = new(file) { XamlRoot = XamlRoot };
+            await dialog.ShowAsync();
         }
 
         private void ShowRenameFileDialogAsync(object sender, RoutedEventArgs e)

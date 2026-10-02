@@ -170,16 +170,33 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task<string> CreateLink(string itemId, DateTimeOffset? expirationDateTime = null, string password = null, string type = "view")
         {
+            if (string.IsNullOrWhiteSpace(itemId))
+            {
+                throw new ArgumentException("A file or folder ID is required.", nameof(itemId));
+            }
+
+            if (graphClient == null) await Login();
+            if (string.IsNullOrWhiteSpace(DriveId))
+            {
+                throw new InvalidOperationException("No drive is available for sharing.");
+            }
+
             Microsoft.Graph.Drives.Item.Items.Item.CreateLink.CreateLinkPostRequestBody requestBody = new()
             {
                 Type = type,
                 Password = password,
                 Scope = "anonymous",
-                RetainInheritedPermissions = false,
+                RetainInheritedPermissions = true,
                 ExpirationDateTime = expirationDateTime,
             };
             Permission result = await graphClient.Drives[DriveId].Items[itemId].CreateLink.PostAsync(requestBody);
-            return result.Link.WebUrl;
+            string link = result?.Link?.WebUrl;
+            if (!Uri.TryCreate(link, UriKind.Absolute, out Uri uri) || uri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new InvalidDataException("The server did not return a valid sharing link.");
+            }
+
+            return link;
         }
 
         public async Task<string> GetDisplayName()

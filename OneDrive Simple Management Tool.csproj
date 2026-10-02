@@ -50,6 +50,7 @@
     <None Remove="Views\PropertyView.xaml" />
     <None Remove="Views\RenameFileView.xaml" />
     <None Remove="Views\SearchView.xaml" />
+    <None Remove="Views\ShareFileView.xaml" />
     <None Remove="Views\Tools\CreateLink.xaml" />
     <None Remove="Views\Tools\LinkDetails.xaml" />
   </ItemGroup>
@@ -220,6 +221,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\RenameFileView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\ShareFileView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\CreateFolderView.xaml">

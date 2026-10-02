@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="OneDrive_Simple_Management_Tool.Views.ShareFileView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    x:Uid="ShareFileView"
+    DefaultButton="Close"
+    Closing="OnClosing">
+
+    <ContentDialog.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </ContentDialog.Resources>
+
+    <StackPanel Spacing="12">
+        <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextWrapping="Wrap" />
+        <TextBlock x:Uid="ShareFileView_Description" TextWrapping="Wrap" />
+        <Button x:Uid="ShareFileView_Generate" Command="{Binding GenerateLinkCommand}" />
+        <ProgressRing IsActive="{Binding IsGenerating}"
+                      Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVisibilityConverter}}"
+                      Width="24" Height="24" HorizontalAlignment="Left" />
+        <TextBox x:Uid="ShareFileView_Link" Text="{Binding SharingLink, Mode=OneWay}"
+                 IsReadOnly="True" TextWrapping="Wrap" MaxHeight="120" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+        <Button x:Uid="ShareFileView_Copy" Command="{Binding CopyLinkCommand}" />
+        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        <InfoBar IsOpen="{Binding HasError}" Severity="Error" IsClosable="False" Message="{Binding ErrorMessage}" />
+        <TextBlock x:Uid="ShareFileView_CloseHint" TextWrapping="Wrap" />
+    </StackPanel>
+</ContentDialog>
