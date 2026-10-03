@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Drives.Item.Items.Item.Restore;
-using Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
@@ -34,10 +33,77 @@ namespace OneDrive_Simple_Management_Tool.Services
             PublicClientApp = Ioc.Default.GetService<IPublicClientApplication>();
         }
 
-        public async Task<DriveItemCollectionResponse> GetFiles(string parentId = "Root")
+        public async Task<DriveItemPage> GetFilePageAsync(string parentId, string keyword,
+            string nextLink, CancellationToken cancellationToken)
         {
             if (!IsAuthenticated) await Login();
-            return await graphClient.Drives[DriveId].Items[parentId].Children.GetAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            if (nextLink != null) ValidateNextLink(nextLink);
+
+            List<DriveItem> items;
+            string continuation;
+            if (keyword == null)
+            {
+                var request = graphClient.Drives[DriveId].Items[parentId].Children;
+                var response = nextLink == null
+                    ? await request.GetAsync(config => config.QueryParameters.Top = 200, cancellationToken)
+                    : await request.WithUrl(nextLink).GetAsync(cancellationToken: cancellationToken);
+                items = response?.Value;
+                continuation = response?.OdataNextLink;
+            }
+            else
+            {
+                // Resolve the root ID so the item-scoped search cannot broaden to shared drives.
+                string rootId = "root";
+                if (nextLink == null)
+                {
+                    var root = await graphClient.Drives[DriveId].Root.GetAsync(cancellationToken: cancellationToken);
+                    rootId = root?.Id;
+                    if (string.IsNullOrWhiteSpace(rootId)) throw new InvalidDataException();
+                }
+                var request = graphClient.Drives[DriveId].Items[rootId].SearchWithQ(SearchQueryRules.ForGraph(keyword));
+                var response = nextLink == null
+                    ? await request.GetAsSearchWithQGetResponseAsync(config => config.QueryParameters.Top = 200, cancellationToken)
+                    : await request.WithUrl(nextLink).GetAsSearchWithQGetResponseAsync(cancellationToken: cancellationToken);
+                items = response?.Value;
+                continuation = response?.OdataNextLink;
+            }
+            if (items == null || items.Any(item => item == null || string.IsNullOrWhiteSpace(item.Id) || item.Name == null))
+                throw new InvalidDataException();
+            // Remote shortcuts/shared items cannot be operated on with this drive's ID.
+            var localItems = items.Where(IsInCurrentDrive).ToList();
+            return new DriveItemPage(localItems, string.IsNullOrEmpty(continuation) ? null : continuation, items.Count - localItems.Count);
+        }
+
+        private bool IsInCurrentDrive(DriveItem item) => item.RemoteItem == null &&
+            (item.ParentReference?.DriveId == null || item.ParentReference.DriveId == DriveId);
+
+        private void ValidateNextLink(string nextLink)
+        {
+            var service = new Uri(graphClient.RequestAdapter.BaseUrl.TrimEnd('/') + "/");
+            if (!Uri.TryCreate(nextLink, UriKind.Absolute, out var uri) || uri.Scheme != service.Scheme ||
+                uri.Authority != service.Authority || !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Fragment) ||
+                !uri.AbsolutePath.StartsWith(service.AbsolutePath + "drives/" + Uri.EscapeDataString(DriveId) + "/", StringComparison.Ordinal))
+                throw new InvalidDataException();
+        }
+
+        public async Task<IReadOnlyList<DriveItem>> GetFolderPathAsync(string itemId, CancellationToken cancellationToken)
+        {
+            var root = await graphClient.Drives[DriveId].Root.GetAsync(cancellationToken: cancellationToken);
+            if (string.IsNullOrWhiteSpace(root?.Id)) throw new InvalidDataException();
+            var path = new List<DriveItem>();
+            var visited = new HashSet<string>(StringComparer.Ordinal);
+            while (itemId != root.Id)
+            {
+                if (string.IsNullOrWhiteSpace(itemId) || !visited.Add(itemId)) throw new InvalidDataException();
+                var item = await graphClient.Drives[DriveId].Items[itemId].GetAsync(cancellationToken: cancellationToken);
+                if (item?.Id != itemId || item.Name == null || item.Folder == null || !IsInCurrentDrive(item))
+                    throw new InvalidDataException();
+                path.Add(item);
+                itemId = item.ParentReference?.Id;
+            }
+            path.Reverse();
+            return path;
         }
 
         public async Task<ThumbnailSetCollectionResponse> GetThumbNails(string itemId)
@@ -280,18 +346,6 @@ namespace OneDrive_Simple_Management_Tool.Services
                 },
             };
             return await graphClient.Drives[DriveId].Items[itemId].Restore.PostAsync(requestBody);
-        }
-
-        public async Task<SearchWithQGetResponse> SearchLocalItems(string query, string itemId)
-        {
-            // 根据代码，Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQResponse
-            // 与 Microsoft.Graph.Drives.Item.SearchWithQ.SearchWithQResponse 相同，那么微软为什么这样做？
-            return await graphClient.Drives[DriveId].Items[itemId].SearchWithQ(query).GetAsSearchWithQGetResponseAsync();
-        }
-
-        public async Task<Microsoft.Graph.Drives.Item.SearchWithQ.SearchWithQGetResponse> SearchGlobalItems(string query)
-        {
-            return await graphClient.Drives[DriveId].SearchWithQ(query).GetAsSearchWithQGetResponseAsync();
         }
 
         //获取受限资源的访问令牌，委托getTokenDelegate，scopes限定权限范围

@@ -67,6 +67,14 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
         private readonly DriveItem _file;
+        public void UpdateName(string name)
+        {
+            _file.Name = name;
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(CanConvert));
+            OnPropertyChanged(nameof(CanPreview));
+            OnPropertyChanged(nameof(CanOpen));
+        }
         [ObservableProperty] private BitmapImage _image;
         [ObservableProperty] private string _content;
 

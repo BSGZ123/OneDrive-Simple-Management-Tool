@@ -50,6 +50,17 @@
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="2" Margin="10,0">
+            <Grid ColumnSpacing="8" Visibility="{Binding SearchVisibility}">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding SearchDescription}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" x:Uid="Drive_ClearSearch" Command="{Binding ClearSearchCommand}" VerticalAlignment="Center" />
+            </Grid>
+            <Grid ColumnSpacing="8" Margin="0,4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" x:Uid="Drive_CancelLoading" Command="{Binding CancelLoadingCommand}" Visibility="{Binding IsLoading}" VerticalAlignment="Center" />
+                <Button Grid.Column="2" x:Uid="Drive_RetryLoading" Command="{Binding RetryLoadingCommand}" Visibility="{Binding RetryVisibility}" VerticalAlignment="Center" />
+            </Grid>
             <InfoBar x:Uid="FileOperation_ErrorBar" IsOpen="{Binding HasError}"
                      Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
             <InfoBar x:Name="UploadErrorInfoBar" Severity="Error" IsOpen="False" IsClosable="True" />
@@ -59,7 +70,7 @@
             <Grid.ContextFlyout>
                 <MenuFlyout>
                     <MenuFlyoutItem x:Uid="CloudPage_Refresh" Command="{Binding RefreshCommand}" />
-                    <MenuFlyoutItem x:Uid="CloudPage_CreateFolder" Click="CreateFolderDialogAsync" />
+                    <MenuFlyoutItem x:Uid="CloudPage_CreateFolder" Click="CreateFolderDialogAsync" IsEnabled="{Binding CanCreateHere}" />
                     <MenuFlyoutSubItem x:Uid="CloudPage_Layout">
                         <MenuFlyoutItem x:Uid="CloudPage_Layout_Column" Tag="List" Click="ChangeLayout" />
                         <MenuFlyoutItem x:Uid="CloudPage_Layout_Grid" Tag="Grid" Click="ChangeLayout" />

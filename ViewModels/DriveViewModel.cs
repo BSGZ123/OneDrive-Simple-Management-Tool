@@ -10,117 +10,275 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
     public partial class DriveViewModel : ObservableObject
     {
+        private sealed class Listing
+        {
+            public string ParentId;
+            public string Query;
+            public string Filter;
+            public string SelectionId;
+            public List<BreadcrumbItem> Path;
+            public bool ResolvePath;
+            public bool Committed;
+            public bool Complete;
+            public string NextLink;
+            public int ExcludedCount;
+            public readonly HashSet<string> LoadedLinks = new(StringComparer.Ordinal);
+            public readonly Dictionary<string, FileViewModel> Items = new(StringComparer.Ordinal);
+        }
+
+        private Listing _view;
+        private Listing _attempt;
+        private CancellationTokenSource _requestCancellation;
+        private long _requestVersion;
+        private bool _updatingSelection;
+
         public DriveViewModel(OneDrive provider, string displayName = null)
         {
             Provider = provider;
             DisplayName = displayName ?? provider.DriveId;
-            BreadcrumbItems.Add(new BreadcrumbItem { Name = "RootFileName".GetLocalized(), ItemId = "Root" });
+            BreadcrumbItems.Add(RootBreadcrumb());
         }
 
-        [RelayCommand]
-        public async Task GetFiles(string itemId = "Root")
+        private static BreadcrumbItem RootBreadcrumb() => new() { Name = "RootFileName".GetLocalized(), ItemId = "Root" };
+
+        [RelayCommand(AllowConcurrentExecutions = true)]
+        public Task GetFiles(string itemId = "Root") => LoadFiles(itemId, null, null,
+            itemId == "Root" ? new List<BreadcrumbItem> { RootBreadcrumb() } : null, itemId != "Root");
+
+        [RelayCommand(AllowConcurrentExecutions = true)]
+        public async Task Refresh() => await TryRefresh();
+
+        public Task<bool> TryRefresh()
         {
-            await LoadFiles(itemId, null, null);
+            // A mutation may finish while a newly requested search/navigation is awaiting its first page.
+            // Refresh that latest intent instead of replacing it with the previously displayed context.
+            Listing target = IsLoading == Visibility.Visible ? _attempt : _view;
+            return LoadFiles(target?.ParentId ?? "Root", target?.Query, target?.Filter,
+                target?.Path ?? BreadcrumbItems.ToList(), target?.ResolvePath == true && !target.Committed);
         }
 
-        [RelayCommand]
-        public async Task Refresh()
+        public async Task<bool> RefreshAfterMutation()
         {
-            await TryRefresh();
+            Task<bool> refresh = TryRefresh();
+            long version = _requestVersion;
+            bool succeeded = await refresh;
+            // A later navigation or explicit stop owns the screen; do not publish an old warning.
+            if (!succeeded && version == _requestVersion)
+                ErrorMessage = "FileOperation_RefreshFailed".GetLocalized();
+            return succeeded || version != _requestVersion;
         }
 
-        public Task<bool> TryRefresh() => LoadFiles(_parentItemId, _globalQuery, _localFilter);
-
-        private async Task<bool> LoadFiles(string itemId, string globalQuery, string localFilter)
+        private Task<bool> LoadFiles(string parentId, string query, string filter,
+            List<BreadcrumbItem> path, bool resolvePath = false)
         {
-            if (IsLoading == Visibility.Visible) return false;
+            return RunLoad(new Listing
+            {
+                ParentId = parentId, Query = query, Filter = filter, Path = path, ResolvePath = resolvePath,
+                SelectionId = parentId == ParentItemId && query == _view?.Query ? SelectedItem?.Id ?? _view?.SelectionId : null
+            });
+        }
+
+        private async Task<bool> RunLoad(Listing listing)
+        {
+            _requestCancellation?.Cancel();
+            using var cancellation = new CancellationTokenSource();
+            _requestCancellation = cancellation;
+            long version = ++_requestVersion;
+            _attempt = listing;
             IsLoading = Visibility.Visible;
             ErrorMessage = string.Empty;
+            NotifyListing();
             try
             {
-                var items = globalQuery == null
-                    ? (await Provider.GetFiles(itemId))?.Value
-                    : (await Provider.SearchGlobalItems(globalQuery))?.Value;
-                if (items == null) throw new InvalidDataException();
-                if (localFilter != null)
-                    items = items.Where(item => item.Name?.Contains(localFilter, StringComparison.OrdinalIgnoreCase) == true).ToList();
+                if (listing.ResolvePath && !listing.Committed)
+                {
+                    var path = await Provider.GetFolderPathAsync(listing.ParentId, cancellation.Token);
+                    if (version != _requestVersion) return false;
+                    listing.Path = new List<BreadcrumbItem> { RootBreadcrumb() };
+                    listing.Path.AddRange(path.Select(item => new BreadcrumbItem { Name = item.Name, ItemId = item.Id }));
+                }
 
-                // Commit navigation and selection only after a successful response.
-                string selectedId = itemId == _parentItemId ? SelectedItem?.Id : null;
-                ReplaceFiles(items, selectedId);
-                _parentItemId = itemId;
-                _globalQuery = globalQuery;
-                _localFilter = localFilter;
-                OnPropertyChanged(nameof(ParentItemId));
-                return true;
+                do
+                {
+                    cancellation.Token.ThrowIfCancellationRequested();
+                    string link = listing.NextLink;
+                    if (link != null && listing.LoadedLinks.Contains(link)) throw new InvalidDataException();
+                    var page = await Provider.GetFilePageAsync(listing.ParentId, listing.Query, link, cancellation.Token);
+                    if (version != _requestVersion) return false;
+                    cancellation.Token.ThrowIfCancellationRequested();
+
+                    if (!listing.Committed)
+                    {
+                        _view = listing;
+                        listing.Committed = true;
+                        SetVisibleFiles(Array.Empty<FileViewModel>(), null);
+                        BreadcrumbItems.Clear();
+                        foreach (var crumb in listing.Path ?? new List<BreadcrumbItem> { RootBreadcrumb() }) BreadcrumbItems.Add(crumb);
+                        OnPropertyChanged(nameof(ParentItemId));
+                    }
+                    // A page commits as one unit. Cancellation cannot skip its remaining rows.
+                    foreach (var item in page.Items)
+                    {
+                        if (listing.Items.ContainsKey(item.Id)) continue;
+                        var file = new FileViewModel(this, item);
+                        listing.Items.Add(file.Id, file);
+                        if (Matches(file, listing.Filter))
+                        {
+                            Files.Add(file);
+                            if (file.IsImage) Images.Add(file);
+                            if (file.Id == listing.SelectionId) SelectedItem = file;
+                        }
+                    }
+                    if (link != null) listing.LoadedLinks.Add(link);
+                    listing.ExcludedCount += page.ExcludedCount;
+                    listing.NextLink = page.NextLink;
+                    listing.Complete = page.NextLink == null;
+                    if (listing.Complete && SelectedItem == null) listing.SelectionId = null;
+                    NotifyListing();
+                    // Render each page and process navigation/cancellation between pages.
+                    await Task.Yield();
+                } while (!listing.Complete);
+                return version == _requestVersion;
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                return false;
             }
             catch (Exception exception)
             {
-                ErrorMessage = FileOperationErrors.GetMessage(exception);
+                if (version == _requestVersion) ErrorMessage = FileOperationErrors.GetMessage(exception);
                 return false;
             }
             finally
             {
-                IsLoading = Visibility.Collapsed;
+                if (version == _requestVersion)
+                {
+                    _requestCancellation = null;
+                    IsLoading = Visibility.Collapsed;
+                    NotifyListing();
+                }
             }
         }
 
-        private void ReplaceFiles(IEnumerable<DriveItem> items, string selectedId)
+        [RelayCommand]
+        public void CancelLoading()
         {
-            var files = items.Select(item => new FileViewModel(this, item)).ToList();
-            Files.Clear();
-            Images.Clear();
-            foreach (var file in files)
+            ++_requestVersion;
+            _requestCancellation?.Cancel();
+            _requestCancellation = null;
+            _attempt = _view;
+            IsLoading = Visibility.Collapsed;
+            ErrorMessage = string.Empty;
+            NotifyListing();
+        }
+
+        [RelayCommand]
+        public async Task RetryLoading()
+        {
+            if (CanRetry) await RunLoad(_attempt);
+        }
+
+        private static bool Matches(FileViewModel file, string filter) => filter == null ||
+            file.Name.Contains(filter, StringComparison.OrdinalIgnoreCase);
+
+        private void SetVisibleFiles(IEnumerable<FileViewModel> files, string selectionId)
+        {
+            _updatingSelection = true;
+            try
             {
-                Files.Add(file);
-                if (file.IsImage) Images.Add(file);
+                // One reset per filter change avoids thousands of Remove notifications.
+                Files = new ObservableCollection<FileViewModel>(files);
+                Images = new ObservableCollection<FileViewModel>(Files.Where(file => file.IsImage));
+                OnPropertyChanged(nameof(Files));
+                OnPropertyChanged(nameof(Images));
+                SelectedItem = Files.FirstOrDefault(file => file.Id == selectionId);
             }
-            SelectedItem = Files.FirstOrDefault(file => file.Id == selectedId);
+            finally { _updatingSelection = false; }
+        }
+
+        partial void OnSelectedItemChanged(FileViewModel value)
+        {
+            if (!_updatingSelection && _view != null && (value != null || IsLoading != Visibility.Visible))
+                _view.SelectionId = value?.Id;
         }
 
         public void FilterByName(string name)
         {
-            if (IsLoading == Visibility.Visible) return;
-            _localFilter = name;
-            foreach (var file in Files.Where(file => !file.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList())
-            {
-                Files.Remove(file);
-                Images.Remove(file);
-            }
-            if (!Files.Contains(SelectedItem)) SelectedItem = null;
+            if (_view == null || _view.Query != null) return;
+            if (!string.IsNullOrEmpty(name) && !SearchQueryRules.TryNormalize(name, out name)) return;
+            if (_attempt != _view) CancelLoading();
+            _view.Filter = string.IsNullOrEmpty(name) ? null : name;
+            string selectedId = SelectedItem?.Id ?? _view.SelectionId;
+            SetVisibleFiles(_view.Items.Values.Where(file => Matches(file, _view.Filter)), selectedId);
+            _view.SelectionId = SelectedItem?.Id ?? (IsLoading == Visibility.Visible ? selectedId : null);
+            NotifyListing();
         }
 
-        [RelayCommand]
-        public async Task SearchFile(string fileName)
+        public Task ApplyLocalFilter(string keyword)
         {
-            await LoadFiles(_parentItemId, fileName, null);
+            if (!SearchQueryRules.TryNormalize(keyword, out keyword)) return Task.CompletedTask;
+            if (_view == null || _view.Query != null)
+                return LoadFiles(ParentItemId, null, keyword, BreadcrumbItems.ToList());
+            FilterByName(keyword);
+            return Task.CompletedTask;
         }
 
-        [RelayCommand]
-        public async Task OpenFolder(FileViewModel file)
+        [RelayCommand(AllowConcurrentExecutions = true)]
+        public Task SearchFile(string keyword) => SearchQueryRules.TryNormalize(keyword, out keyword)
+            ? LoadFiles(ParentItemId, keyword, null, BreadcrumbItems.ToList()) : Task.CompletedTask;
+
+        [RelayCommand(AllowConcurrentExecutions = true)]
+        public Task ClearSearch()
         {
-            if (file?.IsFolder != true || file.Drive != this) return;
-            if (await LoadFiles(file.Id, null, null))
-                BreadcrumbItems.Add(new BreadcrumbItem { Name = file.Name, ItemId = file.Id });
+            if (_view?.Query != null) return LoadFiles(ParentItemId, null, null, BreadcrumbItems.ToList());
+            FilterByName(null);
+            return Task.CompletedTask;
         }
 
-        public async Task NavigateToBreadcrumb(int index)
+        [RelayCommand(AllowConcurrentExecutions = true)]
+        public Task OpenFolder(FileViewModel file)
         {
-            if (index < 0 || index >= BreadcrumbItems.Count) return;
-            if (await LoadFiles(BreadcrumbItems[index].ItemId, null, null))
-            {
-                while (BreadcrumbItems.Count > index + 1) BreadcrumbItems.RemoveAt(BreadcrumbItems.Count - 1);
-            }
+            if (file?.IsFolder != true || file.Drive != this || !Files.Contains(file)) return Task.CompletedTask;
+            var path = BreadcrumbItems.ToList();
+            path.Add(new BreadcrumbItem { Name = file.Name, ItemId = file.Id });
+            return LoadFiles(file.Id, null, null, path, _view?.Query != null);
         }
 
-        [RelayCommand]
+        public Task NavigateToBreadcrumb(int index)
+        {
+            if (index < 0 || index >= BreadcrumbItems.Count) return Task.CompletedTask;
+            return LoadFiles(BreadcrumbItems[index].ItemId, null, null, BreadcrumbItems.Take(index + 1).ToList());
+        }
+
+        [RelayCommand(AllowConcurrentExecutions = true)]
         public Task GoUp() => NavigateToBreadcrumb(BreadcrumbItems.Count - 2);
+
+        public void RemoveFile(string id)
+        {
+            _view?.Items.Remove(id);
+            var file = Files.FirstOrDefault(item => item.Id == id);
+            if (file != null) { Files.Remove(file); Images.Remove(file); }
+            if (SelectedItem?.Id == id) SelectedItem = null;
+            if (_view?.SelectionId == id) _view.SelectionId = null;
+            NotifyListing();
+        }
+
+        public void UpdateFileName(string id, string name)
+        {
+            if (_view == null || !_view.Items.TryGetValue(id, out var file)) return;
+            file.UpdateName(name);
+            string selectionId = SelectedItem?.Id;
+            SetVisibleFiles(_view.Items.Values.Where(item => Matches(item, _view.Filter)), selectionId);
+            _view.SelectionId = SelectedItem?.Id;
+            NotifyListing();
+        }
 
         [RelayCommand]
         private async Task GetCapacity()
@@ -129,18 +287,20 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             StorageInfo = Utils.ReadableFileSize(quota.Used) + " / " + Utils.ReadableFileSize(quota.Total);
         }
 
-        private string _parentItemId = "Root";
-        private string _globalQuery;
-        private string _localFilter;
+        private void NotifyListing()
+        {
+            foreach (string property in new[] { nameof(IsSearchActive), nameof(SearchVisibility), nameof(SearchDescription),
+                nameof(Keyword), nameof(IsDriveSearch), nameof(IsComplete), nameof(LoadedCount), nameof(StatusText),
+                nameof(CanRetry), nameof(RetryVisibility), nameof(CanCreateHere) }) OnPropertyChanged(property);
+        }
+
         [ObservableProperty] private Visibility _isLoading = Visibility.Collapsed;
         [ObservableProperty] private string _storageInfo;
         [ObservableProperty] private FileViewModel _selectedItem;
-
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ListVisibility))]
         [NotifyPropertyChangedFor(nameof(GridVisibility))]
         private FileLayout _layout;
-
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasError))]
         private string _errorMessage = string.Empty;
@@ -148,9 +308,33 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
         public Visibility ListVisibility => Layout == FileLayout.List ? Visibility.Visible : Visibility.Collapsed;
         public Visibility GridVisibility => Layout == FileLayout.Grid ? Visibility.Visible : Visibility.Collapsed;
-        public string ParentItemId => _parentItemId;
-        public ObservableCollection<FileViewModel> Files { get; } = new();
-        public ObservableCollection<FileViewModel> Images { get; } = new();
+        public string ParentItemId => _view?.ParentId ?? "Root";
+        public bool IsDriveSearch => _view?.Query != null;
+        public string Keyword => _view?.Query ?? _view?.Filter ?? string.Empty;
+        public bool IsSearchActive => !string.IsNullOrEmpty(Keyword);
+        public Visibility SearchVisibility => IsSearchActive ? Visibility.Visible : Visibility.Collapsed;
+        public bool IsComplete => _view?.Complete == true;
+        public int LoadedCount => _view?.Items.Count ?? 0;
+        public bool CanRetry => IsLoading != Visibility.Visible && _attempt != null && !_attempt.Complete;
+        public Visibility RetryVisibility => CanRetry ? Visibility.Visible : Visibility.Collapsed;
+        public bool CanCreateHere => !IsDriveSearch && IsLoading != Visibility.Visible;
+        public string SearchDescription => IsSearchActive ? string.Format(
+            (IsDriveSearch ? "Drive_SearchScope" : "Drive_FilterScope").GetLocalized(), Keyword) : string.Empty;
+        public string StatusText
+        {
+            get
+            {
+                if (IsLoading == Visibility.Visible && _attempt != _view) return "Drive_LoadingNew".GetLocalized();
+                string key = IsLoading == Visibility.Visible ? "Drive_LoadingCount" : !IsComplete ? "Drive_PartialCount" : "Drive_CompleteCount";
+                int excluded = _view?.ExcludedCount ?? 0;
+                if (IsComplete && Files.Count == 0 && excluded == 0)
+                    return (IsSearchActive ? "Drive_NoMatches" : "Drive_Empty").GetLocalized();
+                string status = string.Format(key.GetLocalized(), LoadedCount, Files.Count);
+                return excluded == 0 ? status : status + " " + string.Format("Drive_ExcludedCount".GetLocalized(), excluded);
+            }
+        }
+        public ObservableCollection<FileViewModel> Files { get; private set; } = new();
+        public ObservableCollection<FileViewModel> Images { get; private set; } = new();
         public ObservableCollection<BreadcrumbItem> BreadcrumbItems { get; } = new();
         public OneDrive Provider { get; }
         public string DisplayName { get; }

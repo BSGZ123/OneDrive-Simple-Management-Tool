@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OneDrive_Simple_Management_Tool.Helpers;
 using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
@@ -8,23 +9,22 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
     {
         public SearchViewModel(DriveViewModel drive)
         {
-            _drive=drive;
+            _drive = drive;
+            _fileName = drive.Keyword;
+            _mode = drive.IsDriveSearch ? SearchMode.Global : SearchMode.Local;
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanSearch))]
         private async Task Search()
         {
-            if (string.IsNullOrEmpty(FileName))
-            {
-                return;
-            }
+            if (!SearchQueryRules.TryNormalize(FileName, out string keyword)) return;
             if (Mode == SearchMode.Local)
             {
-                _drive.FilterByName(FileName);
+                await _drive.ApplyLocalFilter(keyword);
             }
             else
             {
-                await _drive.SearchFile(FileName);
+                await _drive.SearchFile(keyword);
             }
         }
 
@@ -35,8 +35,24 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
 
-        public DriveViewModel _drive;
-        [ObservableProperty] private string _fileName;
-        [ObservableProperty] private SearchMode _mode;
+        private readonly DriveViewModel _drive;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSearch))]
+        [NotifyPropertyChangedFor(nameof(ValidationMessage))]
+        [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
+        private string _fileName;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ModeIndex))]
+        [NotifyPropertyChangedFor(nameof(ModeHint))]
+        private SearchMode _mode;
+
+        public int ModeIndex
+        {
+            get => (int)Mode;
+            set { if (value is 0 or 1) Mode = (SearchMode)value; }
+        }
+        public bool CanSearch => SearchQueryRules.TryNormalize(FileName, out _);
+        public string ValidationMessage => string.IsNullOrEmpty(FileName) || CanSearch ? string.Empty : "Search_InvalidKeyword".GetLocalized();
+        public string ModeHint => (Mode == SearchMode.Local ? "Search_LocalHint" : "Search_DriveHint").GetLocalized();
     }
 }

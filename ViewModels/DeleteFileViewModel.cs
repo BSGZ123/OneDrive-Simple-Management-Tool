@@ -17,9 +17,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 await File.Drive.Provider.DeleteItem(File.Id);
 
             // Remove the deleted item even if the subsequent refresh fails.
-            File.Drive.Files.Remove(File);
-            File.Drive.Images.Remove(File);
-            if (File.Drive.SelectedItem?.Id == File.Id) File.Drive.SelectedItem = null;
+            File.Drive.RemoveFile(File.Id);
         });
 
         [ObservableProperty] private bool _permanentDelete;

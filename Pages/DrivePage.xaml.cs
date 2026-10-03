@@ -32,9 +32,15 @@ namespace OneDrive_Simple_Management_Tool.Pages
             }
         }
 
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            if (DataContext is DriveViewModel drive) drive.CancelLoading();
+            base.OnNavigatedFrom(e);
+        }
+
         private void CopyIcon_DragOver(object sender, DragEventArgs e)
         {
-            if (!FileActions.IsDialogOpen(XamlRoot) && e.DataView.Contains(StandardDataFormats.StorageItems))
+            if (DataContext is DriveViewModel { CanCreateHere: true } && !FileActions.IsDialogOpen(XamlRoot) && e.DataView.Contains(StandardDataFormats.StorageItems))
                 e.AcceptedOperation = DataPackageOperation.Copy;
         }
 
@@ -42,7 +48,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
         {
             try
             {
-                if (FileActions.IsDialogOpen(XamlRoot) || !e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+                if (DataContext is not DriveViewModel { CanCreateHere: true } || FileActions.IsDialogOpen(XamlRoot) || !e.DataView.Contains(StandardDataFormats.StorageItems)) return;
                 UploadErrorInfoBar.IsOpen = false;
                 DriveViewModel drive = (DriveViewModel)DataContext;
                 string parentItemId = drive.ParentItemId;
@@ -59,7 +65,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
                 TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
                 await Task.WhenAll(items.Select(item => manager.AddUploadTask(drive, parentItemId, item)));
-                if (!await drive.TryRefresh())
+                if (!await drive.RefreshAfterMutation())
                 {
                     UploadErrorInfoBar.Title = "UploadRefreshFailedTitle".GetLocalized();
                     UploadErrorInfoBar.Message = drive.ErrorMessage;
@@ -76,7 +82,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private async Task ShowCreateFolder()
         {
-            if (DataContext is not DriveViewModel drive || drive.IsLoading == Visibility.Visible) return;
+            if (DataContext is not DriveViewModel drive || !drive.CanCreateHere) return;
             try
             {
                 await FileActions.ShowDialogAsync(this, new CreateFolderView { DataContext = new CreateFolderViewModel(drive) });
@@ -116,7 +122,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private async void ShowSearchDialogAsync(object sender, RoutedEventArgs e)
         {
-            if (DataContext is not DriveViewModel drive || drive.IsLoading == Visibility.Visible) return;
+            if (DataContext is not DriveViewModel drive) return;
             try
             {
                 await FileActions.ShowDialogAsync(this, new SearchView { DataContext = new SearchViewModel(drive) });

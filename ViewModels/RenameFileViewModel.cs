@@ -21,7 +21,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public Task RenameFile() => RunAsync(Drive, async () =>
         {
             var result = await Drive.Provider.RenameFile(_file.Id, FileName);
-            if (string.IsNullOrWhiteSpace(result?.Id)) throw new InvalidDataException();
+            if (result?.Id != _file.Id || string.IsNullOrWhiteSpace(result.Name)) throw new InvalidDataException();
+            Drive.UpdateFileName(_file.Id, result.Name);
         });
 
         [ObservableProperty]

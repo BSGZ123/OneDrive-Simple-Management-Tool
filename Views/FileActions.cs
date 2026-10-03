@@ -77,7 +77,8 @@ namespace OneDrive_Simple_Management_Tool.Views
 
         public static async Task ExecuteAsync(FileAction action, FrameworkElement owner, FileViewModel file)
         {
-            if (file == null || IsDialogOpen(owner.XamlRoot) || file.Drive.IsLoading == Visibility.Visible) return;
+            if (file == null || IsDialogOpen(owner.XamlRoot)) return;
+            if (file.Drive.IsLoading == Visibility.Visible && !(action == FileAction.Open && file.IsFolder)) return;
             file.Drive.SelectedItem = file;
             try
             {

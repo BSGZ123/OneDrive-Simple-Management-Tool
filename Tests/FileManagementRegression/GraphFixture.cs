@@ -33,6 +33,7 @@ internal sealed class GraphHandler : HttpMessageHandler
     public Exception ListError { get; set; }
     public bool InvalidList { get; set; }
     public TaskCompletionSource MutationGate { get; set; }
+    public Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> OnGet { get; set; }
     public List<(string Method, string Path, string Query, string Body)> Requests { get; } = [];
     public Dictionary<string, string> Names { get; } = new()
     {
@@ -51,9 +52,15 @@ internal sealed class GraphHandler : HttpMessageHandler
 
         if (request.Method == HttpMethod.Get)
         {
+            if (OnGet != null)
+            {
+                var response = await OnGet(request, cancellationToken);
+                if (response != null) return response;
+            }
             if (ListError != null) throw ListError;
             if (ListStatus != HttpStatusCode.OK) return Error(ListStatus);
             if (InvalidList) return Json("{}", HttpStatusCode.OK);
+            if (path.EndsWith("/root")) return Json("{\"id\":\"root-id\",\"name\":\"Root\",\"folder\":{},\"root\":{}}", HttpStatusCode.OK);
             var rows = path.Contains("/items/folder-id/")
                 ? new[] { Item("child-id", "inside.txt") }
                 : Names.Select(pair => Item(pair.Key, pair.Value)).ToArray();

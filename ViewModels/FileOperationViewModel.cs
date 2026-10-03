@@ -35,8 +35,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 await operation();
                 // Never repeat a completed mutation just because refreshing failed.
                 HasSucceeded = true;
-                if (!await drive.TryRefresh())
-                    drive.ErrorMessage = "FileOperation_RefreshFailed".GetLocalized();
+                await drive.RefreshAfterMutation();
             }
             catch (Exception exception)
             {

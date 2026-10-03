@@ -47,6 +47,7 @@ internal static class FileManagementUiProbe
             var panel = new Grid { Padding = new Thickness(16), RowSpacing = 12 };
             panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             panel.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            var controls = new StackPanel { Spacing = 8 };
             var toggles = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
             toggles.Children.Add(new TextBlock { Text = "Local UI test — in-memory data only", VerticalAlignment = VerticalAlignment.Center });
             var failure = new CheckBox { Content = "Reject mutations" };
@@ -57,7 +58,21 @@ internal static class FileManagementUiProbe
             refreshFailure.Checked += (_, _) => handler.FailRefresh = true;
             refreshFailure.Unchecked += (_, _) => handler.FailRefresh = false;
             toggles.Children.Add(refreshFailure);
-            panel.Children.Add(toggles);
+            controls.Children.Add(toggles);
+            var browsing = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
+            var count = new ComboBox { Header = "Directory size", ItemsSource = new[] { 4, 1000, 10000 }, SelectedIndex = 0 };
+            count.SelectionChanged += async (_, _) =>
+            {
+                handler.SetCount((int)count.SelectedItem);
+                await drive.GetFiles();
+            };
+            browsing.Children.Add(count);
+            var pageFailure = new CheckBox { Content = "Reject later pages" };
+            pageFailure.Checked += (_, _) => handler.FailLaterPage = true;
+            pageFailure.Unchecked += (_, _) => handler.FailLaterPage = false;
+            browsing.Children.Add(pageFailure);
+            controls.Children.Add(browsing);
+            panel.Children.Add(controls);
             var frame = new Frame();
             Grid.SetRow(frame, 1);
             panel.Children.Add(frame);
@@ -79,14 +94,22 @@ internal static class FileManagementUiProbe
     {
         public bool FailMutation;
         public bool FailRefresh;
+        public bool FailLaterPage;
         private readonly Dictionary<string, string> _names = new()
         {
             ["folder"] = "Demo folder", ["document"] = "Report.docx", ["notes"] = "Notes.md", ["plain"] = "LICENSE"
         };
 
+        public void SetCount(int count)
+        {
+            foreach (string id in _names.Keys.Where(id => id.StartsWith("bulk-")).ToArray()) _names.Remove(id);
+            for (int i = 4; i < count; i++)
+                _names["bulk-" + i] = i == count - 1 ? "Last-page-match.txt" : $"File-{i:D5}.txt";
+        }
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            await Task.Delay(600, cancellationToken);
+            await Task.Delay(_names.Count > 4 ? 60 : 600, cancellationToken);
             string path = request.RequestUri.AbsolutePath;
             if ((request.Method == HttpMethod.Get && FailRefresh) || (request.Method != HttpMethod.Get && FailMutation))
                 return Json("{\"error\":{\"code\":\"accessDenied\",\"message\":\"Local test denial\"}}", HttpStatusCode.Forbidden);
@@ -96,8 +119,25 @@ internal static class FileManagementUiProbe
                 return Json("{\"id\":\"test-permission\",\"link\":{\"webUrl\":\"https://example.com/local-test\"}}");
             if (request.Method == HttpMethod.Get)
             {
-                var rows = path.Contains("/items/folder/") ? Array.Empty<object>() : _names.Select(pair => Item(pair.Key, pair.Value)).ToArray();
-                return Json(JsonSerializer.Serialize(new { value = rows }));
+                if (path.EndsWith("/root"))
+                    return Json("{\"id\":\"root-id\",\"name\":\"Root\",\"folder\":{},\"root\":{}}");
+                if (path.EndsWith("/items/folder"))
+                    return Json("{\"id\":\"folder\",\"name\":\"Demo folder\",\"folder\":{},\"parentReference\":{\"id\":\"root-id\",\"driveId\":\"local-test-drive\"}}");
+                int offset = request.RequestUri.Query.StartsWith("?cursor=") ? int.Parse(request.RequestUri.Query.Substring(8)) : 0;
+                if (FailLaterPage && offset > 0)
+                    return Json("{\"error\":{\"code\":\"accessDenied\",\"message\":\"Later page denied\"}}", HttpStatusCode.Forbidden);
+                var matches = _names.AsEnumerable();
+                string decoded = Uri.UnescapeDataString(path);
+                int start = decoded.IndexOf("search(q='", StringComparison.Ordinal);
+                if (start >= 0)
+                {
+                    string keyword = decoded.Substring(start + 10, decoded.Length - start - 12).Replace("''", "'");
+                    matches = matches.Where(pair => pair.Value.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+                }
+                var all = path.Contains("/items/folder/") ? Array.Empty<object>() : matches.Select(pair => Item(pair.Key, pair.Value)).ToArray();
+                var rows = all.Skip(offset).Take(200).ToArray();
+                string next = offset + rows.Length < all.Length ? request.RequestUri.GetLeftPart(UriPartial.Path) + "?cursor=" + (offset + rows.Length) : null;
+                return Json(JsonSerializer.Serialize(new Dictionary<string, object> { ["value"] = rows, ["@odata.nextLink"] = next }));
             }
             string id = path.Split('/').Last();
             if (request.Method == HttpMethod.Delete || id == "permanentDelete")

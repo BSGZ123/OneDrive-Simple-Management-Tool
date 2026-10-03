@@ -223,16 +223,16 @@
     <value>Search File</value>
   </data>
   <data name="SearchView_FileName.Header" xml:space="preserve">
-    <value>FileName</value>
+    <value>Keyword</value>
   </data>
   <data name="SearchView_Mode.Header" xml:space="preserve">
     <value>SearchMode</value>
   </data>
   <data name="SearchView_Mode_Global.Content" xml:space="preserve">
-    <value>Global</value>
+    <value>Search current drive</value>
   </data>
   <data name="SearchView_Mode_Local.Content" xml:space="preserve">
-    <value>Local</value>
+    <value>Filter current folder by filename</value>
   </data>
   <data name="SettingPage_AboutTitle.Text" xml:space="preserve">
     <value>About</value>
@@ -593,5 +593,59 @@
   </data>
   <data name="Download_RemoveButton.ToolTipService.ToolTip" xml:space="preserve">
     <value>Cancel download or remove record</value>
+  </data>
+  <data name="SearchDialog.Title" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchDialog.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Search_InvalidKeyword" xml:space="preserve">
+    <value>Enter a non-empty keyword without control characters.</value>
+  </data>
+  <data name="Search_LocalHint" xml:space="preserve">
+    <value>Filter direct children of this folder by filename, ignoring case. Subfolders are not searched.</value>
+  </data>
+  <data name="Search_DriveHint" xml:space="preserve">
+    <value>Search this drive and its subfolders. Matches can include names, metadata and file content. Open a folder before creating or uploading files.</value>
+  </data>
+  <data name="Drive_ClearSearch.Content" xml:space="preserve">
+    <value>Exit search / clear filter</value>
+  </data>
+  <data name="Drive_CancelLoading.Content" xml:space="preserve">
+    <value>Stop loading</value>
+  </data>
+  <data name="Drive_RetryLoading.Content" xml:space="preserve">
+    <value>Retry / continue</value>
+  </data>
+  <data name="Drive_SearchScope" xml:space="preserve">
+    <value>Current drive · Keyword: {0}</value>
+  </data>
+  <data name="Drive_FilterScope" xml:space="preserve">
+    <value>Current folder · Filename: {0}</value>
+  </data>
+  <data name="Drive_LoadingNew" xml:space="preserve">
+    <value>Loading… Previous results remain until the first page succeeds.</value>
+  </data>
+  <data name="Drive_LoadingCount" xml:space="preserve">
+    <value>Loading… {0} items loaded, {1} displayed.</value>
+  </data>
+  <data name="Drive_PartialCount" xml:space="preserve">
+    <value>Incomplete: {0} items loaded, {1} displayed.</value>
+  </data>
+  <data name="Drive_CompleteCount" xml:space="preserve">
+    <value>Complete: {0} items loaded, {1} displayed.</value>
+  </data>
+  <data name="Drive_NoMatches" xml:space="preserve">
+    <value>No matches.</value>
+  </data>
+  <data name="Drive_Empty" xml:space="preserve">
+    <value>This folder is empty.</value>
+  </data>
+  <data name="Drive_ExcludedCount" xml:space="preserve">
+    <value>{0} external/shared entries omitted; operations on other drives are not supported here.</value>
   </data>
 </root>

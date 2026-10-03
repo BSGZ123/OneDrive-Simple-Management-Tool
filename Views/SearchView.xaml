@@ -8,18 +8,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
     d:DataContext="{d:DesignInstance Type=viewmodels:SearchViewModel}"
-    PrimaryButtonText="OK"
-    CloseButtonText="Cancel"
+    x:Uid="SearchDialog"
+    IsPrimaryButtonEnabled="{Binding CanSearch}"
     DefaultButton="Primary"
     PrimaryButtonCommand="{Binding SearchCommand}"
     mc:Ignorable="d">
 
-    <StackPanel>
-        <ComboBox x:Uid="SearchView_Mode" SelectedIndex="{Binding Mode,Mode=TwoWay}" Loaded="LoadDefaultValue">
-            <ComboBoxItem Content="Local"/>
-            <ComboBoxItem Content="Global"/>
+    <StackPanel Spacing="12" MinWidth="320" MaxWidth="480">
+        <ComboBox x:Uid="SearchView_Mode" SelectedIndex="{Binding ModeIndex,Mode=TwoWay}">
+            <ComboBoxItem x:Uid="SearchView_Mode_Local"/>
+            <ComboBoxItem x:Uid="SearchView_Mode_Global"/>
         </ComboBox>
-
-        <TextBox x:Uid="SearchView_FileName" Text="{Binding FileName, Mode=TwoWay}" />
+        <TextBlock Text="{Binding ModeHint}" TextWrapping="Wrap" />
+        <TextBox x:Uid="SearchView_FileName" Text="{Binding FileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="{Binding ValidationMessage}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
     </StackPanel>
 </ContentDialog>

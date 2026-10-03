@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Services/OneDrive.cs" Link="Production/OneDrive.cs" />
+    <Compile Include="../../Helpers/SearchQueryRules.cs" Link="Production/SearchQueryRules.cs" />
+    <Compile Include="../../Models/DriveItemPage.cs" Link="Production/DriveItemPage.cs" />
     <Compile Include="../../Services/Utils.cs" Link="Production/Utils.cs" />
     <Compile Include="../../Helpers/UploadProgressTracker.cs" Link="Production/UploadProgressTracker.cs" />
     <Compile Include="../../Helpers/FileOperationErrors.cs" Link="Production/FileOperationErrors.cs" />
@@ -19,6 +21,7 @@
     <Compile Include="../../Models/BreadcrumbItem.cs" Link="Production/BreadcrumbItem.cs" />
     <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
     <Compile Include="../../ViewModels/DriveViewModel.cs" Link="Production/DriveViewModel.cs" />
+    <Compile Include="../../ViewModels/SearchViewModel.cs" Link="Production/SearchViewModel.cs" />
     <Compile Include="../../ViewModels/FileOperationViewModel.cs" Link="Production/FileOperationViewModel.cs" />
     <Compile Include="../../ViewModels/CreateFolderViewModel.cs" Link="Production/CreateFolderViewModel.cs" />
     <Compile Include="../../ViewModels/RenameFileViewModel.cs" Link="Production/RenameFileViewModel.cs" />

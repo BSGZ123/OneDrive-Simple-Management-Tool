@@ -35,9 +35,10 @@ internal static class Program
             ("Unsupported conversion never opens the picker", UnsupportedConversion),
             ("English and Chinese mutation error and validation resources resolve", Resources)
         ];
+        cases = cases.Concat(BrowsingChecks.Cases).ToArray();
         foreach (var test in cases)
         {
-            await test.Run();
+            await Microsoft.UI.Dispatching.TestUiContext.Run(test.Run);
             Console.WriteLine($"PASS {test.Name}");
         }
         Console.WriteLine($"Passed {cases.Length} file management regression checks.");
