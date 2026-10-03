@@ -73,6 +73,8 @@ dotnet run --project Tests/UploadRegression/UploadRegression.csproj
 - PDF 转换使用所选文件所属网盘，并通过 `format=pdf` 查询参数请求；取消保存不再发起转换。支持列表收敛到原有格式中仍受 [Microsoft Graph PDF 转换接口](https://learn.microsoft.com/en-us/graph/api/driveitem-get-content-format?view=graph-rest-1.0)支持的扩展名，不新增转换格式。
 - 修复返回上级、网格图标打包，以及测试输出资源被主应用重复收集的问题。布局选择在当前应用会话内保留，不新增设置持久化。
 
+2026-10-03 PDF 转换验收：用户已实际测试并确认可以成功转换，基础功能已完成。
+
 运行文件管理回归：
 
 ```powershell
@@ -106,7 +108,7 @@ Markdown、图片、PDF 和音视频预览统一显示文件名、加载状态�
 # 点点滴滴
 
 ## 当前
-1. 常见格式转换
+1. 常见格式转换（PDF 基础功能已完成）
 2. EPUB书籍阅读
 3. 修复Bug
 
@@ -162,7 +164,7 @@ Markdown、图片、PDF 和音视频预览统一显示文件名、加载状态�
 - [X] 重命名
 - [X] 删除
 - [X] 属性
-- [ ] 转换常见格式文件(PDF)
+- [X] 转换常见格式文件（PDF，基础功能已完成；2026-10-03 用户实测通过）
 - [ ] 新标签打开
 - [ ] 自选主题
 - [X] 多账户
