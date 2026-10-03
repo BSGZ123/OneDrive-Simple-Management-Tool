@@ -504,4 +504,94 @@
   <data name="FilePreview_Dialog.PrimaryButtonText" xml:space="preserve">
     <value>关闭</value>
   </data>
+  <data name="DownloadState_Pending" xml:space="preserve">
+    <value>等待下载</value>
+  </data>
+  <data name="DownloadState_Preparing" xml:space="preserve">
+    <value>正在准备下载…</value>
+  </data>
+  <data name="DownloadState_Downloading" xml:space="preserve">
+    <value>正在下载</value>
+  </data>
+  <data name="DownloadState_Retrying" xml:space="preserve">
+    <value>连接中断，正在重试…</value>
+  </data>
+  <data name="DownloadState_Pausing" xml:space="preserve">
+    <value>正在暂停…</value>
+  </data>
+  <data name="DownloadState_Paused" xml:space="preserve">
+    <value>已暂停</value>
+  </data>
+  <data name="DownloadState_Finalizing" xml:space="preserve">
+    <value>正在保存文件…</value>
+  </data>
+  <data name="DownloadState_Failed" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="DownloadState_Completed" xml:space="preserve">
+    <value>下载完成</value>
+  </data>
+  <data name="DownloadState_Cancelling" xml:space="preserve">
+    <value>正在取消…</value>
+  </data>
+  <data name="DownloadState_Cancelled" xml:space="preserve">
+    <value>已取消</value>
+  </data>
+  <data name="DownloadError_Network" xml:space="preserve">
+    <value>连接失败或超时。请检查网络后重试，已下载的进度会保留。</value>
+  </data>
+  <data name="DownloadError_AccessDenied" xml:space="preserve">
+    <value>无法访问文件。请检查登录状态和文件权限后重试。</value>
+  </data>
+  <data name="DownloadError_NotFound" xml:space="preserve">
+    <value>远程文件不存在或已被移除。</value>
+  </data>
+  <data name="DownloadError_InvalidResponse" xml:space="preserve">
+    <value>下载内容或续传响应校验失败，请重试。</value>
+  </data>
+  <data name="DownloadError_SourceChanged" xml:space="preserve">
+    <value>下载期间远程文件发生变化，请重试以下载最新版本。</value>
+  </data>
+  <data name="DownloadError_LocalStorage" xml:space="preserve">
+    <value>无法写入或清理临时文件。请检查磁盘空间、目录权限及文件占用后重试。</value>
+  </data>
+  <data name="DownloadError_DestinationBusy" xml:space="preserve">
+    <value>已有任务正在使用此保存位置。请先完成或移除该任务，再重试。</value>
+  </data>
+  <data name="DownloadError_Unknown" xml:space="preserve">
+    <value>下载未能完成，请重试。</value>
+  </data>
+  <data name="Download_Restarted" xml:space="preserve">
+    <value>远程文件或续传条件发生变化，已从头重新下载。</value>
+  </data>
+  <data name="TaskManagerPage_Retry.Text" xml:space="preserve">
+    <value>重试</value>
+  </data>
+  <data name="TaskManagerPage_Pause.Text" xml:space="preserve">
+    <value>暂停</value>
+  </data>
+  <data name="Download_PauseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>暂停下载</value>
+  </data>
+  <data name="Download_ResumeButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>继续下载</value>
+  </data>
+  <data name="Download_RetryButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>重试下载</value>
+  </data>
+  <data name="Download_RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>取消下载或移除记录</value>
+  </data>
+  <data name="Download_PauseButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>暂停下载</value>
+  </data>
+  <data name="Download_ResumeButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>继续下载</value>
+  </data>
+  <data name="Download_RetryButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>重试下载</value>
+  </data>
+  <data name="Download_RemoveButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>取消下载或移除记录</value>
+  </data>
 </root>

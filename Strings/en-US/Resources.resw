@@ -504,4 +504,94 @@
   <data name="FilePreview_Dialog.PrimaryButtonText" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="DownloadState_Pending" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="DownloadState_Preparing" xml:space="preserve">
+    <value>Preparing download…</value>
+  </data>
+  <data name="DownloadState_Downloading" xml:space="preserve">
+    <value>Downloading</value>
+  </data>
+  <data name="DownloadState_Retrying" xml:space="preserve">
+    <value>Connection interrupted. Retrying…</value>
+  </data>
+  <data name="DownloadState_Pausing" xml:space="preserve">
+    <value>Pausing…</value>
+  </data>
+  <data name="DownloadState_Paused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="DownloadState_Finalizing" xml:space="preserve">
+    <value>Saving file…</value>
+  </data>
+  <data name="DownloadState_Failed" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="DownloadState_Completed" xml:space="preserve">
+    <value>Download completed</value>
+  </data>
+  <data name="DownloadState_Cancelling" xml:space="preserve">
+    <value>Cancelling…</value>
+  </data>
+  <data name="DownloadState_Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="DownloadError_Network" xml:space="preserve">
+    <value>The connection failed or timed out. Check your network and retry. Downloaded progress is retained.</value>
+  </data>
+  <data name="DownloadError_AccessDenied" xml:space="preserve">
+    <value>Cannot access the file. Check your sign-in and file permissions, then retry.</value>
+  </data>
+  <data name="DownloadError_NotFound" xml:space="preserve">
+    <value>The remote file no longer exists.</value>
+  </data>
+  <data name="DownloadError_InvalidResponse" xml:space="preserve">
+    <value>The downloaded content or resume response failed validation. Please retry.</value>
+  </data>
+  <data name="DownloadError_SourceChanged" xml:space="preserve">
+    <value>The remote file changed during download. Retry to download the latest version.</value>
+  </data>
+  <data name="DownloadError_LocalStorage" xml:space="preserve">
+    <value>Cannot write or clean up the temporary file. Check disk space, folder permissions and file locks, then retry.</value>
+  </data>
+  <data name="DownloadError_DestinationBusy" xml:space="preserve">
+    <value>Another task is using this destination. Complete or remove that task, then retry.</value>
+  </data>
+  <data name="DownloadError_Unknown" xml:space="preserve">
+    <value>The download could not finish. Please retry.</value>
+  </data>
+  <data name="Download_Restarted" xml:space="preserve">
+    <value>The remote file or resume conditions changed. The download restarted from the beginning.</value>
+  </data>
+  <data name="TaskManagerPage_Retry.Text" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="TaskManagerPage_Pause.Text" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Download_PauseButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Pause download</value>
+  </data>
+  <data name="Download_ResumeButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Resume download</value>
+  </data>
+  <data name="Download_RetryButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Retry download</value>
+  </data>
+  <data name="Download_RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Cancel download or remove record</value>
+  </data>
+  <data name="Download_PauseButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Pause download</value>
+  </data>
+  <data name="Download_ResumeButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Resume download</value>
+  </data>
+  <data name="Download_RetryButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Retry download</value>
+  </data>
+  <data name="Download_RemoveButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Cancel download or remove record</value>
+  </data>
 </root>

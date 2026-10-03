@@ -14,6 +14,7 @@
     <Compile Include="../../Helpers/FileNameRules.cs" Link="Production/FileNameRules.cs" />
     <Compile Include="../../Helpers/FileConversionRules.cs" Link="Production/FileConversionRules.cs" />
     <Compile Include="../../Models/FileType.cs" Link="Production/FileType.cs" />
+    <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
     <Compile Include="../../Models/FileLayout.cs" Link="Production/FileLayout.cs" />
     <Compile Include="../../Models/BreadcrumbItem.cs" Link="Production/BreadcrumbItem.cs" />
     <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />

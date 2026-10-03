@@ -1,148 +1,122 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Downloader;
-using System;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using OneDrive_Simple_Management_Tool.Helpers;
+using OneDrive_Simple_Management_Tool.Models;
+using OneDrive_Simple_Management_Tool.Services;
+using System;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Microsoft.Graph.Models;
-using System.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
     public partial class DownloadTaskViewModel : ObservableObject
     {
+        private readonly DownloadSession _session;
+        private readonly TaskManagerViewModel _manager;
+        private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
+        private long _revision;
+        private long _lastProgressTick;
+        private DownloadTaskState _lastReportedState;
+
         public DownloadTaskViewModel(DriveViewModel drive, string itemId, StorageFile file)
         {
-            _itemId = itemId;
-            _file = file;
-            Drive = drive;
+            Name = file.Name;
+            _manager = Ioc.Default.GetService<TaskManagerViewModel>();
+            _session = new DownloadSession(file.Path, token => drive.Provider.GetDownloadSourceAsync(itemId, token));
+            _session.Changed += OnSessionChanged;
         }
+
+        public string Name { get; }
+        public string DestinationPath => _session.DestinationPath;
+        public DateTime StartTime { get; private set; }
+        public DateTime? FinishTime { get; private set; }
+
+        public bool Completed => State == DownloadTaskState.Completed;
+        public bool HasFailed => State == DownloadTaskState.Failed;
+        public bool IsPaused => State == DownloadTaskState.Paused;
+        public bool CanPause => State is DownloadTaskState.Preparing or DownloadTaskState.Downloading or DownloadTaskState.Retrying;
+        public bool CanResume => State is DownloadTaskState.Pending or DownloadTaskState.Paused;
+        public bool CanRetry => HasFailed;
+        public bool CanRemove => State is not (DownloadTaskState.Cancelling or DownloadTaskState.Finalizing);
+        public bool IsIndeterminate => State is DownloadTaskState.Preparing or DownloadTaskState.Retrying or DownloadTaskState.Finalizing;
+        public string StatusText => ($"DownloadState_{State}").GetLocalized();
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Completed), nameof(HasFailed), nameof(IsPaused), nameof(CanPause),
+            nameof(CanResume), nameof(CanRetry), nameof(CanRemove), nameof(IsIndeterminate), nameof(StatusText))]
+        [NotifyCanExecuteChangedFor(nameof(PauseDownloadCommand), nameof(ResumeDownloadCommand),
+            nameof(RetryDownloadCommand), nameof(CancelTaskCommand), nameof(OpenFolderCommand))]
+        private DownloadTaskState _state = DownloadTaskState.Pending;
+
+        [ObservableProperty] private int _progress;
+        [ObservableProperty] private long _downloadedBytes;
+        [ObservableProperty] private long _totalBytes;
+        [ObservableProperty] private long _downloadSpeed;
+        [ObservableProperty] private string _errorMessage = string.Empty;
+        [ObservableProperty] private string _notice = string.Empty;
 
         public async Task StartDownload()
         {
-            DriveItem item = await Drive.Provider.GetItem(_itemId);
-            //从获取的 DriveItem 对象中提取下载 URL
-            string downloadUrl = item.AdditionalData["@microsoft.graph.downloadUrl"].ToString();
-
-            StartTime = DateTime.Now;
-            _downloader = new();
-            _downloader.DownloadFileCompleted += DownloadFileCompleted;
-            _downloader.DownloadProgressChanged += DownloadProgressChanged;
-            await _downloader.DownloadFileTaskAsync(downloadUrl, _file.Path);
+            if (StartTime == default) StartTime = DateTime.Now;
+            await _session.StartAsync();
+            ApplySnapshot(_session.Snapshot);
         }
 
-        private void DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        [RelayCommand(CanExecute = nameof(CanPause))]
+        public async Task PauseDownload()
         {
-            _dispatcher.TryEnqueue(() =>
-            {
-                // 更新状态变量
-                if (_downloader.Status == DownloadStatus.Completed)
-                {
-                    Completed = true;
-                    IsDownloading = false;
-                }
-            });
+            await _session.PauseAsync();
+            ApplySnapshot(_session.Snapshot);
         }
 
-        private void DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
-        {
-            // 根据 _updateInterval 控制更新频率，防止频繁更新导致界面卡顿
-            if (DateTime.Now - _lastUpdate >= _updateInterval)
-            {
-                _lastUpdate = DateTime.Now;
-                // 如果这里使用了double数据类型，会导致进度控件需要处理额外的数据，从而导致页面卡住。
-                _dispatcher.TryEnqueue(() =>
-                {
-                    Progress = (int)e.ProgressPercentage;
-                    DownloadedBytes = e.ReceivedBytesSize;
-                    TotalBytes = e.TotalBytesToReceive;
-                    DownloadSpeed = (long)e.BytesPerSecondSpeed;
-                });
-            }
-        }
+        [RelayCommand(CanExecute = nameof(CanResume))]
+        public Task ResumeDownload() => StartDownload();
 
-        [RelayCommand]
-        public void PauseDownload()
-        {
-            _downloader.Pause();
-            _pack = _downloader.Package;
-            IsPaused = true;
-            IsDownloading = false;
-        }
+        [RelayCommand(CanExecute = nameof(CanRetry))]
+        public Task RetryDownload() => StartDownload();
 
-        [RelayCommand]
-        public async Task ResumeDownload()
-        {
-            IsPaused = false;
-            IsDownloading = true;
-
-            //如果检测到暂停时间大于等于1个小时，就重新获取下载链接
-            if ((DateTime.Now - StartTime).TotalHours >= 1)
-            {
-                //刷新下载链接
-                DriveItem item = await Drive.Provider.GetItem(_itemId);
-                string downloadUrl = item.AdditionalData["@microsoft.graph.downloadUrl"].ToString();
-                //_pack.Address = downloadUrl;
-                _pack.Urls[0] = downloadUrl;//暂时这样吧 毕竟只获取一个下载链接
-            }
-            if (_pack != null)
-            {
-                await _downloader.DownloadFileTaskAsync(_pack);
-            }
-            else
-            {
-                _downloader.Resume();
-            }
-        }
-
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanRemove))]
         public async Task CancelTaskAsync()
         {
-            if (!Completed)
+            await _session.CancelAsync();
+            ApplySnapshot(_session.Snapshot);
+            if (State is DownloadTaskState.Cancelled or DownloadTaskState.Completed)
             {
-                _downloader.CancelAsync();
-                await _file.DeleteAsync();
+                _session.Changed -= OnSessionChanged;
+                _manager.RemoveSelectedDownloadTasks(this);
             }
-            //这里还要对传输任务管理器删除对应下载任务
-            _manager.RemoveSelectedDownloadTasks(this);
         }
 
-        [RelayCommand]
-        public void OpenFolder()
+        [RelayCommand(CanExecute = nameof(Completed))]
+        public void OpenFolder() => System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{DestinationPath}\"");
+
+        private void OnSessionChanged(DownloadSnapshot snapshot)
         {
-            //下载完成后查看文件所在目录
-            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{_file.Path}\"");
+            // Throttle progress only. Every transition and final byte count reaches the UI.
+            long now = Environment.TickCount64;
+            if (_lastReportedState == snapshot.State && snapshot.State == DownloadTaskState.Downloading &&
+                snapshot.ReceivedBytes < snapshot.TotalBytes &&
+                now - System.Threading.Interlocked.Read(ref _lastProgressTick) < 200) return;
+            _lastReportedState = snapshot.State;
+            System.Threading.Interlocked.Exchange(ref _lastProgressTick, now);
+            _dispatcher.TryEnqueue(() => ApplySnapshot(snapshot));
         }
 
-
-        //分片大小为1MB
-        public static readonly int chunkSize = 1024 * 1024;
-        private DateTime _lastUpdate;
-        //每秒更新当前下载速度
-        private readonly TimeSpan _updateInterval = TimeSpan.FromMilliseconds(1000);
-        private readonly string _itemId;
-        private DriveViewModel Drive { get; }
-        private readonly StorageFile _file;
-        //确保整个程序只有一个taskmanager实例
-        private readonly TaskManagerViewModel _manager = Ioc.Default.GetService<TaskManagerViewModel>();
-        private DownloadService _downloader;
-        private DownloadPackage _pack;
-        //管理 UI 线程上的操作,保证UI线程持续保持响应
-        private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
-
-
-        [ObservableProperty] private int _progress;
-        [ObservableProperty] private bool _completed = false;
-        [ObservableProperty] private bool _isDownloading = true;
-        [ObservableProperty] private bool _isPaused = false;
-        [ObservableProperty] private long _downloadedBytes = 0;
-        [ObservableProperty] private long _totalBytes = 0;
-        [ObservableProperty] private long _downloadSpeed = 0;
-
-        public DateTime StartTime { get; private set; }
-        public DateTime FinishTime { get; private set; }
-        public string Name { get => _file.Name; }
+        private void ApplySnapshot(DownloadSnapshot snapshot)
+        {
+            if (snapshot.Revision <= _revision) return;
+            _revision = snapshot.Revision;
+            State = snapshot.State;
+            DownloadedBytes = snapshot.ReceivedBytes;
+            TotalBytes = snapshot.TotalBytes;
+            DownloadSpeed = snapshot.BytesPerSecond;
+            Progress = Completed ? 100 : TotalBytes == 0 ? 0 : (int)Math.Clamp(DownloadedBytes * 100.0 / TotalBytes, 0, 99);
+            ErrorMessage = snapshot.Failure == DownloadFailure.None ? string.Empty :
+                ($"DownloadError_{snapshot.Failure}").GetLocalized();
+            Notice = snapshot.Restarted ? "Download_Restarted".GetLocalized() : string.Empty;
+            if (Completed) FinishTime = DateTime.Now;
+        }
     }
 }

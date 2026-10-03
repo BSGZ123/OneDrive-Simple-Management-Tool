@@ -6,7 +6,9 @@ using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Abstractions;
 using OneDrive_Simple_Management_Tool.Helpers;
+using OneDrive_Simple_Management_Tool.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,6 +48,34 @@ namespace OneDrive_Simple_Management_Tool.Services
         public async Task<DriveItem> GetItem(string itemId)
         {
             return await graphClient.Drives[DriveId].Items[itemId].GetAsync();
+        }
+
+        public async Task<DownloadSource> GetDownloadSourceAsync(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                DriveItem item = await graphClient.Drives[DriveId].Items[itemId]
+                    .GetAsync(cancellationToken: cancellationToken);
+                if (item?.File == null || item.Size == null ||
+                    !item.AdditionalData.TryGetValue("@microsoft.graph.downloadUrl", out object url))
+                    throw new DownloadFailureException(DownloadFailure.InvalidResponse);
+
+                return new DownloadSource(url?.ToString(), item.Size.Value, item.CTag ?? item.ETag,
+                    item.File.Hashes?.Sha256Hash, item.File.Hashes?.Sha1Hash);
+            }
+            catch (ApiException exception)
+            {
+                throw new DownloadFailureException(exception.ResponseStatusCode switch
+                {
+                    401 or 403 => DownloadFailure.AccessDenied,
+                    404 => DownloadFailure.NotFound,
+                    _ => DownloadFailure.Network
+                }, exception);
+            }
+            catch (MsalException exception)
+            {
+                throw new DownloadFailureException(DownloadFailure.AccessDenied, exception);
+            }
         }
 
         public async Task<Stream> GetItemContent(string itemId)

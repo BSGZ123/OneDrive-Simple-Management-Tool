@@ -28,7 +28,9 @@
                     <!--Grid组件的上下文菜单，提供右键功能-->
                     <Grid.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" Command="{Binding ResumeDownloadCommand }" IsEnabled="{Binding IsPaused}"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" Command="{Binding ResumeDownloadCommand}"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Retry" Command="{Binding RetryDownloadCommand}"/>
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Pause" Command="{Binding PauseDownloadCommand}"/>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_Remove" Command="{Binding CancelTaskCommand}"/>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_OpenFolder" Command="{Binding OpenFolderCommand}"/>
                         </MenuFlyout>
@@ -43,7 +45,7 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
                         <!--下载进度条-->
-                        <ProgressBar Value="{Binding Progress}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                        <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" ShowError="{Binding HasFailed}" ShowPaused="{Binding IsPaused}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
                         
                         <!--下载参数-->
                         <TextBlock>
@@ -58,21 +60,26 @@
                             <Run Text="/s" />
                         </TextBlock>
 
-                        <!--下载完成后显示，所以可见属性下载完显示-->
-                        <TextBlock Text="Download completed" Visibility="{Binding Completed,Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <!--任务状态与可恢复的失败原因-->
+                        <TextBlock Text="{Binding StatusText}" />
+                        <TextBlock Text="{Binding ErrorMessage}" Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}" TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Left" />
+                        <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Left" />
                     </StackPanel>
 
                     <!--功能按钮，如下载 暂停 取消-->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button Margin="0 0 10 0" Visibility="{Binding IsDownloading,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseDownloadCommand}">
+                        <Button x:Uid="Download_PauseButton" Margin="0 0 10 0" Visibility="{Binding CanPause,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseDownloadCommand}">
                             <FontIcon Glyph="&#xE769;" FontSize="10" />
                         </Button>
 
-                        <Button Margin="0 0 10 0" Visibility="{Binding IsPaused ,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding ResumeDownloadCommand}">
+                        <Button x:Uid="Download_ResumeButton" Margin="0 0 10 0" Visibility="{Binding CanResume,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding ResumeDownloadCommand}">
                             <FontIcon Glyph="&#xE768;" FontSize="10" />
                         </Button>
 
-                        <Button Command="{Binding CancelTaskCommand}">
+                        <Button x:Uid="Download_RetryButton" Margin="0 0 10 0" Visibility="{Binding CanRetry,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RetryDownloadCommand}">
+                            <FontIcon Glyph="&#xE72C;" FontSize="10" />
+                        </Button>
+                        <Button x:Uid="Download_RemoveButton" Command="{Binding CancelTaskCommand}">
                             <FontIcon Glyph="&#xE711;" FontSize="10" />
                         </Button>
                     </StackPanel>

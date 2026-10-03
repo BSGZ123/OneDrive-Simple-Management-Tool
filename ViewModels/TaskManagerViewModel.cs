@@ -21,13 +21,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         //重新开始所有下载任务
         public async Task StartAllDownloadTasks()
         {
-            foreach (var task in DownloadTasks)
-            {
-                if (!task.Completed)
-                {
-                    await task.ResumeDownload();
-                }
-            }
+            await Task.WhenAll(DownloadTasks.ToList()
+                .Where(task => task.CanResume || task.CanRetry)
+                .Select(task => task.StartDownload()));
         }
 
 

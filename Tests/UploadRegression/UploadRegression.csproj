@@ -12,6 +12,7 @@
     <Compile Include="../../Services/Utils.cs" Link="Production/Utils.cs" />
     <Compile Include="../../Helpers/UploadProgressTracker.cs" Link="Production/UploadProgressTracker.cs" />
     <Compile Include="../../Models/FileType.cs" Link="Production/FileType.cs" />
+    <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
     <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
     <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
