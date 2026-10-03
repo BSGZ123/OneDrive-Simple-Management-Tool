@@ -27,11 +27,13 @@ namespace OneDrive_Simple_Management_Tool.Pages
     /// </summary>
     public sealed partial class TaskManagerPage : Page
     {
+        public FolderSyncViewModel FolderSync { get; } = Ioc.Default.GetService<FolderSyncViewModel>();
 
         public TaskManagerPage()
         {
             this.InitializeComponent();
             DataContext = Ioc.Default.GetService<TaskManagerViewModel>();
+            Loaded += async (_, _) => { if (FolderSync != null) await FolderSync.InitializeAsync(); };
         }
 
     }

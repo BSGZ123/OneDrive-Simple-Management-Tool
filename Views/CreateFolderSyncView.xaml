@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="OneDrive_Simple_Management_Tool.Views.CreateFolderSyncView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Uid="Sync_CreateDialog" IsPrimaryButtonEnabled="{Binding CanBind}"
+    PrimaryButtonClick="Bind" Closing="OnClosing" DefaultButton="None">
+    <ScrollViewer MaxHeight="620" MaxWidth="480" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="10">
+            <TextBlock x:Uid="Sync_CreateDescription" TextWrapping="Wrap" />
+            <Button x:Uid="Sync_PickLocal" Click="PickLocal" IsEnabled="{Binding CanEdit}" />
+            <TextBlock Text="{Binding LocalPath}" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+            <TextBlock Text="{Binding NameHint}" TextWrapping="Wrap" />
+            <ComboBox x:Uid="Sync_Account" ItemsSource="{Binding Drives}" DisplayMemberPath="DisplayName"
+                      SelectedItem="{Binding SelectedDrive, Mode=TwoWay}" SelectionChanged="SelectDrive" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}" />
+            <TextBlock x:Uid="Sync_BrowseHint" TextWrapping="Wrap" />
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Button x:Uid="Sync_Up" Command="{Binding GoUpCommand}" IsEnabled="{Binding CanGoUp}" />
+                <TextBlock Grid.Column="1" Text="{Binding CloudPath}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            </Grid>
+            <ProgressRing IsActive="{Binding IsBusy}" Width="24" Height="24" />
+            <ListView ItemsSource="{Binding Folders}" IsItemClickEnabled="True" ItemClick="OpenFolder" SelectionMode="None" Height="180">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="8"><SymbolIcon Symbol="Folder" /><TextBlock Text="{Binding Name}" /></StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

@@ -762,4 +762,59 @@
   <data name="Preview_AutoEncoding" xml:space="preserve">
     <value>Auto (BOM / UTF-8)</value>
   </data>
+  <data name="NavigationBar_FolderSync.Content" xml:space="preserve"><value>Folder sync</value></data>
+  <data name="Sync_Title.Text" xml:space="preserve"><value>Folder sync</value></data>
+  <data name="Sync_New.Content" xml:space="preserve"><value>New sync</value></data>
+  <data name="Sync_Description.Text" xml:space="preserve"><value>New and modified local files upload to OneDrive. Local deletions leave cloud files intact.</value></data>
+  <data name="Sync_Lifetime.Text" xml:space="preserve"><value>Monitoring runs while the app is open and catches up when reopened. Renames and moves upload the new path and keep the old cloud copy.</value></data>
+  <data name="Sync_Empty.Message" xml:space="preserve"><value>No sync bindings yet. Choose New sync to select local and cloud folders with identical names.</value></data>
+  <data name="Sync_CheckNow.Content" xml:space="preserve"><value>Check now / Retry</value></data>
+  <data name="Sync_Remove.Content" xml:space="preserve"><value>Unlink</value></data>
+  <data name="Sync_IssueBar.Title" xml:space="preserve"><value>Some items need attention</value></data>
+  <data name="Sync_CreateDialog.Title" xml:space="preserve"><value>New folder sync</value></data>
+  <data name="Sync_CreateDialog.PrimaryButtonText" xml:space="preserve"><value>Link and sync</value></data>
+  <data name="Sync_CreateDialog.CloseButtonText" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Sync_CreateDescription.Text" xml:space="preserve"><value>Upload all contents initially, then new and modified items. Local content replaces files at the same path and name. Root folder names must also match exactly.</value></data>
+  <data name="Sync_PickLocal.Content" xml:space="preserve"><value>Choose local folder</value></data>
+  <data name="Sync_Account.Header" xml:space="preserve"><value>Signed-in drive</value></data>
+  <data name="Sync_BrowseHint.Text" xml:space="preserve"><value>Open folders until the current directory is your target. Create any new cloud folder from the Files page first.</value></data>
+  <data name="Sync_Up.Content" xml:space="preserve"><value>Up</value></data>
+  <data name="Sync_Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="Sync_Resume" xml:space="preserve"><value>Resume / Retry</value></data>
+  <data name="Sync_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Sync_RemoveTitle" xml:space="preserve"><value>Unlink this folder?</value></data>
+  <data name="Sync_RemoveDescription" xml:space="preserve"><value>Stop monitoring and uploading this folder and remove its sync history. Existing local and cloud files are retained.</value></data>
+  <data name="Sync_RemoveLabel" xml:space="preserve"><value>Unlink</value></data>
+  <data name="Sync_Progress" xml:space="preserve"><value>Checked {0} / {1} items  {2}</value></data>
+  <data name="Sync_LastSuccess" xml:space="preserve"><value>Last successful sync: {0}</value></data>
+  <data name="Sync_Never" xml:space="preserve"><value>Initial sync has not completed</value></data>
+  <data name="Sync_Waiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="Sync_Scanning" xml:space="preserve"><value>Scanning local files</value></data>
+  <data name="Sync_Uploading" xml:space="preserve"><value>Checking and uploading</value></data>
+  <data name="Sync_Monitoring" xml:space="preserve"><value>Monitoring</value></data>
+  <data name="Sync_Attention" xml:space="preserve"><value>Needs attention</value></data>
+  <data name="Sync_Paused" xml:space="preserve"><value>Paused</value></data>
+  <data name="Sync_InvalidName" xml:space="preserve"><value>Unsupported name. Rename the item and retry; sync never renames it automatically.</value></data>
+  <data name="Sync_NameMismatch" xml:space="preserve"><value>Names differ, including letter case. Make both names identical and retry.</value></data>
+  <data name="Sync_RootMissing" xml:space="preserve"><value>The local folder is unavailable. Restore its original path before resuming.</value></data>
+  <data name="Sync_LinkUnsupported" xml:space="preserve"><value>Symbolic links, junctions, and on-demand placeholders are unsupported. Use ordinary local files and folders.</value></data>
+  <data name="Sync_RemoteMissing" xml:space="preserve"><value>The cloud target is unavailable. Check access or create a new binding.</value></data>
+  <data name="Sync_RemoteMoved" xml:space="preserve"><value>The cloud folder has moved. Unlink it and select the target again.</value></data>
+  <data name="Sync_TypeConflict" xml:space="preserve"><value>An item has the same name but a different type, or is a shared shortcut. Resolve the cloud conflict first.</value></data>
+  <data name="Sync_FileBusy" xml:space="preserve"><value>The file is being written, locked, or unreadable. It will be retried later.</value></data>
+  <data name="Sync_AccessDenied" xml:space="preserve"><value>Access denied. Check local or cloud folder permissions and retry.</value></data>
+  <data name="Sync_NetworkError" xml:space="preserve"><value>The cloud operation failed. Check your connection and retry.</value></data>
+  <data name="Sync_LoginNeeded" xml:space="preserve"><value>Sign-in is required. Sign in to this binding's account from Files, then resume sync.</value></data>
+  <data name="Sync_RemoteChanged" xml:space="preserve"><value>The matching cloud item changed during upload. Check it and retry.</value></data>
+  <data name="Sync_Quota" xml:space="preserve"><value>Cloud storage is full. Free space and retry.</value></data>
+  <data name="Sync_InvalidResponse" xml:space="preserve"><value>The server did not confirm the complete upload with the exact name. This item is not marked successful.</value></data>
+  <data name="Sync_ConfigError" xml:space="preserve"><value>Some sync settings could not be read or saved. Existing settings are preserved; check local storage access.</value></data>
+  <data name="Sync_ConfigInsideRoot" xml:space="preserve"><value>This folder overlaps the app's sync settings. Choose another folder.</value></data>
+  <data name="Sync_Overlap" xml:space="preserve"><value>The local or cloud folder overlaps an existing binding. Unlink the conflicting binding first.</value></data>
+  <data name="Sync_ChooseLocalHint" xml:space="preserve"><value>Choose a local folder, then open the cloud folder with the same name.</value></data>
+  <data name="Sync_SameNameHint" xml:space="preserve"><value>Open the cloud folder with this exact name: {0}</value></data>
+  <data name="Sync_NoDrives" xml:space="preserve"><value>No signed-in drives. Add and sign in to a drive from Files first.</value></data>
+  <data name="Sync_BindCurrent.ToolTipService.ToolTip" xml:space="preserve"><value>Link a local folder</value></data>
+  <data name="Sync_BindCurrent.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Link a local folder</value></data>
+  <data name="Sync_Transfers.Header" xml:space="preserve"><value>Sync uploads</value></data>
 </root>

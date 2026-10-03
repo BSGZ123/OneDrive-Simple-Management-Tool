@@ -25,6 +25,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Controls\ItemCard.xaml" />
+    <None Remove="Pages\FolderSyncPage.xaml" />
+    <None Remove="Views\CreateFolderSyncView.xaml" />
     <None Remove="Pages\BookmarkPage.xaml" />
     <None Remove="Pages\CloudPage.xaml" />
     <None Remove="Pages\DrivePage.xaml" />

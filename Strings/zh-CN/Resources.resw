@@ -762,4 +762,59 @@
   <data name="Preview_AutoEncoding" xml:space="preserve">
     <value>自动（BOM / UTF-8）</value>
   </data>
+  <data name="NavigationBar_FolderSync.Content" xml:space="preserve"><value>文件夹同步</value></data>
+  <data name="Sync_Title.Text" xml:space="preserve"><value>文件夹同步</value></data>
+  <data name="Sync_New.Content" xml:space="preserve"><value>新建同步</value></data>
+  <data name="Sync_Description.Text" xml:space="preserve"><value>本地新增和修改自动上传至 OneDrive，本地删除不影响云端文件。</value></data>
+  <data name="Sync_Lifetime.Text" xml:space="preserve"><value>应用运行时持续监测，重新打开后检查遗漏的变化。重命名或移动会上传新路径并保留云端旧副本。</value></data>
+  <data name="Sync_Empty.Message" xml:space="preserve"><value>还没有同步绑定。点击“新建同步”，选择同名的本地和云端文件夹。</value></data>
+  <data name="Sync_CheckNow.Content" xml:space="preserve"><value>立即检查 / 重试</value></data>
+  <data name="Sync_Remove.Content" xml:space="preserve"><value>解除绑定</value></data>
+  <data name="Sync_IssueBar.Title" xml:space="preserve"><value>部分项目需要处理</value></data>
+  <data name="Sync_CreateDialog.Title" xml:space="preserve"><value>新建文件夹同步</value></data>
+  <data name="Sync_CreateDialog.PrimaryButtonText" xml:space="preserve"><value>绑定并同步</value></data>
+  <data name="Sync_CreateDialog.CloseButtonText" xml:space="preserve"><value>取消</value></data>
+  <data name="Sync_CreateDescription.Text" xml:space="preserve"><value>首次上传全部内容，之后上传新增和修改。同路径同名文件以本地内容更新；两端根文件夹名称也必须完全一致。</value></data>
+  <data name="Sync_PickLocal.Content" xml:space="preserve"><value>选择本地文件夹</value></data>
+  <data name="Sync_Account.Header" xml:space="preserve"><value>已登录的网盘</value></data>
+  <data name="Sync_BrowseHint.Text" xml:space="preserve"><value>点击文件夹进入，直到当前目录为要绑定的目标。需要新目录时，请先在“文件”页面创建。</value></data>
+  <data name="Sync_Up.Content" xml:space="preserve"><value>上一级</value></data>
+  <data name="Sync_Pause" xml:space="preserve"><value>暂停</value></data>
+  <data name="Sync_Resume" xml:space="preserve"><value>恢复 / 重试</value></data>
+  <data name="Sync_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Sync_RemoveTitle" xml:space="preserve"><value>解除文件夹绑定？</value></data>
+  <data name="Sync_RemoveDescription" xml:space="preserve"><value>停止该文件夹的监测和上传，移除同步记录。本地与云端已有文件都会保留。</value></data>
+  <data name="Sync_RemoveLabel" xml:space="preserve"><value>解除绑定</value></data>
+  <data name="Sync_Progress" xml:space="preserve"><value>已检查 {0} / {1} 项  {2}</value></data>
+  <data name="Sync_LastSuccess" xml:space="preserve"><value>最近同步成功：{0}</value></data>
+  <data name="Sync_Never" xml:space="preserve"><value>尚未完成首次同步</value></data>
+  <data name="Sync_Waiting" xml:space="preserve"><value>等待检查</value></data>
+  <data name="Sync_Scanning" xml:space="preserve"><value>扫描本地文件</value></data>
+  <data name="Sync_Uploading" xml:space="preserve"><value>检查并上传</value></data>
+  <data name="Sync_Monitoring" xml:space="preserve"><value>监测中</value></data>
+  <data name="Sync_Attention" xml:space="preserve"><value>需要处理</value></data>
+  <data name="Sync_Paused" xml:space="preserve"><value>已暂停</value></data>
+  <data name="Sync_InvalidName" xml:space="preserve"><value>名称不受支持。请修改名称后重试；同步不会自动改名。</value></data>
+  <data name="Sync_NameMismatch" xml:space="preserve"><value>名称不一致（包括大小写）。请保持两端名称完全相同后重试。</value></data>
+  <data name="Sync_RootMissing" xml:space="preserve"><value>本地绑定文件夹不可用。请恢复原路径后再继续。</value></data>
+  <data name="Sync_LinkUnsupported" xml:space="preserve"><value>不支持符号链接、目录联接或按需占位文件；请使用普通本地文件和文件夹。</value></data>
+  <data name="Sync_RemoteMissing" xml:space="preserve"><value>云端绑定目录不可用。请检查权限或重新建立绑定。</value></data>
+  <data name="Sync_RemoteMoved" xml:space="preserve"><value>云端绑定目录已移动。请解除绑定后重新选择目标。</value></data>
+  <data name="Sync_TypeConflict" xml:space="preserve"><value>同名项目的类型不一致，或目标是共享快捷方式。请先处理云端冲突。</value></data>
+  <data name="Sync_FileBusy" xml:space="preserve"><value>文件正在写入、被占用或无法读取。稍后自动重试。</value></data>
+  <data name="Sync_AccessDenied" xml:space="preserve"><value>没有访问权限。请检查文件夹或网盘权限后重试。</value></data>
+  <data name="Sync_NetworkError" xml:space="preserve"><value>上传或读取云端失败。请检查网络后重试。</value></data>
+  <data name="Sync_LoginNeeded" xml:space="preserve"><value>登录已失效。请先在“文件”页面重新登录此绑定所属账号，再恢复同步。</value></data>
+  <data name="Sync_RemoteChanged" xml:space="preserve"><value>云端同名项目在上传期间发生变化。请检查后重试。</value></data>
+  <data name="Sync_Quota" xml:space="preserve"><value>网盘空间不足。请释放空间后重试。</value></data>
+  <data name="Sync_InvalidResponse" xml:space="preserve"><value>云端未确认完整、同名的上传结果。此项目尚未记为成功。</value></data>
+  <data name="Sync_ConfigError" xml:space="preserve"><value>部分同步配置无法读取或保存。原配置已保留，请检查本地存储权限。</value></data>
+  <data name="Sync_ConfigInsideRoot" xml:space="preserve"><value>所选目录包含应用的同步配置，不能绑定。请选择其他文件夹。</value></data>
+  <data name="Sync_Overlap" xml:space="preserve"><value>本地或云端目录与现有绑定重叠。请先解除冲突的绑定。</value></data>
+  <data name="Sync_ChooseLocalHint" xml:space="preserve"><value>请先选择本地文件夹，再进入云端的同名目录。</value></data>
+  <data name="Sync_SameNameHint" xml:space="preserve"><value>请进入名称完全相同的云端文件夹：{0}</value></data>
+  <data name="Sync_NoDrives" xml:space="preserve"><value>没有已登录网盘。请先从左侧“文件”页面添加并登录网盘。</value></data>
+  <data name="Sync_BindCurrent.ToolTipService.ToolTip" xml:space="preserve"><value>绑定本地文件夹</value></data>
+  <data name="Sync_BindCurrent.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>绑定本地文件夹</value></data>
+  <data name="Sync_Transfers.Header" xml:space="preserve"><value>同步上传</value></data>
 </root>

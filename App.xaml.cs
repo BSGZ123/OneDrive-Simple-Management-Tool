@@ -51,10 +51,16 @@ namespace OneDrive_Simple_Management_Tool
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
                     .AddSingleton<TaskManagerViewModel>()
+                    .AddSingleton<FolderSyncService>()
+                    .AddSingleton<FolderSyncViewModel>()
                     .AddSingleton(CacheHelper)
                     .AddSingleton(BuildPublicApp())
                     .BuildServiceProvider()
             );
+
+            var folderSync = Ioc.Default.GetService<FolderSyncService>();
+            _ = folderSync.InitializeAsync();
+            m_window.Closed += (_, _) => folderSync.Stop();
 
         }
 

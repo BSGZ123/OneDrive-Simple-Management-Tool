@@ -42,6 +42,7 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Uid="NavigationBar_Home" Tag="HomePage" x:Name="HomePageItem" Icon="Home" IsSelected="True"/>
                 <NavigationViewItem x:Uid="NavigationBar_Files" Tag="CloudPage" x:Name="CloudPageItem" Icon="Document"/>
+                <NavigationViewItem x:Uid="NavigationBar_FolderSync" Tag="FolderSyncPage" Icon="Sync"/>
                 <NavigationViewItem x:Uid="NavigationBar_Tasks" Tag="TaskManagerPage" x:Name="TaskManagerItem" Icon="Sort"/>
                 <NavigationViewItem x:Uid="NavigationBar_Tools" Tag="ToolPage" x:Name="ToolPageItem">
                     <NavigationViewItem.Icon>

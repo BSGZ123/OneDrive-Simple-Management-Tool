@@ -92,6 +92,17 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private async void CreateFolderDialogAsync(object sender, RoutedEventArgs e) => await ShowCreateFolder();
 
+        private async void BindCurrentFolder(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not DriveViewModel drive || !drive.CanCreateHere || FileActions.IsDialogOpen(XamlRoot)) return;
+            try
+            {
+                using var model = new CreateFolderSyncViewModel(Ioc.Default.GetService<Services.FolderSyncService>(), drive);
+                await FileActions.ShowDialogAsync(this, new CreateFolderSyncView(model));
+            }
+            catch (Exception exception) { drive.ErrorMessage = Services.FolderSyncJob.GetErrorKey(exception).GetLocalized(); }
+        }
+
         private void ChangeLayout(object sender, RoutedEventArgs e)
         {
             if (DataContext is DriveViewModel drive && sender is MenuFlyoutItem item &&

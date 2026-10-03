@@ -19,7 +19,7 @@ using Windows.Storage;
 
 namespace OneDrive_Simple_Management_Tool.Services
 {
-    public class OneDrive
+    public partial class OneDrive
     {
         public OneDrive()
         {

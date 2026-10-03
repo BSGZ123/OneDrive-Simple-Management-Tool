@@ -135,6 +135,27 @@
             <PivotItem x:Uid="TaskManagerPage_Pivot_Upload">
                 <ListView ItemsSource="{Binding UploadTasks}" ItemTemplate="{StaticResource UploadTaskTemplate}" />
             </PivotItem>
+            <PivotItem x:Uid="Sync_Transfers">
+                <ListView ItemsSource="{x:Bind FolderSync.Bindings}" SelectionMode="None" HorizontalContentAlignment="Stretch">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Spacing="8" Padding="12">
+                                <TextBlock Text="{Binding Name}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                <TextBlock Text="{Binding State}" />
+                                <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" />
+                                <ProgressBar Value="{Binding Percent}" />
+                                <TextBlock Text="{Binding LastSuccess}" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Content="{Binding ToggleLabel}" Command="{Binding ToggleCommand}" />
+                                    <Button x:Uid="Sync_CheckNow" Command="{Binding CheckNowCommand}" IsEnabled="{Binding Enabled}" />
+                                </StackPanel>
+                                <InfoBar IsOpen="{Binding HasIssues}" Message="{Binding Issues}" Severity="Warning" IsClosable="False" />
+                                <TextBlock Text="{Binding CommandError}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </PivotItem>
         </Pivot>
 
         <!--为什么不使用AppSDK1.5 SelectBar呢？因为SettingsControls Nuget包与其不兼容，降级或者替换类似组件，所以等待修复吧-->

@@ -35,6 +35,7 @@
                 </BreadcrumbBar.ItemTemplate>
             </BreadcrumbBar>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                <Button x:Uid="Sync_BindCurrent" Click="BindCurrentFolder" IsEnabled="{Binding CanCreateHere}"><SymbolIcon Symbol="Sync" /></Button>
                 <Button x:Uid="Drive_Search" Click="ShowSearchDialogAsync"><SymbolIcon Symbol="Find" /></Button>
                 <Button x:Uid="Drive_Refresh" Command="{Binding RefreshCommand}"><SymbolIcon Symbol="Refresh" /></Button>
                 <Button x:Uid="Drive_Layout">

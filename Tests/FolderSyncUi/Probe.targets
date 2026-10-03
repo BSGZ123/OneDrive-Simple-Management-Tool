@@ -1,0 +1,4 @@
+<Project>
+  <PropertyGroup><StartupObject>FolderSyncUiProbe</StartupObject></PropertyGroup>
+  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\FolderSyncUi\Probe.cs" /></ItemGroup>
+</Project>
