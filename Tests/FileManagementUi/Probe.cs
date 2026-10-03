@@ -123,6 +123,9 @@ internal static class FileManagementUiProbe
                     return Json("{\"id\":\"root-id\",\"name\":\"Root\",\"folder\":{},\"root\":{}}");
                 if (path.EndsWith("/items/folder"))
                     return Json("{\"id\":\"folder\",\"name\":\"Demo folder\",\"folder\":{},\"parentReference\":{\"id\":\"root-id\",\"driveId\":\"local-test-drive\"}}");
+                string itemId = path.Split('/').Last();
+                if (_names.TryGetValue(itemId, out string itemName))
+                    return Json(JsonSerializer.Serialize(Item(itemId, itemName)));
                 int offset = request.RequestUri.Query.StartsWith("?cursor=") ? int.Parse(request.RequestUri.Query.Substring(8)) : 0;
                 if (FailLaterPage && offset > 0)
                     return Json("{\"error\":{\"code\":\"accessDenied\",\"message\":\"Later page denied\"}}", HttpStatusCode.Forbidden);
@@ -155,7 +158,9 @@ internal static class FileManagementUiProbe
 
         private static object Item(string id, string name) => new
         {
-            id, name, size = 1234, lastModifiedDateTime = "2026-10-03T00:00:00Z",
+            id, name, size = id == "notes" ? Encoding.UTF8.GetByteCount("# Local preview\n\nThis content comes from an in-memory test response.") : 1234,
+            file = id == "folder" || id.StartsWith("new-") ? null : new { mimeType = "text/plain" },
+            lastModifiedDateTime = "2026-10-03T00:00:00Z",
             folder = id == "folder" || id.StartsWith("new-") ? new { childCount = 0 } : null
         };
 

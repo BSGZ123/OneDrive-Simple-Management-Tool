@@ -648,4 +648,70 @@
   <data name="Drive_ExcludedCount" xml:space="preserve">
     <value>{0} external/shared entries omitted; operations on other drives are not supported here.</value>
   </data>
+  <data name="Preview_Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Preview_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Preview_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Preview_Status_Preparing" xml:space="preserve">
+    <value>Preparing preview…</value>
+  </data>
+  <data name="Preview_Status_Loading" xml:space="preserve">
+    <value>Loading preview…</value>
+  </data>
+  <data name="Preview_Status_Retrying" xml:space="preserve">
+    <value>Retrying preview…</value>
+  </data>
+  <data name="Preview_Status_Ready" xml:space="preserve">
+    <value>Preview opened</value>
+  </data>
+  <data name="Preview_Status_Empty" xml:space="preserve">
+    <value>This document is empty.</value>
+  </data>
+  <data name="Preview_Status_Failed" xml:space="preserve">
+    <value>Preview unavailable</value>
+  </data>
+  <data name="Preview_Status_Closed" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="Preview_Status_Buffering" xml:space="preserve">
+    <value>Buffering…</value>
+  </data>
+  <data name="Preview_Error_Network" xml:space="preserve">
+    <value>Could not load the file. Check your connection and retry, or download it.</value>
+  </data>
+  <data name="Preview_Error_Timeout" xml:space="preserve">
+    <value>Loading timed out. Retry or download the file.</value>
+  </data>
+  <data name="Preview_Error_Authentication" xml:space="preserve">
+    <value>Sign in to this account again, then reopen the preview.</value>
+  </data>
+  <data name="Preview_Error_AccessDenied" xml:space="preserve">
+    <value>You do not have permission to load this file, or its temporary address is unavailable.</value>
+  </data>
+  <data name="Preview_Error_NotFound" xml:space="preserve">
+    <value>This file no longer exists. Refresh the file list.</value>
+  </data>
+  <data name="Preview_Error_TooLarge" xml:space="preserve">
+    <value>This file exceeds the preview size or image resolution limit. Download it to view.</value>
+  </data>
+  <data name="Preview_Error_InvalidContent" xml:space="preserve">
+    <value>The file is empty, damaged, incomplete, or uses an unsupported text encoding. Download it to inspect.</value>
+  </data>
+  <data name="Preview_Error_Unsupported" xml:space="preserve">
+    <value>This format, media encoding, or server response cannot be previewed here. Download the file to view.</value>
+  </data>
+  <data name="Preview_Error_RuntimeUnavailable" xml:space="preserve">
+    <value>The preview component could not start or stopped unexpectedly. Retry or download the file.</value>
+  </data>
+  <data name="Preview_Error_Unknown" xml:space="preserve">
+    <value>Could not preview this file. Retry or download it.</value>
+  </data>
+  <data name="Preview_ImagesIncomplete" xml:space="preserve">
+    <value>Some document images could not be loaded or exceeded the preview limits.</value>
+  </data>
 </root>

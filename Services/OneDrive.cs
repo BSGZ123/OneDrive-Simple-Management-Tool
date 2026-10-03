@@ -111,9 +111,9 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].Items[itemId].Thumbnails.GetAsync();
         }
 
-        public async Task<DriveItem> GetItem(string itemId)
+        public async Task<DriveItem> GetItem(string itemId, CancellationToken cancellationToken = default)
         {
-            return await graphClient.Drives[DriveId].Items[itemId].GetAsync();
+            return await graphClient.Drives[DriveId].Items[itemId].GetAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<DownloadSource> GetDownloadSourceAsync(string itemId, CancellationToken cancellationToken)
@@ -144,9 +144,9 @@ namespace OneDrive_Simple_Management_Tool.Services
             }
         }
 
-        public async Task<Stream> GetItemContent(string itemId)
+        public async Task<Stream> GetItemContent(string itemId, CancellationToken cancellationToken = default)
         {
-            return await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync();
+            return await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<DriveItem> CreateFolder(string parentItemId, string folderName)

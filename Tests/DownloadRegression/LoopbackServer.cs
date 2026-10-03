@@ -17,6 +17,8 @@ internal sealed class LoopbackServer : IAsyncDisposable
     public byte[] Bytes { get; set; } = Enumerable.Range(0, 1024 * 512).Select(i => (byte)(i * 31 + i / 251)).ToArray();
     public int DelayMilliseconds { get; set; } = 3;
     public int StatusCode { get; set; } = 200;
+    public string ContentType { get; set; } = "application/octet-stream";
+    public bool Attachment { get; set; }
     public int DropsRemaining;
     public bool SupportsRange { get; set; } = true;
     public bool IgnoreRange { get; set; }
@@ -76,7 +78,8 @@ internal sealed class LoopbackServer : IAsyncDisposable
                 if (status == 200) { start = 0; end = data.Length - 1; }
                 bool success = status is 200 or 206;
                 long length = success ? Math.Max(0, end - start + 1) : 0;
-                var headers = new StringBuilder($"HTTP/1.1 {status} Test\r\nConnection: close\r\nContent-Type: application/octet-stream\r\n");
+                var headers = new StringBuilder($"HTTP/1.1 {status} Test\r\nConnection: close\r\nContent-Type: {ContentType}\r\n");
+                if (Attachment) headers.Append("Content-Disposition: attachment; filename=sample.pdf\r\n");
                 if (!OmitLength || !success) headers.Append($"Content-Length: {length}\r\n");
                 headers.Append($"Accept-Ranges: {(SupportsRange ? "bytes" : "none")}\r\n");
                 if (status == 206)

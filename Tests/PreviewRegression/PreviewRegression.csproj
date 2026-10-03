@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/OneDrive.cs" Link="Production/OneDrive.cs" />
+    <Compile Include="../../Services/Utils.cs" Link="Production/Utils.cs" />
+    <Compile Include="../../Services/PreviewContentLoader.cs" Link="Production/PreviewContentLoader.cs" />
+    <Compile Include="../../Services/GraphPreviewSource.cs" Link="Production/GraphPreviewSource.cs" />
+    <Compile Include="../../Services/PreviewSession.cs" Link="Production/PreviewSession.cs" />
+    <Compile Include="../../Services/PreviewPdfProbe.cs" Link="Production/PreviewPdfProbe.cs" />
+    <Compile Include="../../Helpers/PreviewErrors.cs" Link="Production/PreviewErrors.cs" />
+    <Compile Include="../../Helpers/SearchQueryRules.cs" Link="Production/SearchQueryRules.cs" />
+    <Compile Include="../../Helpers/UploadProgressTracker.cs" Link="Production/UploadProgressTracker.cs" />
+    <Compile Include="../../Models/PreviewState.cs" Link="Production/PreviewState.cs" />
+    <Compile Include="../../Models/DriveItemPage.cs" Link="Production/DriveItemPage.cs" />
+    <Compile Include="../../Models/FileType.cs" Link="Production/FileType.cs" />
+    <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
+    <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
+    <Compile Include="../../ViewModels/PreviewViewModel.cs" Link="Production/PreviewViewModel.cs" />
+    <Compile Include="../UploadRegression/PlatformFakes.cs" Link="PlatformFakes.cs" />
+    <Compile Include="../ShareRegression/ShareFakes.cs" Link="ShareFakes.cs" />
+    <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+  </ItemGroup>
+</Project>

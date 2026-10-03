@@ -98,8 +98,20 @@ namespace OneDrive_Simple_Management_Tool.Views
                         };
                         if (preview != null)
                         {
-                            preview.DataContext = new PreviewViewModel(file);
-                            await ShowDialogAsync(owner, preview);
+                            PreviewKind kind = preview switch
+                            {
+                                MarkdownPreviewView => PreviewKind.Markdown,
+                                ImagePreviewView => PreviewKind.Image,
+                                MediaPreviewView => PreviewKind.Media,
+                                _ => PreviewKind.Pdf
+                            };
+                            var viewModel = new PreviewViewModel(file.Name,
+                                Services.GraphPreviewSource.Create(file.Drive.Provider, file.Id, kind));
+                            preview.DataContext = viewModel;
+                            try { await ShowDialogAsync(owner, preview); }
+                            finally { await viewModel.CloseAsync(); }
+                            if (viewModel.DownloadRequested && file.DownloadFileCommand.CanExecute(file.Id))
+                                await file.DownloadFileCommand.ExecuteAsync(file.Id);
                         }
                         break;
                     case FileAction.Download when file.IsFile:

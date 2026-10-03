@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <StartupObject>PreviewUiProbe</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\PreviewUi\Probe.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\DownloadRegression\LoopbackServer.cs" />
+  </ItemGroup>
+</Project>

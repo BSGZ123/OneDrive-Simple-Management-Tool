@@ -3,17 +3,27 @@
     x:Class="OneDrive_Simple_Management_Tool.Views.Preview.PdfPreviewView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:OneDrive_Simple_Management_Tool.Views.Preview"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:tools="using:OneDrive_Simple_Management_Tool.ViewModels.Tools" 
-    d:DataContext="{d:DesignInstance Type=tools:PreviewViewModel}"
-    mc:Ignorable="d"
-    x:Uid="FilePreview_Dialog"
-    Loaded="LoadPreviewUrlAsync">
-
-    <Grid>
-        <WebView2  Source="{Binding PdfUrl}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="200" MinWidth="200" />
-        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" VerticalAlignment="Top" />
+    Title="{Binding FileName}"
+    PrimaryButtonText="{Binding RetryText}"
+    PrimaryButtonCommand="{Binding RetryCommand}"
+    IsPrimaryButtonEnabled="{Binding CanRetry}"
+    SecondaryButtonText="{Binding DownloadText}"
+    CloseButtonText="{Binding CloseText}"
+    DefaultButton="Close">
+    <Grid MinWidth="280" MinHeight="220" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <ProgressRing IsActive="{Binding IsLoading}" Width="20" Height="20" />
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+        </StackPanel>
+        <InfoBar Grid.Row="1" IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}"
+                 Severity="Error" IsClosable="False" />
+        <Grid x:Name="ContentHost" Grid.Row="2" MinHeight="180" />
+        <TextBlock Grid.Row="3" Text="{Binding Notice}" TextWrapping="Wrap" />
     </Grid>
 </ContentDialog>
