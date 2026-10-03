@@ -90,6 +90,7 @@ namespace OneDrive_Simple_Management_Tool.Views
                     case FileAction.Open when file.CanPreview:
                         ContentDialog preview = Services.Utils.GetFileType(Path.GetExtension(file.Name).ToLowerInvariant()) switch
                         {
+                            FileType.Text => new TextPreviewView(),
                             FileType.Markdown => new MarkdownPreviewView(),
                             FileType.Image => new ImagePreviewView(),
                             FileType.Media => new MediaPreviewView(),
@@ -100,6 +101,7 @@ namespace OneDrive_Simple_Management_Tool.Views
                         {
                             PreviewKind kind = preview switch
                             {
+                                TextPreviewView => PreviewKind.Text,
                                 MarkdownPreviewView => PreviewKind.Markdown,
                                 ImagePreviewView => PreviewKind.Image,
                                 MediaPreviewView => PreviewKind.Media,

@@ -92,6 +92,6 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public DateTimeOffset? Updated { get => _file.LastModifiedDateTime; }
         public string DownloadUrl => _file.AdditionalData.TryGetValue("@microsoft.graph.downloadUrl", out var url) ? url?.ToString() : null;
         public bool CanPreview => IsFile && Utils.GetFileType(Path.GetExtension(Name).ToLowerInvariant())
-            is FileType.Markdown or FileType.Image or FileType.Media or FileType.Pdf;
+            is FileType.Text or FileType.Markdown or FileType.Image or FileType.Media or FileType.Pdf;
     }
 }

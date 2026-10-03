@@ -2,12 +2,12 @@ using System;
 
 namespace OneDrive_Simple_Management_Tool.Models
 {
-    public enum PreviewKind { Markdown, Image, Pdf, Media }
+    public enum PreviewKind { Markdown, Image, Pdf, Media, Text }
     public enum PreviewState { Preparing, Loading, Retrying, Ready, Empty, Failed, Closed }
     public enum PreviewFailure
     {
         None, Network, Timeout, Authentication, AccessDenied, NotFound,
-        TooLarge, InvalidContent, Unsupported, RuntimeUnavailable, Unknown
+        TooLarge, InvalidContent, Unsupported, RuntimeUnavailable, Unknown, TextEncoding
     }
 
     public sealed class PreviewException : Exception
@@ -23,9 +23,9 @@ namespace OneDrive_Simple_Management_Tool.Models
     }
 
     public sealed record PreviewMetadata(long? Size, string Url);
-    public sealed record PreviewContent(PreviewKind Kind, byte[] Bytes = null, string Text = null, Uri Uri = null)
+    public sealed record PreviewContent(PreviewKind Kind, byte[] Bytes = null, string Text = null, Uri Uri = null, string EncodingName = null)
     {
-        public bool IsEmpty => Kind == PreviewKind.Markdown && string.IsNullOrEmpty(Text);
+        public bool IsEmpty => Kind is PreviewKind.Markdown or PreviewKind.Text && string.IsNullOrEmpty(Text);
     }
 
     public sealed class PreviewOptions

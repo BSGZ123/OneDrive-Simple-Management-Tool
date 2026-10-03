@@ -70,6 +70,12 @@ internal static class PreviewUiProbe
             _results = new TextBlock { Text = "Synthetic files only; no account or cloud data.", TextWrapping = TextWrapping.Wrap };
             _panel.Children.Add(_results);
             Add("Run preview regression", RunAsync);
+            Add("Markdown compatibility", () => ReadingProbe.ValidateMarkdownAsync(_panel.XamlRoot, Record));
+            Add("Run reading regression", () => ReadingProbe.ValidateReadingAsync(_panel.XamlRoot, Record, _window));
+            Add("Reading Markdown", () => ShowAsync("基础阅读_代码与表格_很长的文件名_Reading.md", PreviewKind.Markdown, Encoding.UTF8.GetBytes(ReadingProbe.Sample)));
+            Add("Reading TXT", () => ShowAsync("中文文本.txt", PreviewKind.Text, Encoding.UTF8.GetBytes("中文文本选择复制 😀\r\n" + new string('字', 500))));
+            Add("GBK TXT", () => ShowAsync("旧编码.txt", PreviewKind.Text, CodePagesEncodingProvider.Instance.GetEncoding(936).GetBytes("中文旧编码文件\r\n第二行")));
+            Add("Large image", async () => await ShowAsync("Large.png", PreviewKind.Image, await ReadingProbe.LargePngAsync()));
             Add("Markdown", () => ShowAsync("Notes.md", PreviewKind.Markdown, Markdown));
             Add("Image PNG", () => ShowAsync("Pixel.png", PreviewKind.Image, Png));
             Add("Image SVG", () => ShowAsync("Shapes.svg", PreviewKind.Image, Svg));
@@ -109,6 +115,12 @@ internal static class PreviewUiProbe
             File.WriteAllText(_log, "Started\n");
             if (Environment.GetEnvironmentVariable("CLOUDFLOW_PREVIEW_AUTORUN") == "1")
                 _panel.Loaded += async (_, _) => { if (!_running) await RunAsync(); };
+            if (Environment.GetEnvironmentVariable("CLOUDFLOW_PREVIEW_AUTORUN") == "reading")
+                _panel.Loaded += async (_, _) =>
+                {
+                    try { await ReadingProbe.ValidateReadingAsync(_panel.XamlRoot, Record, _window); }
+                    catch (Exception exception) { Record("FAIL reading: " + exception); }
+                };
         }
 
         private void Add(string label, Func<Task> action)
@@ -135,6 +147,7 @@ internal static class PreviewUiProbe
             var vm = new PreviewViewModel(name, loader, Options);
             ContentDialog dialog = kind switch
             {
+                PreviewKind.Text => new TextPreviewView(),
                 PreviewKind.Markdown => new MarkdownPreviewView(),
                 PreviewKind.Image => new ImagePreviewView(),
                 PreviewKind.Pdf => new PdfPreviewView(),

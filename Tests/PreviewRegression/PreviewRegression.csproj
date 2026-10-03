@@ -9,6 +9,9 @@
     <Compile Include="../../Services/OneDrive.cs" Link="Production/OneDrive.cs" />
     <Compile Include="../../Services/Utils.cs" Link="Production/Utils.cs" />
     <Compile Include="../../Services/PreviewContentLoader.cs" Link="Production/PreviewContentLoader.cs" />
+    <Compile Include="../../Services/PreviewTextDecoder.cs" Link="Production/PreviewTextDecoder.cs" />
+    <Compile Include="../../Services/PreviewTextLayout.cs" Link="Production/PreviewTextLayout.cs" />
+    <Compile Include="../../Services/PreviewImageLayout.cs" Link="Production/PreviewImageLayout.cs" />
     <Compile Include="../../Services/GraphPreviewSource.cs" Link="Production/GraphPreviewSource.cs" />
     <Compile Include="../../Services/PreviewSession.cs" Link="Production/PreviewSession.cs" />
     <Compile Include="../../Services/PreviewPdfProbe.cs" Link="Production/PreviewPdfProbe.cs" />

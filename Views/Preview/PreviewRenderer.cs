@@ -9,6 +9,7 @@ using OneDrive_Simple_Management_Tool.Services;
 using OneDrive_Simple_Management_Tool.ViewModels.Tools;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -38,6 +39,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
         public Task RenderAsync(PreviewContent content, CancellationToken token) => content.Kind switch
         {
             PreviewKind.Markdown => MarkdownAsync(content, token),
+            PreviewKind.Text => TextAsync(content, token),
             PreviewKind.Image => ImageAsync(content, token),
             PreviewKind.Pdf => PdfAsync(content, token),
             PreviewKind.Media => MediaAsync(content, token),
@@ -72,27 +74,103 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
 
         private async Task ImageAsync(PreviewContent content, CancellationToken token)
         {
-            ImageSource source = await PreviewImageDecoder.DecodeAsync(content.Bytes,
-                Path.GetExtension(_viewModel.FileName).Equals(".svg", StringComparison.OrdinalIgnoreCase), token);
-            token.ThrowIfCancellationRequested();
-            var image = new Image { Source = source, Stretch = Stretch.Uniform };
-            ExceptionRoutedEventHandler failed = (_, _) =>
-            {
-                if (!token.IsCancellationRequested) _viewModel.ReportFailure(PreviewFailure.InvalidContent);
-            };
-            image.ImageFailed += failed;
-            _cleanup.Add(() => { image.ImageFailed -= failed; image.Source = null; });
+            var image = new PreviewImageSurface(content.Bytes,
+                Path.GetExtension(_viewModel.FileName).Equals(".svg", StringComparison.OrdinalIgnoreCase), _viewModel, token);
+            _cleanup.Add(image.Dispose);
             _host.Children.Add(image);
+            await image.LoadAsync();
+        }
+
+        private TextBox CreateTextBox(string text)
+        {
+            var box = new TextBox
+            {
+                IsReadOnly = true, AcceptsReturn = true, IsSpellCheckEnabled = false,
+                IsTextPredictionEnabled = false, FontSize = _viewModel.ReadingFontSize,
+                TextWrapping = _viewModel.WrapText ? TextWrapping.Wrap : TextWrapping.NoWrap,
+                FontFamily = new FontFamily("Consolas"), Padding = new Thickness(12), Text = text
+            };
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(box, _viewModel.FileName);
+            ScrollViewer.SetVerticalScrollBarVisibility(box, ScrollBarVisibility.Auto);
+            ScrollViewer.SetHorizontalScrollBarVisibility(box, _viewModel.WrapText ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto);
+            PropertyChangedEventHandler changed = (_, args) =>
+            {
+                if (args.PropertyName == nameof(PreviewViewModel.ReadingFontSize)) box.FontSize = _viewModel.ReadingFontSize;
+                if (args.PropertyName == nameof(PreviewViewModel.WrapText))
+                {
+                    box.TextWrapping = _viewModel.WrapText ? TextWrapping.Wrap : TextWrapping.NoWrap;
+                    ScrollViewer.SetHorizontalScrollBarVisibility(box, _viewModel.WrapText ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto);
+                }
+            };
+            _viewModel.PropertyChanged += changed;
+            _cleanup.Add(() => { _viewModel.PropertyChanged -= changed; box.Text = string.Empty; });
+            return box;
+        }
+
+        private Task TextAsync(PreviewContent content, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            _host.Children.Add(CreateTextBox(content.Text));
+            return Task.CompletedTask;
         }
 
         private async Task MarkdownAsync(PreviewContent content, CancellationToken token)
         {
+            if (PreviewTextLayout.UsePlainText(content.Text))
+            {
+                _viewModel.Notice = "Preview_PlainTextFallback".GetLocalized();
+                await TextAsync(content, token);
+                return;
+            }
             var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            var markdown = new MarkdownTextBlock { Padding = new Thickness(12) };
+            var markdown = new MarkdownTextBlock
+            {
+                Padding = new Thickness(12), IsTextSelectionEnabled = true, UseSyntaxHighlighting = true,
+                WrapCodeBlock = false, TextWrapping = TextWrapping.Wrap,
+                CodeFontFamily = new FontFamily("Consolas"), InlineCodeFontFamily = new FontFamily("Consolas"),
+                FontSize = _viewModel.ReadingFontSize, MaxWidth = 900, HorizontalAlignment = HorizontalAlignment.Stretch,
+                Header1FontSize = _viewModel.ReadingFontSize * 2, Header2FontSize = _viewModel.ReadingFontSize * 1.6,
+                Header3FontSize = _viewModel.ReadingFontSize * 1.3, Header4FontSize = _viewModel.ReadingFontSize * 1.2,
+                Header5FontSize = _viewModel.ReadingFontSize * 1.1, Header6FontSize = _viewModel.ReadingFontSize
+            };
+            markdown.SetRenderer<ReadingMarkdownRenderer>();
+            var scroll = new ScrollViewer { Content = markdown, HorizontalScrollMode = ScrollMode.Disabled,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+            TextBox sourceView = null;
+            PropertyChangedEventHandler readingChanged = (_, args) =>
+            {
+                if (token.IsCancellationRequested) return;
+                if (args.PropertyName == nameof(PreviewViewModel.ReadingFontSize))
+                {
+                    double fraction = scroll.ScrollableHeight > 0 ? scroll.VerticalOffset / scroll.ScrollableHeight : 0;
+                    markdown.FontSize = _viewModel.ReadingFontSize;
+                    markdown.Header1FontSize = _viewModel.ReadingFontSize * 2;
+                    markdown.Header2FontSize = _viewModel.ReadingFontSize * 1.6;
+                    markdown.Header3FontSize = _viewModel.ReadingFontSize * 1.3;
+                    markdown.Header4FontSize = _viewModel.ReadingFontSize * 1.2;
+                    markdown.Header5FontSize = _viewModel.ReadingFontSize * 1.1;
+                    markdown.Header6FontSize = _viewModel.ReadingFontSize;
+                    Dispatch(token, () => scroll.ChangeView(null, fraction * scroll.ScrollableHeight, null, true));
+                }
+                if (args.PropertyName == nameof(PreviewViewModel.ShowSource))
+                {
+                    if (_viewModel.ShowSource && sourceView == null)
+                    {
+                        sourceView = CreateTextBox(content.Text);
+                        _host.Children.Add(sourceView);
+                    }
+                    scroll.Visibility = _viewModel.ShowSource ? Visibility.Collapsed : Visibility.Visible;
+                    if (sourceView != null) sourceView.Visibility = _viewModel.ShowSource ? Visibility.Visible : Visibility.Collapsed;
+                }
+            };
+            _viewModel.PropertyChanged += readingChanged;
+            _cleanup.Add(() => _viewModel.PropertyChanged -= readingChanged);
             // Serial bounded image loads keep Markdown subresources inside the preview lifecycle.
             var imageGate = new SemaphoreSlim(1, 1);
             int imageCount = 0;
             int remainingImageBytes = _viewModel.Options.MaxImageBytes;
+            var imageCache = new Dictionary<string, ImageSource>();
+            _cleanup.Add(imageCache.Clear);
             EventHandler<MarkdownRenderedEventArgs> rendered = (_, args) =>
             {
                 if (token.IsCancellationRequested) return;
@@ -106,11 +184,17 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
                 bool entered = false;
                 try
                 {
-                    if (++imageCount > 16 || !Uri.TryCreate(args.Url, UriKind.Absolute, out Uri uri) ||
+                    if (!Uri.TryCreate(args.Url, UriKind.Absolute, out Uri uri) ||
                         (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
                         throw new PreviewException(PreviewFailure.Unsupported);
                     await imageGate.WaitAsync(token);
                     entered = true;
+                    if (imageCache.TryGetValue(uri.AbsoluteUri, out ImageSource cached))
+                    {
+                        args.Image = cached;
+                        return;
+                    }
+                    if (++imageCount > 16) throw new PreviewException(PreviewFailure.TooLarge);
                     if (remainingImageBytes <= 0) throw new PreviewException(PreviewFailure.TooLarge);
                     using var response = await PreviewContentLoader.WithTimeoutAsync(
                         ct => Images.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct),
@@ -124,6 +208,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
                         response.Content.Headers.ContentType?.MediaType == "image/svg+xml", token);
                     token.ThrowIfCancellationRequested();
                     args.Image = image;
+                    imageCache[uri.AbsoluteUri] = image;
                 }
                 catch (Exception)
                 {
@@ -143,7 +228,8 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
                 markdown.ImageResolving -= resolving;
                 markdown.Text = string.Empty;
             });
-            _host.Children.Add(new ScrollViewer { Content = markdown, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto });
+            _host.Children.Add(scroll);
+            readingChanged(this, new PropertyChangedEventArgs(nameof(PreviewViewModel.ShowSource)));
             token.ThrowIfCancellationRequested();
             markdown.Text = content.Text;
             await completion.Task.WaitAsync(token);
@@ -236,6 +322,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
             catch (Exception exception) { throw new PreviewException(PreviewFailure.RuntimeUnavailable, inner: exception); }
             token.ThrowIfCancellationRequested();
             var core = web.CoreWebView2;
+            core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs;
             ulong? navigationId = null;
             TypedEventHandler<CoreWebView2, CoreWebView2NavigationStartingEventArgs> starting = (_, args) =>
             {
@@ -260,7 +347,10 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
             {
                 args.Cancel = true;
                 args.Handled = true;
-                Fail(completion, token, new PreviewException(PreviewFailure.Unsupported));
+                if (!completion.Task.IsCompleted)
+                    Fail(completion, token, new PreviewException(PreviewFailure.Unsupported));
+                else if (!token.IsCancellationRequested)
+                    _viewModel.Notice = "Preview_PdfDownload".GetLocalized();
             };
             TypedEventHandler<CoreWebView2, CoreWebView2NewWindowRequestedEventArgs> newWindow = (_, args) => args.Handled = true;
             core.NavigationStarting += starting;

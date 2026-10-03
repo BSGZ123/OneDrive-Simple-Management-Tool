@@ -27,6 +27,9 @@ internal static class Program
         (string, Func<Task>)[] cases =
         [
             ("UTF-8, UTF-16 BOM and empty documents", Text),
+            ("Strict UTF and explicit Chinese legacy encodings", TextEncodings),
+            ("Encoding recovery reuses bytes and close clears them", EncodingRecovery),
+            ("Reading preferences, long-document fallback and DPI-aware image bounds", ReadingRules),
             ("Metadata limit prevents the content request", MetadataLimit),
             ("Actual byte limits reject unknown and dishonest sizes", ActualLimit),
             ("Truncated, null, invalid encoding and empty image content", InvalidContent),
@@ -101,6 +104,76 @@ internal static class Program
         Assert(calls == 0);
     }
 
+    private static async Task TextEncodings()
+    {
+        const string sample = "中文繁體 English 😀\r\n第二行\tend";
+        foreach (Encoding encoding in new Encoding[] { new UTF8Encoding(true, true),
+            new UnicodeEncoding(false, true, true), new UnicodeEncoding(true, true, true),
+            new UTF32Encoding(false, true, true), new UTF32Encoding(true, true, true) })
+        {
+            byte[] bytes = [.. encoding.GetPreamble(), .. encoding.GetBytes(sample)];
+            Assert(PreviewTextDecoder.Decode(bytes).Text == sample);
+            Assert(PreviewTextDecoder.Decode(encoding.GetPreamble()).Text == "");
+            Assert((await Loader(bytes, bytes.Length, PreviewKind.Text).LoadAsync(default)).Text == sample);
+        }
+        Assert(PreviewTextDecoder.Decode(Encoding.Unicode.GetBytes(sample), "UTF-16 LE").Text == sample);
+        foreach (var (page, name) in new[] { (54936, "GB18030"), (936, "GBK"), (950, "Big5") })
+        {
+            string value = page == 54936 ? sample : "中文 English";
+            byte[] bytes = CodePagesEncodingProvider.Instance.GetEncoding(page).GetBytes(value);
+            Assert(PreviewTextDecoder.Decode(bytes, name).Text == value);
+        }
+        foreach (byte[] bytes in new byte[][] { [0xFF], [0xC0, 0xAF], [0xFF, 0xFE, 1],
+            [0xFF, 0xFE, 0, 0xD8], [0xFF, 0xFE, 0, 0, 0, 0, 0x11, 0], [0, 1, 0, 2] })
+            await Expect(PreviewFailure.TextEncoding, () => Task.FromResult(PreviewTextDecoder.Decode(bytes)));
+        await Expect(PreviewFailure.TextEncoding, () => Task.FromResult(PreviewTextDecoder.Decode([0x81], "GBK")));
+        Assert((await Loader([], 0, PreviewKind.Text).LoadAsync(default)).IsEmpty);
+        await Expect(PreviewFailure.TooLarge, () => Loader(new byte[129], null, PreviewKind.Text).LoadAsync(default));
+    }
+
+    private static async Task EncodingRecovery()
+    {
+        int calls = 0, metadata = 0;
+        byte[] bytes = CodePagesEncodingProvider.Instance.GetEncoding(936).GetBytes("中文");
+        var loader = new PreviewContentLoader(PreviewKind.Text,
+            _ => { metadata++; return Task.FromResult(new PreviewMetadata(bytes.Length, null)); },
+            _ => { calls++; return Task.FromResult<Stream>(new MemoryStream(bytes)); }, Fast);
+        string text = null;
+        var vm = new PreviewViewModel("中文.txt", loader, Fast);
+        vm.Configure((content, _) => { text = content.Text; return Task.CompletedTask; }, () => { });
+        await vm.StartAsync();
+        Assert(vm.HasError && vm.CanChangeEncoding && calls == 1);
+        await vm.ChangeEncodingAsync("GBK");
+        Assert(vm.State == PreviewState.Ready && text == "中文" && vm.ActualEncoding == "GBK");
+        Assert(calls == 1 && metadata == 1, "Changing encoding fetched the file again");
+        await vm.ChangeEncodingAsync("UTF-8");
+        Assert(vm.HasError && vm.CanChangeEncoding);
+        await vm.ChangeEncodingAsync("GB18030");
+        Assert(vm.State == PreviewState.Ready && calls == 1);
+        await vm.CloseAsync();
+        Assert(!loader.HasTextBytes && !vm.CanChangeEncoding);
+        await vm.ChangeEncodingAsync("GBK");
+        Assert(vm.State == PreviewState.Closed && calls == 1);
+    }
+
+    private static Task ReadingRules()
+    {
+        var vm = new PreviewViewModel("a.txt", Loader([], kind: PreviewKind.Text));
+        vm.ReadingFontSize = 100; Assert(vm.ReadingFontSize == 32);
+        vm.ReadingFontSize = 0; Assert(vm.ReadingFontSize == 12);
+        vm.ReadingFontSize = double.NaN; Assert(vm.ReadingFontSize == 16);
+        Assert(!PreviewTextLayout.UsePlainText("# title\n\nSome **text**"));
+        Assert(PreviewTextLayout.UsePlainText(new string('a', 200001)));
+        Assert(PreviewTextLayout.UsePlainText(string.Concat(Enumerable.Repeat("x\n", 2001))));
+        Assert(PreviewImageLayout.Fit(4000, 2000, 1000, 600, 1) == 0.25);
+        Assert(PreviewImageLayout.Fit(4000, 2000, 1000, 600, 2) == 0.5);
+        Assert(PreviewImageLayout.DecodeEdge(4000, 2000, 1, false) == 4000);
+        Assert(PreviewImageLayout.DecodeEdge(4000, 2000, 8, false) == 4000);
+        Assert(PreviewImageLayout.DecodeEdge(100000, 100, 1, false) <= 8192);
+        Assert(PreviewImageLayout.DecodeEdge(240, 120, 2, true) == 480);
+        return Task.CompletedTask;
+    }
+
     private static async Task ActualLimit()
     {
         foreach (long? size in new long?[] { null, 1 })
@@ -111,7 +184,7 @@ internal static class Program
     private static async Task InvalidContent()
     {
         await Expect(PreviewFailure.InvalidContent, () => Loader([1], 2).LoadAsync(default));
-        await Expect(PreviewFailure.InvalidContent, () => Loader([0xFF]).LoadAsync(default));
+        await Expect(PreviewFailure.TextEncoding, () => Loader([0xFF]).LoadAsync(default));
         await Expect(PreviewFailure.InvalidContent, () => Loader([], 0, PreviewKind.Image).LoadAsync(default));
         var loader = new PreviewContentLoader(PreviewKind.Image, _ => Task.FromResult(new PreviewMetadata(null, null)),
             _ => Task.FromResult<Stream>(null), Fast);

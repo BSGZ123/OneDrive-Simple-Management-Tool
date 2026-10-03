@@ -1,7 +1,6 @@
 using OneDrive_Simple_Management_Tool.Models;
 using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +12,20 @@ namespace OneDrive_Simple_Management_Tool.Services
         private readonly Func<CancellationToken, Task<PreviewMetadata>> _metadata;
         private readonly Func<CancellationToken, Task<Stream>> _content;
         private readonly PreviewOptions _options;
+        private byte[] _textBytes;
+        public PreviewKind Kind => _kind;
+        public string TextEncoding { get; set; } = "Auto";
+        public bool HasTextBytes => _textBytes != null;
+
+        public Task<PreviewContent> DecodeTextAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if (_textBytes == null) throw new PreviewException(PreviewFailure.InvalidContent);
+            var decoded = PreviewTextDecoder.Decode(_textBytes, TextEncoding);
+            return Task.FromResult(new PreviewContent(_kind, Text: decoded.Text, EncodingName: decoded.EncodingName));
+        }
+
+        public void Clear() => _textBytes = null;
 
         public PreviewContentLoader(PreviewKind kind, Func<CancellationToken, Task<PreviewMetadata>> metadata,
             Func<CancellationToken, Task<Stream>> content, PreviewOptions options = null)
@@ -25,6 +38,7 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task<PreviewContent> LoadAsync(CancellationToken token)
         {
+            Clear();
             PreviewMetadata metadata = await WithTimeoutAsync(_metadata, _options.RequestTimeout, token);
             if (metadata == null || metadata.Size < 0) throw new PreviewException(PreviewFailure.InvalidContent);
             if (_kind is PreviewKind.Pdf or PreviewKind.Media)
@@ -36,7 +50,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 return new(_kind, Uri: uri);
             }
 
-            int limit = _kind == PreviewKind.Markdown ? _options.MaxTextBytes : _options.MaxImageBytes;
+            int limit = _kind is PreviewKind.Markdown or PreviewKind.Text ? _options.MaxTextBytes : _options.MaxImageBytes;
             if (metadata.Size > limit) throw new PreviewException(PreviewFailure.TooLarge);
             using Stream stream = await WithTimeoutAsync(_content, _options.RequestTimeout, token);
             if (stream == null) throw new PreviewException(PreviewFailure.InvalidContent);
@@ -48,15 +62,9 @@ namespace OneDrive_Simple_Management_Tool.Services
                 if (bytes.Length == 0) throw new PreviewException(PreviewFailure.InvalidContent);
                 return new(_kind, Bytes: bytes);
             }
-            try
-            {
-                using var reader = new StreamReader(new MemoryStream(bytes), new UTF8Encoding(false, true), true);
-                return new(_kind, Text: await reader.ReadToEndAsync(token));
-            }
-            catch (DecoderFallbackException exception)
-            {
-                throw new PreviewException(PreviewFailure.InvalidContent, inner: exception);
-            }
+            token.ThrowIfCancellationRequested();
+            _textBytes = bytes;
+            return await DecodeTextAsync(token);
         }
 
         public static async Task<byte[]> ReadLimitedAsync(Stream stream, int limit, TimeSpan timeout, CancellationToken token)

@@ -714,4 +714,52 @@
   <data name="Preview_ImagesIncomplete" xml:space="preserve">
     <value>部分文档图片无法加载或超过预览限制。</value>
   </data>
+  <data name="Preview_Encoding" xml:space="preserve">
+    <value>编码</value>
+  </data>
+  <data name="Preview_EncodingHelp" xml:space="preserve">
+    <value>自动：优先识别 BOM，否则使用 UTF-8。乱码时可手动选择 UTF、GB18030、GBK 或 Big5。</value>
+  </data>
+  <data name="Preview_FontSmaller" xml:space="preserve">
+    <value>缩小字号</value>
+  </data>
+  <data name="Preview_FontLarger" xml:space="preserve">
+    <value>放大字号</value>
+  </data>
+  <data name="Preview_FontReset" xml:space="preserve">
+    <value>恢复字号 16</value>
+  </data>
+  <data name="Preview_Wrap" xml:space="preserve">
+    <value>自动换行（文本／源码）</value>
+  </data>
+  <data name="Preview_Source" xml:space="preserve">
+    <value>查看 Markdown 源码</value>
+  </data>
+  <data name="Preview_PlainTextFallback" xml:space="preserve">
+    <value>此文档较长或结构复杂，已以纯文本显示完整内容。</value>
+  </data>
+  <data name="Preview_Error_TextEncoding" xml:space="preserve">
+    <value>无法按当前编码读取文本。请选择 UTF、GB18030、GBK 或 Big5 后重试解码，或下载查看。</value>
+  </data>
+  <data name="Preview_PdfDownload" xml:space="preserve">
+    <value>请使用预览底部的“下载”保存此文件。</value>
+  </data>
+  <data name="Preview_ZoomOut" xml:space="preserve">
+    <value>缩小</value>
+  </data>
+  <data name="Preview_ZoomIn" xml:space="preserve">
+    <value>放大</value>
+  </data>
+  <data name="Preview_Fit" xml:space="preserve">
+    <value>适应窗口</value>
+  </data>
+  <data name="Preview_Original" xml:space="preserve">
+    <value>原始比例 100%</value>
+  </data>
+  <data name="Preview_ImageResolutionLimited" xml:space="preserve">
+    <value>为控制内存，已限制解码清晰度；可下载原图查看全部细节。</value>
+  </data>
+  <data name="Preview_AutoEncoding" xml:space="preserve">
+    <value>自动（BOM / UTF-8）</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildProjectDirectory)\Tests\PreviewUi\Probe.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\PreviewUi\ReadingProbe.cs" />
     <Compile Include="$(MSBuildProjectDirectory)\Tests\DownloadRegression\LoopbackServer.cs" />
   </ItemGroup>
 </Project>

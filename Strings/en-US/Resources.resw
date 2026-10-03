@@ -714,4 +714,52 @@
   <data name="Preview_ImagesIncomplete" xml:space="preserve">
     <value>Some document images could not be loaded or exceeded the preview limits.</value>
   </data>
+  <data name="Preview_Encoding" xml:space="preserve">
+    <value>Encoding</value>
+  </data>
+  <data name="Preview_EncodingHelp" xml:space="preserve">
+    <value>Auto: detect a BOM, otherwise use UTF-8. Choose UTF, GB18030, GBK or Big5 manually if needed.</value>
+  </data>
+  <data name="Preview_FontSmaller" xml:space="preserve">
+    <value>Smaller text</value>
+  </data>
+  <data name="Preview_FontLarger" xml:space="preserve">
+    <value>Larger text</value>
+  </data>
+  <data name="Preview_FontReset" xml:space="preserve">
+    <value>Reset text size to 16</value>
+  </data>
+  <data name="Preview_Wrap" xml:space="preserve">
+    <value>Wrap text / source</value>
+  </data>
+  <data name="Preview_Source" xml:space="preserve">
+    <value>View Markdown source</value>
+  </data>
+  <data name="Preview_PlainTextFallback" xml:space="preserve">
+    <value>This document is long or complex. Its complete content is shown as plain text.</value>
+  </data>
+  <data name="Preview_Error_TextEncoding" xml:space="preserve">
+    <value>The text cannot be decoded with this encoding. Select UTF, GB18030, GBK or Big5, or download the file.</value>
+  </data>
+  <data name="Preview_PdfDownload" xml:space="preserve">
+    <value>Use the download button below the preview to save this file.</value>
+  </data>
+  <data name="Preview_ZoomOut" xml:space="preserve">
+    <value>Zoom out</value>
+  </data>
+  <data name="Preview_ZoomIn" xml:space="preserve">
+    <value>Zoom in</value>
+  </data>
+  <data name="Preview_Fit" xml:space="preserve">
+    <value>Fit to window</value>
+  </data>
+  <data name="Preview_Original" xml:space="preserve">
+    <value>Original size 100%</value>
+  </data>
+  <data name="Preview_ImageResolutionLimited" xml:space="preserve">
+    <value>Decoded resolution is limited to control memory use. Download the original for full detail.</value>
+  </data>
+  <data name="Preview_AutoEncoding" xml:space="preserve">
+    <value>Auto (BOM / UTF-8)</value>
+  </data>
 </root>
