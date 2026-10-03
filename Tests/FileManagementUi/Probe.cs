@@ -65,7 +65,13 @@ internal static class FileManagementUiProbe
             _window = new Window { Title = "File management UI regression — LOCAL", Content = panel };
             typeof(App).GetField("m_window", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, _window);
             _window.Activate();
-            await drive.GetFiles();
+            // Exercise the page's navigation load; explicitly loading here would mask
+            // a regression where entering a drive requires a manual refresh.
+            for (int attempt = 0; attempt < 100 && drive.IsLoading == Visibility.Visible; attempt++)
+                await Task.Delay(50);
+            if (drive.IsLoading == Visibility.Visible || drive.HasError || drive.Files.Count != 4)
+                throw new InvalidOperationException("Navigating to DrivePage did not automatically load its files.");
+            _window.Title = "File management UI regression — LOCAL — initial load passed";
         }
     }
 

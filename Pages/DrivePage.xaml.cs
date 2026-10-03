@@ -22,10 +22,14 @@ namespace OneDrive_Simple_Management_Tool.Pages
     {
         public DrivePage() => InitializeComponent();
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (e.Parameter is DriveViewModel drive) DataContext = drive;
+            if (e.Parameter is DriveViewModel drive)
+            {
+                DataContext = drive;
+                await drive.TryRefresh();
+            }
         }
 
         private void CopyIcon_DragOver(object sender, DragEventArgs e)

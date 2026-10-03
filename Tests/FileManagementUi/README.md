@@ -32,3 +32,13 @@ msbuild "OneDrive Simple Management Tool.csproj" /restore /p:Configuration=Debug
 自动化业务回归另见 `Tests/FileManagementRegression`，覆盖普通/永久删除端点、失败重试、重复提交、操作成功但刷新失败、转换取消和请求参数等。本地模拟通过不代表所有真实服务场景均已覆盖。
 
 2026-10-03 用户完成测试并确认本轮验证通过，同意提交至远端主分支。具体账户、文件类型、异常场景及永久删除等专项覆盖未逐项记录，上表仅表示已记录的本地界面验证。
+
+## 2026-10-03 进入网盘自动加载修复
+
+复现路径：左侧“文件”进入已登录网盘列表，再打开网盘。原先 `DrivePage.OnNavigatedTo` 只绑定 ViewModel，必须手动刷新才会请求文件。
+
+页面现在进入后调用现有刷新流程：首次加载根目录；再次进入保留 ViewModel 当前目录、搜索条件和选中项。加载状态、错误提示及重复请求保护复用现有逻辑。
+
+界面测试已移除显式调用 `drive.GetFiles()` 的代码，改为断言页面导航自动加载四个模拟文件。启动后不点击刷新，窗口标题出现 `initial load passed`，列表自动显示文件，实际验证通过：[initial-load.jpg](Screenshots/initial-load.jpg)。本项使用本机模拟 Graph 响应，未重新登录真实账户。
+
+分享 10 项、上传 18 项、文件管理 17 项回归通过；Debug/x64、Release/x64 构建通过，保留原有 `ShareCommunityViewModel` CS1998 警告。
