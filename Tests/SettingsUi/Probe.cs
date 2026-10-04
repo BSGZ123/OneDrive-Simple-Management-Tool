@@ -53,7 +53,7 @@ internal static class SettingsUiProbe
                 var store = new SwitchableStore(new AppearanceSettingsStore(paths));
                 var vm = new SettingViewModel(store);
                 await vm.InitializeAsync();
-                Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(vm).BuildServiceProvider());
+                Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(vm).AddOfflineHome(paths).BuildServiceProvider());
                 SafeDiagnostics.Configure(new SafeDiagnostics(paths.Diagnostics));
                 window = new MainWindow { Title = "Settings UI regression - LOCAL ONLY" };
                 typeof(App).GetField("m_window", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, window);

@@ -891,4 +891,112 @@
   <data name="Settings_SourceLink.Content" xml:space="preserve"><value>在 GitHub 查看</value></data>
   <data name="Settings_Release.Header" xml:space="preserve"><value>版本发布</value></data>
   <data name="Settings_ReleaseLink.Content" xml:space="preserve"><value>查看发布页面</value></data>
+  <data name="Home_Title.Text" xml:space="preserve">
+    <value>首页</value>
+  </data>
+  <data name="Home_Description.Text" xml:space="preserve">
+    <value>你的云盘与任务概览</value>
+  </data>
+  <data name="Home_Refresh.Content" xml:space="preserve">
+    <value>刷新容量</value>
+  </data>
+  <data name="Home_Files.Content" xml:space="preserve">
+    <value>我的文件</value>
+  </data>
+  <data name="Home_Tasks.Content" xml:space="preserve">
+    <value>传输任务</value>
+  </data>
+  <data name="Home_Sync.Content" xml:space="preserve">
+    <value>文件夹同步</value>
+  </data>
+  <data name="Home_Settings.Content" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Home_TransfersTitle.Text" xml:space="preserve">
+    <value>传输概览</value>
+  </data>
+  <data name="Home_ActiveTransfers.Text" xml:space="preserve">
+    <value>个进行中</value>
+  </data>
+  <data name="Home_TransferScope.Text" xml:space="preserve">
+    <value>仅统计本次会话中尚未移除的任务。</value>
+  </data>
+  <data name="Home_NoTransfers.Text" xml:space="preserve">
+    <value>还没有传输任务。打开云盘后即可上传或下载文件。</value>
+  </data>
+  <data name="Home_SyncTitle.Text" xml:space="preserve">
+    <value>同步概览</value>
+  </data>
+  <data name="Home_SyncFolders.Text" xml:space="preserve">
+    <value>个绑定文件夹</value>
+  </data>
+  <data name="Home_NoSyncs.Text" xml:space="preserve">
+    <value>还没有同步绑定。前往文件夹同步，将本地文件夹同步到 OneDrive。</value>
+  </data>
+  <data name="Home_DrivesTitle.Text" xml:space="preserve">
+    <value>云盘容量</value>
+  </data>
+  <data name="Home_ManageDrives.Content" xml:space="preserve">
+    <value>管理云盘</value>
+  </data>
+  <data name="Home_NoDrivesTitle.Text" xml:space="preserve">
+    <value>添加你的第一个云盘</value>
+  </data>
+  <data name="Home_NoDrives.Text" xml:space="preserve">
+    <value>在“我的文件”中添加 OneDrive 账户，即可浏览文件并查看容量。</value>
+  </data>
+  <data name="Home_AddDrive.Content" xml:space="preserve">
+    <value>前往添加云盘</value>
+  </data>
+  <data name="Home_OpenDrive.Content" xml:space="preserve">
+    <value>打开云盘</value>
+  </data>
+  <data name="Home_LoadingQuota" xml:space="preserve">
+    <value>正在读取容量…</value>
+  </data>
+  <data name="Home_QuotaUnavailable" xml:space="preserve">
+    <value>容量信息不可用</value>
+  </data>
+  <data name="Home_Capacity" xml:space="preserve">
+    <value>已用 {0} / 总计 {1}</value>
+  </data>
+  <data name="Home_Remaining" xml:space="preserve">
+    <value>剩余 {0}</value>
+  </data>
+  <data name="Home_Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="Home_TransferSummary" xml:space="preserve">
+    <value>进行中 {0} · 等待/暂停 {1} · 失败 {2} · 完成 {3} · 取消 {4}</value>
+  </data>
+  <data name="Home_SyncSummary" xml:space="preserve">
+    <value>共 {0} 个 · 正在同步 {1} · 已暂停 {2} · 需关注 {3}</value>
+  </data>
+  <data name="Home_LastRefreshed" xml:space="preserve">
+    <value>上次容量检查：{0}</value>
+  </data>
+  <data name="Home_ConfigurationFailed" xml:space="preserve">
+    <value>无法读取云盘配置。请重试，或前往“我的文件”检查配置。</value>
+  </data>
+  <data name="Home_SignInRequired" xml:space="preserve">
+    <value>登录已失效。请打开此云盘并重新登录，然后返回首页刷新。</value>
+  </data>
+  <data name="Home_QuotaNetwork" xml:space="preserve">
+    <value>无法连接 OneDrive。请检查网络后刷新。</value>
+  </data>
+  <data name="Home_QuotaAccessDenied" xml:space="preserve">
+    <value>无权读取此云盘的容量。请打开云盘检查访问权限。</value>
+  </data>
+  <data name="Home_DriveNotFound" xml:space="preserve">
+    <value>找不到此云盘。请前往“我的文件”检查账户。</value>
+  </data>
+  <data name="Home_QuotaThrottled" xml:space="preserve">
+    <value>OneDrive 请求过于频繁，请稍后刷新。</value>
+  </data>
+  <data name="Home_QuotaFailed" xml:space="preserve">
+    <value>读取容量失败。请刷新重试，或打开云盘检查账户。</value>
+  </data>
+  <data name="Home_QuotaTimeout" xml:space="preserve">
+    <value>读取容量超时，请稍后刷新。</value>
+  </data>
 </root>

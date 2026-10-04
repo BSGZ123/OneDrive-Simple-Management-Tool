@@ -891,4 +891,112 @@
   <data name="Settings_SourceLink.Content" xml:space="preserve"><value>View on GitHub</value></data>
   <data name="Settings_Release.Header" xml:space="preserve"><value>Releases</value></data>
   <data name="Settings_ReleaseLink.Content" xml:space="preserve"><value>View releases</value></data>
+  <data name="Home_Title.Text" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Home_Description.Text" xml:space="preserve">
+    <value>Your drives and activity at a glance</value>
+  </data>
+  <data name="Home_Refresh.Content" xml:space="preserve">
+    <value>Refresh storage</value>
+  </data>
+  <data name="Home_Files.Content" xml:space="preserve">
+    <value>My files</value>
+  </data>
+  <data name="Home_Tasks.Content" xml:space="preserve">
+    <value>Transfers</value>
+  </data>
+  <data name="Home_Sync.Content" xml:space="preserve">
+    <value>Folder sync</value>
+  </data>
+  <data name="Home_Settings.Content" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Home_TransfersTitle.Text" xml:space="preserve">
+    <value>Transfer overview</value>
+  </data>
+  <data name="Home_ActiveTransfers.Text" xml:space="preserve">
+    <value>in progress</value>
+  </data>
+  <data name="Home_TransferScope.Text" xml:space="preserve">
+    <value>Tasks kept in the current session.</value>
+  </data>
+  <data name="Home_NoTransfers.Text" xml:space="preserve">
+    <value>No transfers yet. Open a drive to upload or download files.</value>
+  </data>
+  <data name="Home_SyncTitle.Text" xml:space="preserve">
+    <value>Sync overview</value>
+  </data>
+  <data name="Home_SyncFolders.Text" xml:space="preserve">
+    <value>linked folders</value>
+  </data>
+  <data name="Home_NoSyncs.Text" xml:space="preserve">
+    <value>No folders linked yet. Go to Folder sync to sync a local folder to OneDrive.</value>
+  </data>
+  <data name="Home_DrivesTitle.Text" xml:space="preserve">
+    <value>Drive storage</value>
+  </data>
+  <data name="Home_ManageDrives.Content" xml:space="preserve">
+    <value>Manage drives</value>
+  </data>
+  <data name="Home_NoDrivesTitle.Text" xml:space="preserve">
+    <value>Add your first drive</value>
+  </data>
+  <data name="Home_NoDrives.Text" xml:space="preserve">
+    <value>Add a OneDrive account in My files to browse files and see storage usage.</value>
+  </data>
+  <data name="Home_AddDrive.Content" xml:space="preserve">
+    <value>Go to My files</value>
+  </data>
+  <data name="Home_OpenDrive.Content" xml:space="preserve">
+    <value>Open drive</value>
+  </data>
+  <data name="Home_LoadingQuota" xml:space="preserve">
+    <value>Loading storage…</value>
+  </data>
+  <data name="Home_QuotaUnavailable" xml:space="preserve">
+    <value>Storage information unavailable</value>
+  </data>
+  <data name="Home_Capacity" xml:space="preserve">
+    <value>{0} used of {1} total</value>
+  </data>
+  <data name="Home_Remaining" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="Home_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Home_TransferSummary" xml:space="preserve">
+    <value>Active {0} · Waiting/paused {1} · Failed {2} · Completed {3} · Cancelled {4}</value>
+  </data>
+  <data name="Home_SyncSummary" xml:space="preserve">
+    <value>Total {0} · Syncing {1} · Paused {2} · Needs attention {3}</value>
+  </data>
+  <data name="Home_LastRefreshed" xml:space="preserve">
+    <value>Last storage check: {0}</value>
+  </data>
+  <data name="Home_ConfigurationFailed" xml:space="preserve">
+    <value>Could not read drive settings. Retry or check the configuration in My files.</value>
+  </data>
+  <data name="Home_SignInRequired" xml:space="preserve">
+    <value>Sign-in required. Open this drive, sign in again, then refresh Home.</value>
+  </data>
+  <data name="Home_QuotaNetwork" xml:space="preserve">
+    <value>Could not connect to OneDrive. Check your connection and refresh.</value>
+  </data>
+  <data name="Home_QuotaAccessDenied" xml:space="preserve">
+    <value>Access to this drive's storage information was denied. Open the drive to check access.</value>
+  </data>
+  <data name="Home_DriveNotFound" xml:space="preserve">
+    <value>This drive could not be found. Check the account in My files.</value>
+  </data>
+  <data name="Home_QuotaThrottled" xml:space="preserve">
+    <value>OneDrive is receiving too many requests. Refresh again later.</value>
+  </data>
+  <data name="Home_QuotaFailed" xml:space="preserve">
+    <value>Could not load storage. Refresh to retry or open the drive to check the account.</value>
+  </data>
+  <data name="Home_QuotaTimeout" xml:space="preserve">
+    <value>Storage request timed out. Refresh to try again.</value>
+  </data>
 </root>

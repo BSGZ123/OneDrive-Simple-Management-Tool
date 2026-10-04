@@ -44,7 +44,7 @@ internal static class AccountConfigurationUiProbe
             SafeDiagnostics.Configure(new SafeDiagnostics(paths.Diagnostics));
             await store.AddAsync(Record("A"), 0);
             await store.AddAsync(Record("B"), 1);
-            Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(store).AddSingleton<TaskManagerViewModel>().BuildServiceProvider());
+            Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(store).AddSingleton<TaskManagerViewModel>().AddOfflineHome(paths).BuildServiceProvider());
             var model = new CloudViewModel(store, CreateDrive);
             await model.LoadDrivesFromDisk();
             var window = new MainWindow { Title = "Account configuration UI test - LOCAL ONLY" };

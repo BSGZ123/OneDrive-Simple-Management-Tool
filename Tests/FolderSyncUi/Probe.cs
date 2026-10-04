@@ -43,7 +43,7 @@ internal static class FolderSyncUiProbe
                 DisplayName = "本地模拟网盘", Provider = new() { HomeAccountId = "fake-account", DriveId = "fake-drive" }
             }, 0);
             Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(service).AddSingleton<FolderSyncViewModel>()
-                .AddSingleton(drives).AddSingleton<TaskManagerViewModel>().BuildServiceProvider());
+                .AddSingleton(drives).AddSingleton<TaskManagerViewModel>().AddOfflineHome(paths).BuildServiceProvider());
             await service.AddAsync(Binding("项目资料", "folder", true));
             await service.AddAsync(Binding("照片归档", "photos", false));
             var window = new MainWindow { Title = "Folder sync UI test — LOCAL ONLY" };

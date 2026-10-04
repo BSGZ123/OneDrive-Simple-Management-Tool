@@ -1,0 +1,4 @@
+<Project>
+  <PropertyGroup><StartupObject>HomeUiProbe</StartupObject></PropertyGroup>
+  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\HomeUi\Probe.cs" /></ItemGroup>
+</Project>

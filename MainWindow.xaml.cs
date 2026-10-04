@@ -18,6 +18,7 @@ namespace OneDrive_Simple_Management_Tool
     {
         private bool _selectionInitialized;
         private bool _explicitNavigation;
+        private bool _updatingNavigation;
 
         public MainWindow()
         {
@@ -35,6 +36,7 @@ namespace OneDrive_Simple_Management_Tool
         {
             bool initialSelection = !_selectionInitialized;
             _selectionInitialized = true;
+            if (_updatingNavigation) return;
             if (initialSelection && _explicitNavigation) return;
             if (args.SelectedItem == null && !args.IsSettingsSelected) return;
             if(args.IsSettingsSelected)
@@ -58,7 +60,18 @@ namespace OneDrive_Simple_Management_Tool
         public void Navigate(Type pageType,object targetPageArguments = null, NavigationTransitionInfo navigationTransitionInfo = null)
         {
             _explicitNavigation = true;
-            Rootframe.Navigate(pageType, targetPageArguments, navigationTransitionInfo);
+            if (!Rootframe.Navigate(pageType, targetPageArguments, navigationTransitionInfo)) return;
+            _updatingNavigation = true;
+            try
+            {
+                // Drive details belong to Files; Settings uses the built-in item.
+                string tag = pageType == typeof(DrivePage) ? nameof(CloudPage) : pageType.Name;
+                object selected = pageType == typeof(SettingPage) ? nvSample.SettingsItem : null;
+                foreach (var item in nvSample.MenuItems)
+                    if (item is NavigationViewItem navigationItem && (string)navigationItem.Tag == tag) selected = item;
+                nvSample.SelectedItem = selected;
+            }
+            finally { _updatingNavigation = false; }
         }
 
         public Frame Rootframe => contentFrame;

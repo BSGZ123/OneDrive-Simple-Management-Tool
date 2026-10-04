@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Models/HomeOverview.cs" Link="Production/HomeOverview.cs" />
+    <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
+    <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
+    <Compile Include="../../Models/DTO/DriveDTO.cs" Link="Production/DriveDTO.cs" />
+    <Compile Include="../../ViewModels/HomeViewModel.cs" Link="Production/HomeViewModel.cs" />
+    <Compile Include="../../ViewModels/HomeDriveViewModel.cs" Link="Production/HomeDriveViewModel.cs" />
+    <Compile Include="../../Services/HomeDriveService.cs" Link="Production/HomeDriveService.cs" />
+    <Compile Include="../../Services/AccountAuthenticationService.cs" Link="Production/AccountAuthenticationService.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/DriveConfigurationStore.cs" Link="Production/DriveConfigurationStore.cs" />
+    <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
+    <Compile Include="../../Helpers/AccountConfigurationErrors.cs" Link="Production/AccountConfigurationErrors.cs" />
+    <Compile Include="../UploadRegression/ResourceFake.cs" Link="ResourceFake.cs" />
+    <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Pages/HomePage.xaml" Link="HomePage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
+  </ItemGroup>
+</Project>
