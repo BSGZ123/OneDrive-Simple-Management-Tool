@@ -30,7 +30,7 @@ msbuild "OneDrive Simple Management Tool.csproj" /p:Configuration=Debug /p:Platf
 
 截图：[中文浅色](Screenshots/light-zh.png)、[中文深色](Screenshots/dark-zh.png)、[首次空状态](Screenshots/empty-zh.png)、[移动后的文件定位](Screenshots/located-file-zh.png)、[英文窄窗口错误](Screenshots/narrow-error-en.png)、[英文配置恢复](Screenshots/configuration-error-en.png)。
 
-20 项业务检查及 5 项新增文件定位检查见 [业务回归](../BookmarkRegression/README.md)。重建数据的存储保护由业务回归覆盖，界面确认对话框尚未通过自动化点击；实际进程重启、真实账户登录和云端操作属于下方人工验收范围。
+20 项业务检查及 5 项新增文件定位检查见 [业务回归](../BookmarkRegression/README.md)。第四轮在同一入口增加三页联动、长名称、短窗口、主题和恢复对话框取消/重建的自动化检查，详见 [联合验收记录](../PageIntegration/README.md)。实际进程重启、真实账户登录和云端操作属于下方人工验收范围。
 
 ## 第三轮人工验收
 

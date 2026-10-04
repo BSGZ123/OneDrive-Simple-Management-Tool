@@ -898,7 +898,7 @@
     <value>你的云盘与任务概览</value>
   </data>
   <data name="Home_Refresh.Content" xml:space="preserve">
-    <value>刷新容量</value>
+    <value>刷新概览</value>
   </data>
   <data name="Home_Files.Content" xml:space="preserve">
     <value>我的文件</value>
@@ -1118,5 +1118,20 @@
   </data>
   <data name="Bookmarks_RebuildAction" xml:space="preserve">
     <value>重建列表</value>
+  </data>
+  <data name="Home_Bookmarks.Content" xml:space="preserve">
+    <value>书签</value>
+  </data>
+  <data name="Home_RecentBookmarksTitle.Text" xml:space="preserve">
+    <value>最近收藏</value>
+  </data>
+  <data name="Home_RecentBookmarksDescription.Text" xml:space="preserve">
+    <value>显示最近收藏的 3 项；点击可打开当前所在位置。</value>
+  </data>
+  <data name="Home_NoBookmarks.Text" xml:space="preserve">
+    <value>还没有书签。在文件列表或网格中右键添加收藏，即可在这里快速打开。</value>
+  </data>
+  <data name="Home_AllBookmarks.Content" xml:space="preserve">
+    <value>查看全部书签</value>
   </data>
 </root>

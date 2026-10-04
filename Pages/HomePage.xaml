@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:localControls="using:OneDrive_Simple_Management_Tool.Controls"
     Background="Transparent">
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -15,21 +16,15 @@
             <Setter Property="Padding" Value="20" />
         </Style>
     </Page.Resources>
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="F5" Invoked="RefreshOverview" />
+    </Page.KeyboardAccelerators>
     <Grid>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState x:Name="WideOverview">
                     <VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="900" /></VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="FilesShortcut.(Grid.ColumnSpan)" Value="1" />
-                        <Setter Target="TasksShortcut.(Grid.ColumnSpan)" Value="1" />
-                        <Setter Target="TasksShortcut.(Grid.Column)" Value="1" />
-                        <Setter Target="SyncShortcut.(Grid.ColumnSpan)" Value="1" />
-                        <Setter Target="SyncShortcut.(Grid.Column)" Value="2" />
-                        <Setter Target="SyncShortcut.(Grid.Row)" Value="0" />
-                        <Setter Target="SettingsShortcut.(Grid.ColumnSpan)" Value="1" />
-                        <Setter Target="SettingsShortcut.(Grid.Column)" Value="3" />
-                        <Setter Target="SettingsShortcut.(Grid.Row)" Value="0" />
                         <Setter Target="TransfersCard.(Grid.ColumnSpan)" Value="1" />
                         <Setter Target="SyncCard.(Grid.ColumnSpan)" Value="1" />
                         <Setter Target="SyncCard.(Grid.Column)" Value="1" />
@@ -48,14 +43,40 @@
                     </StackPanel>
                     <Button x:Name="RefreshHome" x:Uid="Home_Refresh" Grid.Column="1" VerticalAlignment="Center" Command="{Binding RefreshCommand}" />
                 </Grid>
-                <Grid ColumnSpacing="8" RowSpacing="8">
-                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <Button x:Name="FilesShortcut" x:Uid="Home_Files" Click="OpenFiles" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
-                    <Button x:Name="TasksShortcut" x:Uid="Home_Tasks" Click="OpenTasks" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
-                    <Button x:Name="SyncShortcut" x:Uid="Home_Sync" Click="OpenSync" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
-                    <Button x:Name="SettingsShortcut" x:Uid="Home_Settings" Click="OpenSettings" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
-                </Grid>
+                <localControls:WrapPanel>
+                    <Button x:Name="FilesShortcut" x:Uid="Home_Files" Click="OpenFiles" Margin="0,0,8,4" />
+                    <Button x:Name="TasksShortcut" x:Uid="Home_Tasks" Click="OpenTasks" Margin="0,0,8,4" />
+                    <Button x:Name="SyncShortcut" x:Uid="Home_Sync" Click="OpenSync" Margin="0,0,8,4" />
+                    <Button x:Name="BookmarksShortcut" x:Uid="Home_Bookmarks" Click="OpenBookmarks" Margin="0,0,8,4" />
+                    <Button x:Name="SettingsShortcut" x:Uid="Home_Settings" Click="OpenSettings" Margin="0,0,8,4" />
+                </localControls:WrapPanel>
+                <Border Style="{StaticResource HomeCard}" DataContext="{Binding Bookmarks}">
+                    <StackPanel Spacing="10">
+                        <TextBlock x:Uid="Home_RecentBookmarksTitle" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="Home_RecentBookmarksDescription" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <ProgressBar IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock x:Uid="Home_NoBookmarks" TextWrapping="Wrap" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
+                        <ItemsControl x:Name="RecentBookmarkCards" ItemsSource="{Binding RecentItems}" IsEnabled="{Binding CanUseItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Spacing="6" Margin="0,0,0,12">
+                                        <Button Click="OpenRecentBookmark" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                AutomationProperties.Name="{Binding Name}">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2"
+                                                           TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
+                                                <TextBlock Text="{Binding DriveName}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button x:Uid="Home_AllBookmarks" Click="OpenBookmarks" />
+                    </StackPanel>
+                </Border>
                 <Grid ColumnSpacing="12" RowSpacing="12">
                     <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
@@ -86,7 +107,7 @@
                 </Grid>
                 <StackPanel Spacing="6" Margin="0,8,0,0">
                     <TextBlock x:Uid="Home_DrivesTitle" FontSize="20" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding LastRefreshed}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="{Binding LastRefreshed}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <ProgressBar IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
                 </StackPanel>
                 <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}">

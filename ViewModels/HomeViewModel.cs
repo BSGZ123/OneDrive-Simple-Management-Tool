@@ -14,13 +14,15 @@ using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-    public partial class HomeViewModel(IHomeDriveService drives, TaskManagerViewModel tasks, FolderSyncViewModel sync) : ObservableObject
+    public partial class HomeViewModel(IHomeDriveService drives, TaskManagerViewModel tasks, FolderSyncViewModel sync,
+        BookmarkViewModel bookmarks) : ObservableObject
     {
         private readonly HashSet<INotifyPropertyChanged> _observed = new();
         private CancellationTokenSource _request;
         private bool _active;
         private int _activationVersion;
         public ObservableCollection<HomeDriveViewModel> Drives { get; } = new();
+        public BookmarkViewModel Bookmarks { get; } = bookmarks;
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
         private bool _isLoading;
@@ -58,8 +60,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             sync.PropertyChanged += SyncChanged;
             ObserveItems();
             UpdateSummaries();
+            // Local bookmarks stay available while quota and sync initialization are pending.
+            var bookmarkLoad = Bookmarks.ActivateAsync();
             await sync.InitializeAsync();
-            if (_active && activation == _activationVersion) await RefreshAsync();
+            if (_active && activation == _activationVersion) await RefreshOverviewAsync(false);
+            await bookmarkLoad;
         }
 
         public void Deactivate()
@@ -68,6 +73,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _activationVersion++;
             _request?.Cancel();
             _request = null;
+            Bookmarks.Deactivate();
             IsLoading = false;
             tasks.DownloadTasks.CollectionChanged -= CollectionChanged;
             tasks.UploadTasks.CollectionChanged -= CollectionChanged;
@@ -80,7 +86,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         private bool CanRefresh() => !IsLoading;
 
         [RelayCommand(CanExecute = nameof(CanRefresh))]
-        private async Task RefreshAsync()
+        private Task RefreshAsync() => RefreshOverviewAsync(true);
+
+        private async Task RefreshOverviewAsync(bool reloadBookmarks)
         {
             if (!_active) return;
             _request?.Cancel();
@@ -90,6 +98,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             IsEmpty = false;
             ErrorMessage = LastRefreshed = "";
             Drives.Clear();
+            var bookmarkLoad = reloadBookmarks && Bookmarks.ReloadCommand.CanExecute(null)
+                ? Bookmarks.ReloadCommand.ExecuteAsync(null) : Task.CompletedTask;
             try
             {
                 var configured = await drives.LoadDrivesAsync(request.Token).WaitAsync(request.Token);
@@ -109,6 +119,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             }
             finally
             {
+                await bookmarkLoad;
                 if (_request == request) { _request = null; IsLoading = false; }
             }
         }

@@ -11,8 +11,9 @@ using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
-    public partial class BookmarkItemViewModel(Bookmark bookmark) : ObservableObject
+    public partial class BookmarkItemViewModel(Bookmark bookmark, BookmarkViewModel owner) : ObservableObject
     {
+        public BookmarkViewModel Owner { get; } = owner;
         public Bookmark Bookmark { get; private set; } = bookmark;
         public string Name => Bookmark.Name;
         public string DriveName => Bookmark.DriveName;
@@ -55,6 +56,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool IsEmpty => _all.Count == 0 && !HasError && !IsBusy;
         public bool HasNoMatches => _all.Count > 0 && Items.Count == 0;
         public bool HasItems => Items.Count > 0;
+        public IReadOnlyList<BookmarkItemViewModel> RecentItems => _all.Take(3).ToArray();
         public bool CanRecoverBookmarks => !IsBusy && NeedsRecovery;
         public bool CanUseItems => _active && !IsBusy && !NeedsRecovery;
         public string CountText => string.Format("Bookmarks_Count".GetLocalized(), Items.Count, _all.Count);
@@ -102,7 +104,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             var bookmarks = await store.LoadAsync(token).WaitAsync(token);
             token.ThrowIfCancellationRequested();
             _all = bookmarks.OrderByDescending(item => item.AddedAt).ThenBy(item => item.Name, StringComparer.CurrentCultureIgnoreCase)
-                .Select(item => new BookmarkItemViewModel(item)).ToList();
+                .Select(item => new BookmarkItemViewModel(item, this)).ToList();
             NeedsRecovery = false;
             Filter();
         }
@@ -179,6 +181,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             OnPropertyChanged(nameof(HasNoMatches));
             OnPropertyChanged(nameof(HasItems));
             OnPropertyChanged(nameof(CountText));
+            OnPropertyChanged(nameof(RecentItems));
         }
     }
 }

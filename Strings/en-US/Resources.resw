@@ -898,7 +898,7 @@
     <value>Your drives and activity at a glance</value>
   </data>
   <data name="Home_Refresh.Content" xml:space="preserve">
-    <value>Refresh storage</value>
+    <value>Refresh overview</value>
   </data>
   <data name="Home_Files.Content" xml:space="preserve">
     <value>My files</value>
@@ -1118,5 +1118,20 @@
   </data>
   <data name="Bookmarks_RebuildAction" xml:space="preserve">
     <value>Rebuild list</value>
+  </data>
+  <data name="Home_Bookmarks.Content" xml:space="preserve">
+    <value>Bookmarks</value>
+  </data>
+  <data name="Home_RecentBookmarksTitle.Text" xml:space="preserve">
+    <value>Recent bookmarks</value>
+  </data>
+  <data name="Home_RecentBookmarksDescription.Text" xml:space="preserve">
+    <value>Your three most recent bookmarks. Select one to open its current location.</value>
+  </data>
+  <data name="Home_NoBookmarks.Text" xml:space="preserve">
+    <value>No bookmarks yet. Add one from a file or folder context menu to open it here.</value>
+  </data>
+  <data name="Home_AllBookmarks.Content" xml:space="preserve">
+    <value>View all bookmarks</value>
   </data>
 </root>

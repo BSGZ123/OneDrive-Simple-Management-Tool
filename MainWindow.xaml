@@ -36,8 +36,9 @@
             IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
             SelectionChanged="NvSample_SelectionChanged"
-            PaneDisplayMode="Left"
-            ExpandedModeThresholdWidth="500"
+            PaneDisplayMode="Auto"
+            ExpandedModeThresholdWidth="1000"
+            CompactModeThresholdWidth="0"
             SelectionFollowsFocus="Disabled"
             IsTabStop="False">
 

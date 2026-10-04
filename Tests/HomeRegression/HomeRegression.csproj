@@ -6,6 +6,11 @@
     <LangVersion>12</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../Models/Bookmark.cs" Link="Production/Bookmark.cs" />
+    <Compile Include="../../ViewModels/BookmarkViewModel.cs" Link="Production/BookmarkViewModel.cs" />
+    <Compile Include="../../Services/BookmarkStore.cs" Link="Production/BookmarkStore.cs" />
+    <Compile Include="../../Services/BookmarkResolver.cs" Link="Production/BookmarkResolver.cs" />
+    <Compile Include="../../Helpers/BookmarkErrors.cs" Link="Production/BookmarkErrors.cs" />
     <Compile Include="../../Models/HomeOverview.cs" Link="Production/HomeOverview.cs" />
     <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />

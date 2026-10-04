@@ -18,7 +18,16 @@ internal static class HomeProbeServices
         services.TryAddSingleton<FolderSyncViewModel>();
         services.AddSingleton<IHomeDriveService, EmptyDrives>();
         services.AddTransient<HomeViewModel>();
+        services.TryAddSingleton<IBookmarkStore>(new BookmarkStore(paths));
+        services.TryAddSingleton<IBookmarkResolver, OfflineBookmarks>();
+        services.TryAddTransient<BookmarkViewModel>();
         return services;
+    }
+
+    private sealed class OfflineBookmarks : IBookmarkResolver
+    {
+        public Task<BookmarkLocation> ResolveAsync(Bookmark bookmark, CancellationToken token) =>
+            throw new BookmarkException("Bookmarks_SignInRequired");
     }
 
     private sealed class EmptyDrives : IHomeDriveService

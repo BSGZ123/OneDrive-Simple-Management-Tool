@@ -65,6 +65,8 @@ internal static class HomeUiProbe
                 Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton<IHomeDriveService>(drives)
                     .AddSingleton(tasks).AddSingleton(service).AddSingleton(sync).AddSingleton(settings)
                     .AddSingleton(new DriveConfigurationStore(paths)).AddSingleton<IAccountAuthenticationService>(authentication)
+                    .AddSingleton<IBookmarkStore>(new BookmarkStore(paths)).AddSingleton<IBookmarkResolver, BookmarkResolver>()
+                    .AddTransient<BookmarkViewModel>()
                     .AddTransient<HomeViewModel>().BuildServiceProvider());
                 window = new MainWindow { Title = "Home UI regression - LOCAL ONLY" };
                 typeof(App).GetField("m_window", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, window);
@@ -119,6 +121,7 @@ internal static class HomeUiProbe
                     ("FilesShortcut", typeof(CloudPage), "CloudPage"),
                     ("TasksShortcut", typeof(TaskManagerPage), "TaskManagerPage"),
                     ("SyncShortcut", typeof(FolderSyncPage), "FolderSyncPage"),
+                    ("BookmarksShortcut", typeof(BookmarkPage), "BookmarkPage"),
                     ("SettingsShortcut", typeof(SettingPage), "Settings")
                 })
                 {
@@ -169,7 +172,7 @@ internal static class HomeUiProbe
                 await page.Model.RefreshCommand.ExecuteAsync(null);
                 Assert(!page.Model.HasError && !page.Model.IsLoading, "Retry recovery");
                 await File.WriteAllTextAsync(Path.Combine(_output, "result.txt"),
-                    "PASS: startup recovery route; empty states; real transfer and sync model updates; mixed quotas; light/dark; four shortcut destinations and sidebar; old page unsubscribes; account-specific drive opening; narrow layout; config failure/retry. No real account/network used.");
+                    "PASS: startup recovery route; empty states; real transfer and sync model updates; mixed quotas; light/dark; five shortcut destinations and sidebar; old page unsubscribes; account-specific drive opening; narrow layout; config failure/retry. No real account/network used.");
             }
             catch (Exception exception)
             {

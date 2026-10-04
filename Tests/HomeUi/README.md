@@ -14,6 +14,8 @@ msbuild "OneDrive Simple Management Tool.csproj" /p:Configuration=Debug /p:Platf
 
 2026-10-04：中英文首页检查通过。
 
+第四轮新增第五个快捷入口“书签”，对应的首页最近收藏和跨页操作由 [三页联合入口](../PageIntegration/README.md) 覆盖。以下为第二轮基线记录；第四轮采用新版布局重新执行独立检查，最新结果见联合验收记录。
+
 | 操作 | 预期 | 实际 |
 | --- | --- | --- |
 | 启动时先导航到文件恢复页，再选首页 | 不被初始选中事件送回首页；随后可正常切页 | 通过 |

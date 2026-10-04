@@ -33,7 +33,7 @@ using Windows.Graphics;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 
-internal static class BookmarkUiProbe
+internal static partial class BookmarkUiProbe
 {
     [STAThread]
     private static void Main()
@@ -49,7 +49,7 @@ internal static class BookmarkUiProbe
         });
     }
 
-    private sealed class ProbeApp : App
+    private sealed partial class ProbeApp : App
     {
         private string _output;
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
@@ -66,14 +66,20 @@ internal static class BookmarkUiProbe
                 await driveStore.AddAsync(new DriveDTO { DisplayName = "Design archive · 项目资料", Provider = new() { HomeAccountId = "account-A", DriveId = "drive-A" } }, 0);
                 await driveStore.AddAsync(new DriveDTO { DisplayName = "Work · 工作资料", Provider = new() { HomeAccountId = "account-B", DriveId = "drive-A" } }, 1);
                 var store = new SwitchableStore(new BookmarkStore(paths));
+                var settings = new SettingViewModel(new AppearanceSettingsStore(paths));
+                await settings.InitializeAsync();
                 var authentication = new Authentication();
                 var resolver = new BookmarkResolver(driveStore, authentication, (auth, account) =>
                     new GraphServiceClient(new HttpClient(new Handler(account)), new BaseBearerTokenAuthenticationProvider(new AccountTokenProvider(auth, account))));
                 Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton<IBookmarkStore>(store).AddSingleton<IBookmarkResolver>(resolver)
                     .AddSingleton(driveStore).AddSingleton<IAccountAuthenticationService>(authentication).AddTransient<BookmarkViewModel>()
-                    .AddOfflineHome(paths).BuildServiceProvider());
+                    .AddOfflineHome(paths).AddSingleton(settings)
+                    .AddSingleton<IHomeDriveService>(new HomeDriveService(driveStore, authentication, (auth, account) =>
+                        new GraphServiceClient(new HttpClient(new Handler(account)), new BaseBearerTokenAuthenticationProvider(new AccountTokenProvider(auth, account)))))
+                    .BuildServiceProvider());
                 window = new MainWindow { Title = "Bookmarks UI regression - LOCAL ONLY" };
                 typeof(App).GetField("m_window", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, window);
+                settings.AttachAppearance(p => ThemeHelper.Apply(window, p));
                 // Install an in-memory Graph transport before DrivePage starts its real navigation code.
                 window.Rootframe.Navigating += (_, e) =>
                 {
@@ -174,10 +180,13 @@ internal static class BookmarkUiProbe
                 await page.Model.ReloadCommand.ExecuteAsync(null);
                 Assert(page.Model.NeedsRecovery && !page.Model.CanUseItems && !page.Model.IsEmpty, "Corruption is not empty");
                 await Capture(window, "configuration-error.png");
+                var disabledActions = BookmarkButtons(page).ToArray();
+                Assert(disabledActions.Length > 0 && disabledActions.All(b => !b.IsEnabled), "Corrupt-data row buttons disabled");
                 await page.Model.RestoreBackupCommand.ExecuteAsync(null);
                 Assert(!page.Model.HasError && !page.Model.NeedsRecovery && page.Model.Items.Count > 0, "Backup recovery");
+                await VerifyIntegration(window, store, settings, paths);
                 await File.WriteAllTextAsync(Path.Combine(_output, "result.txt"),
-                    "PASS: empty; list/grid add/remove menus; save failure; account isolation; file rename/move and later-page selection; folder opening; missing item; filtering and local removal; fresh store; encrypted data recovery; light/dark/narrow. No real cloud requests.");
+                    "PASS: empty; list/grid add/remove menus; save failure; account isolation; file rename/move and later-page selection; folder opening; missing item; filtering and local removal; fresh store; encrypted data recovery; Home/Files/bookmark loop; theme across three pages; long names; automatic pane; short viewport; recovery dialog cancel/rebuild; keyboard focus. No real cloud requests.");
             }
             catch (Exception exception)
             {
@@ -187,11 +196,11 @@ internal static class BookmarkUiProbe
             finally { window?.Close(); }
         }
 
-        private async Task Capture(MainWindow window, string name)
+        private async Task Capture(MainWindow window, string name, UIElement surface = null)
         {
             await Task.Delay(400);
             var bitmap = new RenderTargetBitmap();
-            await bitmap.RenderAsync((UIElement)window.Content);
+            await bitmap.RenderAsync(surface ?? (UIElement)window.Content);
             var pixels = await bitmap.GetPixelsAsync();
             string path = Path.Combine(_output, name);
             File.WriteAllBytes(path, Array.Empty<byte>());
@@ -214,7 +223,7 @@ internal static class BookmarkUiProbe
         await Until(() => Descendants((DependencyObject)window.Rootframe.Content).OfType<T>().Any(c => c.IsLoaded && c.DataContext is FileViewModel f && f.Id == id));
         return Descendants((DependencyObject)window.Rootframe.Content).OfType<T>().First(c => c.DataContext is FileViewModel f && f.Id == id);
     }
-    private static async Task ClickBookmarkMenu(UserControl owner, string key)
+    private static async Task ClickBookmarkMenu(FrameworkElement owner, string key)
     {
         var menu = (MenuFlyout)owner.ContextFlyout;
         var opened = new TaskCompletionSource();
@@ -280,7 +289,8 @@ internal static class BookmarkUiProbe
             if (request.Method != HttpMethod.Get) throw new InvalidOperationException("Bookmarks must not mutate cloud data");
             string path = request.RequestUri.AbsolutePath;
             object result;
-            if (path.EndsWith("/root")) result = new { id = "root", folder = new { }, root = new { } };
+            if (path.EndsWith("/drives/drive-A")) result = new { id = "drive-A", quota = new { total = 107374182400L, used = 40265318400L, remaining = 67108864000L } };
+            else if (path.EndsWith("/root")) result = new { id = "root", folder = new { }, root = new { } };
             else if (path.EndsWith("/items/missing")) return Task.FromResult(Json(new { error = new { code = "itemNotFound", message = "fictional missing item" } }, HttpStatusCode.NotFound));
             else if (path.EndsWith("/items/file-A")) result = new { id = "file-A", name = "Design notes · 已重命名.md", file = new { }, parentReference = new { id = "moved-parent", driveId = "drive-A" } };
             else if (path.EndsWith("/items/folder-A") || path.EndsWith("/items/moved-parent"))

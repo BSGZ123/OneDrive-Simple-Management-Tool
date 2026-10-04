@@ -47,13 +47,26 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private async void OnListKeyDown(object sender, KeyRoutedEventArgs args)
         {
-            if (args.Key != VirtualKey.Enter || FocusManager.GetFocusedElement(XamlRoot) is ButtonBase) return;
+            if (args.Key != VirtualKey.Enter || FocusManager.GetFocusedElement(XamlRoot) is ButtonBase or TextBox) return;
             if (BookmarkList.SelectedItem is not BookmarkItemViewModel item) return;
             args.Handled = true;
             await Model.OpenAsync(item);
         }
 
         private void OpenFiles(object sender, RoutedEventArgs args) => (App.StartupWindow as MainWindow)?.Navigate(typeof(CloudPage));
+
+        private void FocusSearch(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            BookmarkSearch.Focus(FocusState.Keyboard);
+            BookmarkSearch.SelectAll();
+            args.Handled = true;
+        }
+
+        private async void RefreshBookmarks(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            if (Model.ReloadCommand.CanExecute(null)) await Model.ReloadCommand.ExecuteAsync(null);
+        }
 
         private async void Rebuild(object sender, RoutedEventArgs args)
         {
@@ -62,6 +75,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
             var dialog = new ContentDialog
             {
                 XamlRoot = XamlRoot, Title = "Bookmarks_RebuildTitle".GetLocalized(), Content = "Bookmarks_RebuildDescription".GetLocalized(),
+                RequestedTheme = (XamlRoot.Content as FrameworkElement)?.ActualTheme ?? ElementTheme.Default,
                 PrimaryButtonText = "Bookmarks_RebuildAction".GetLocalized(), CloseButtonText = "Account_Cancel".GetLocalized(),
                 DefaultButton = ContentDialogButton.Close
             };

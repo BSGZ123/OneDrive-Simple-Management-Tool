@@ -241,6 +241,7 @@ await Check("Both locales cover all Home keys and XAML UIDs", () =>
     }
     return Task.CompletedTask;
 });
+foreach (var (name, action) in HomeBookmarkChecks.Cases) await Check(name, action);
 Console.WriteLine($"PASS: {passed} home regression checks");
 
 async Task Check(string name, Func<Task> action) { await action(); passed++; Console.WriteLine("PASS " + name); }
@@ -263,8 +264,10 @@ sealed class Fixture : IDisposable
     public MemoryDrives Service { get; } = new();
     public TaskManagerViewModel Tasks { get; } = new();
     public FolderSyncViewModel Sync { get; } = new();
+    public MemoryBookmarks BookmarkStore { get; } = new();
+    public MemoryBookmarkResolver BookmarkResolver { get; } = new();
     public HomeViewModel Model { get; }
-    public Fixture() => Model = new(Service, Tasks, Sync);
+    public Fixture() => Model = new(Service, Tasks, Sync, new BookmarkViewModel(BookmarkStore, BookmarkResolver));
     public void Dispose() => Model.Deactivate();
 }
 sealed class MemoryDrives : IHomeDriveService

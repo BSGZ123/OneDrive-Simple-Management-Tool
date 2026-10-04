@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:localControls="using:OneDrive_Simple_Management_Tool.Controls"
     Background="Transparent">
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -34,7 +35,7 @@
             </controls:SettingsCard>
             <TextBlock Text="{Binding MaterialNotice}" TextWrapping="Wrap"
                        Visibility="{Binding HasMaterialNotice, Converter={StaticResource BoolToVisibilityConverter}}" />
-            <TextBlock Text="{Binding SaveStatus}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            <TextBlock Text="{Binding SaveStatus}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Visibility="{Binding HasSaveStatus, Converter={StaticResource BoolToVisibilityConverter}}" />
             <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}">
                 <InfoBar.ActionButton>
@@ -44,11 +45,11 @@
 
             <TextBlock x:Uid="Diagnostics_Title" FontWeight="SemiBold" Margin="0,12,0,0" />
             <TextBlock x:Uid="Diagnostics_Description" TextWrapping="Wrap" />
-            <VariableSizedWrapGrid Orientation="Horizontal" ItemHeight="40">
-                <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" Margin="0,0,8,0" />
-                <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" Margin="0,0,8,0" />
-                <Button x:Uid="Diagnostics_Copy" Click="CopyDiagnostics" />
-            </VariableSizedWrapGrid>
+            <localControls:WrapPanel>
+                <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" Margin="0,0,8,8" />
+                <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" Margin="0,0,8,8" />
+                <Button x:Uid="Diagnostics_Copy" Click="CopyDiagnostics" Margin="0,0,0,8" />
+            </localControls:WrapPanel>
             <TextBlock x:Name="DiagnosticsStatus" TextWrapping="Wrap" Visibility="Collapsed" />
 
             <TextBlock x:Uid="SettingPage_AboutTitle" FontWeight="SemiBold" Margin="0,12,0,0" />
