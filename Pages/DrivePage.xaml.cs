@@ -25,7 +25,13 @@ namespace OneDrive_Simple_Management_Tool.Pages
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (e.Parameter is DriveViewModel drive)
+            if (e.Parameter is DriveNavigationRequest request)
+            {
+                DataContext = request.Drive;
+                await request.Drive.OpenLocationAsync(request.Location.FolderId, request.Location.SelectedItemId);
+                if (DataContext == request.Drive) request.Drive.BookmarkMessage = request.Location.Notice ?? "";
+            }
+            else if (e.Parameter is DriveViewModel drive)
             {
                 DataContext = drive;
                 await drive.TryRefresh();

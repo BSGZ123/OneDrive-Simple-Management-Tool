@@ -999,4 +999,124 @@
   <data name="Home_QuotaTimeout" xml:space="preserve">
     <value>读取容量超时，请稍后刷新。</value>
   </data>
+  <data name="Bookmarks_Title.Text" xml:space="preserve">
+    <value>书签</value>
+  </data>
+  <data name="Bookmarks_Description.Text" xml:space="preserve">
+    <value>收藏常用文件和文件夹，快速找到它们的位置。移除书签不会删除云端文件。</value>
+  </data>
+  <data name="Bookmarks_Search.Header" xml:space="preserve">
+    <value>筛选书签</value>
+  </data>
+  <data name="Bookmarks_Search.PlaceholderText" xml:space="preserve">
+    <value>文件名或云盘名称</value>
+  </data>
+  <data name="Bookmarks_Reload.Content" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Bookmarks_Restore.Content" xml:space="preserve">
+    <value>恢复上一份备份</value>
+  </data>
+  <data name="Bookmarks_Rebuild.Content" xml:space="preserve">
+    <value>重建书签列表…</value>
+  </data>
+  <data name="Bookmarks_EmptyTitle.Text" xml:space="preserve">
+    <value>还没有书签</value>
+  </data>
+  <data name="Bookmarks_Empty.Text" xml:space="preserve">
+    <value>在文件列表或网格中，右键文件或文件夹并选择“添加书签”。收藏后可在这里快速定位。</value>
+  </data>
+  <data name="Bookmarks_Files.Content" xml:space="preserve">
+    <value>前往我的文件</value>
+  </data>
+  <data name="Bookmarks_NoMatches.Text" xml:space="preserve">
+    <value>没有匹配的书签，试试其他关键词。</value>
+  </data>
+  <data name="Bookmarks_Open.Content" xml:space="preserve">
+    <value>打开位置</value>
+  </data>
+  <data name="Bookmarks_RemoveButton.Content" xml:space="preserve">
+    <value>移除书签</value>
+  </data>
+  <data name="Bookmarks_Add" xml:space="preserve">
+    <value>添加书签</value>
+  </data>
+  <data name="Bookmarks_Remove" xml:space="preserve">
+    <value>移除书签</value>
+  </data>
+  <data name="Bookmarks_Added" xml:space="preserve">
+    <value>已添加书签，可在书签页查看。</value>
+  </data>
+  <data name="Bookmarks_Removed" xml:space="preserve">
+    <value>书签已移除，云端文件不受影响。</value>
+  </data>
+  <data name="Bookmarks_AddedAt" xml:space="preserve">
+    <value>收藏于 {0}</value>
+  </data>
+  <data name="Bookmarks_Count" xml:space="preserve">
+    <value>显示 {0} / 共 {1} 个书签</value>
+  </data>
+  <data name="Bookmarks_Limit" xml:space="preserve">
+    <value>书签数量已达到上限，请移除不需要的书签后重试。</value>
+  </data>
+  <data name="Bookmarks_AccountUnavailable" xml:space="preserve">
+    <value>此书签对应的账户或云盘未添加。请前往“我的文件”添加原账户后重试。</value>
+  </data>
+  <data name="Bookmarks_AccountConfiguration" xml:space="preserve">
+    <value>无法读取账户配置。请前往“我的文件”检查并修复配置，再重试。</value>
+  </data>
+  <data name="Bookmarks_SignInRequired" xml:space="preserve">
+    <value>登录已失效。请在“我的文件”中打开对应云盘并重新登录，然后重试此书签。</value>
+  </data>
+  <data name="Bookmarks_NotFound" xml:space="preserve">
+    <value>项目已删除或不再可用。书签已保留，你可以重试或移除。</value>
+  </data>
+  <data name="Bookmarks_InvalidTarget" xml:space="preserve">
+    <value>无法确认项目属于原云盘，未打开。请在“我的文件”中检查该项目。</value>
+  </data>
+  <data name="Bookmarks_AccessDenied" xml:space="preserve">
+    <value>没有访问此项目的权限。书签已保留，请检查账户或权限后重试。</value>
+  </data>
+  <data name="Bookmarks_Throttled" xml:space="preserve">
+    <value>OneDrive 请求过于频繁，请稍后重试。</value>
+  </data>
+  <data name="Bookmarks_Network" xml:space="preserve">
+    <value>无法连接 OneDrive。请检查网络后重试，书签仍保留在本地。</value>
+  </data>
+  <data name="Bookmarks_OpenFailed" xml:space="preserve">
+    <value>打开书签失败，请重试或在“我的文件”中检查该项目。</value>
+  </data>
+  <data name="Bookmarks_LoadFailed" xml:space="preserve">
+    <value>无法读取书签。请刷新重试，或在书签页检查本地存储。</value>
+  </data>
+  <data name="Bookmarks_SaveFailed" xml:space="preserve">
+    <value>书签保存失败，未报告操作成功。请检查本地存储后重试。</value>
+  </data>
+  <data name="Bookmarks_Changed" xml:space="preserve">
+    <value>书签配置已变化，请刷新后重试。</value>
+  </data>
+  <data name="Bookmarks_Damaged" xml:space="preserve">
+    <value>书签配置损坏、不受支持或无法解密，原文件已保留。请在书签页重试、恢复备份或重建列表。</value>
+  </data>
+  <data name="Bookmarks_RecoveryFailed" xml:space="preserve">
+    <value>书签恢复失败，原文件已保留。请检查备份和本地存储后重试。</value>
+  </data>
+  <data name="Bookmarks_Timeout" xml:space="preserve">
+    <value>操作超时，请重试。</value>
+  </data>
+  <data name="Bookmarks_MetadataNotSaved" xml:space="preserve">
+    <value>已打开项目，但书签名称更新未能保存。可稍后在书签页重试。</value>
+  </data>
+  <data name="Bookmarks_LocationChanged" xml:space="preserve">
+    <value>未在此文件夹找到书签对应的文件，它可能刚被移动或删除。请回到书签页重新定位。</value>
+  </data>
+  <data name="Bookmarks_RebuildTitle" xml:space="preserve">
+    <value>重建书签列表？</value>
+  </data>
+  <data name="Bookmarks_RebuildDescription" xml:space="preserve">
+    <value>当前书签配置无法读取。重建会保存加密恢复副本，然后创建空列表；不会修改云端文件。也可以取消并先尝试恢复备份。</value>
+  </data>
+  <data name="Bookmarks_RebuildAction" xml:space="preserve">
+    <value>重建列表</value>
+  </data>
 </root>

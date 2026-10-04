@@ -35,7 +35,7 @@ internal static class Program
             ("Unsupported conversion never opens the picker", UnsupportedConversion),
             ("English and Chinese mutation error and validation resources resolve", Resources)
         ];
-        cases = cases.Concat(BrowsingChecks.Cases).Concat(AccountViewModelChecks.Cases).ToArray();
+        cases = cases.Concat(BrowsingChecks.Cases).Concat(AccountViewModelChecks.Cases).Concat(BookmarkNavigationChecks.Cases).ToArray();
         foreach (var test in cases)
         {
             await Microsoft.UI.Dispatching.TestUiContext.Run(test.Run);

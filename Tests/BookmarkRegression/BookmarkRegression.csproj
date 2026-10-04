@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><LangVersion>12</LangVersion></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Models/Bookmark.cs" Link="Production/Bookmark.cs" />
+    <Compile Include="../../Models/DTO/DriveDTO.cs" Link="Production/DriveDTO.cs" />
+    <Compile Include="../../ViewModels/BookmarkViewModel.cs" Link="Production/BookmarkViewModel.cs" />
+    <Compile Include="../../Services/BookmarkStore.cs" Link="Production/BookmarkStore.cs" />
+    <Compile Include="../../Services/BookmarkResolver.cs" Link="Production/BookmarkResolver.cs" />
+    <Compile Include="../../Helpers/BookmarkErrors.cs" Link="Production/BookmarkErrors.cs" />
+    <Compile Include="../../Services/AccountAuthenticationService.cs" Link="Production/AccountAuthenticationService.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/DriveConfigurationStore.cs" Link="Production/DriveConfigurationStore.cs" />
+    <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
+    <Compile Include="../UploadRegression/ResourceFake.cs" Link="ResourceFake.cs" />
+    <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Pages/BookmarkPage.xaml" Link="BookmarkPage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
+  </ItemGroup>
+</Project>

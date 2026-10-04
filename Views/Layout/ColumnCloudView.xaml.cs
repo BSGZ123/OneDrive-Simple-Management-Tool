@@ -23,6 +23,13 @@ namespace OneDrive_Simple_Management_Tool.Views.Layout
         public ColumnCloudView()
         {
             this.InitializeComponent();
+            Loaded += (_, _) => ScrollToSelection(Content, null);
+        }
+
+        private void ScrollToSelection(object sender, SelectionChangedEventArgs args)
+        {
+            var list = (ListView)sender;
+            DispatcherQueue.TryEnqueue(() => { if (list.IsLoaded && list.SelectedItem != null) list.ScrollIntoView(list.SelectedItem); });
         }
     }
 }

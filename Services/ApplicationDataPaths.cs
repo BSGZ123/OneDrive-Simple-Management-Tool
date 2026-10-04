@@ -21,5 +21,6 @@ namespace OneDrive_Simple_Management_Tool.Services
         public string FolderSync => Path.Combine(Root, "FolderSync");
         public string Diagnostics => Path.Combine(Root, "Diagnostics");
         public string Appearance => Path.Combine(Root, "Configuration", "appearance.json");
+        public string Bookmarks => Path.Combine(Root, "Configuration", "bookmarks.dat");
     }
 }

@@ -23,6 +23,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             public string Query;
             public string Filter;
             public string SelectionId;
+            public string RequiredSelectionId;
             public List<BreadcrumbItem> Path;
             public bool ResolvePath;
             public bool Committed;
@@ -52,6 +53,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public Task GetFiles(string itemId = "Root") => LoadFiles(itemId, null, null,
             itemId == "Root" ? new List<BreadcrumbItem> { RootBreadcrumb() } : null, itemId != "Root");
 
+        public Task OpenLocationAsync(string folderId, string selectedItemId) => RunLoad(new Listing
+        {
+            ParentId = folderId, SelectionId = selectedItemId, RequiredSelectionId = selectedItemId, ResolvePath = true
+        });
+
         [RelayCommand(AllowConcurrentExecutions = true)]
         public async Task Refresh() => await TryRefresh();
 
@@ -59,9 +65,14 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         {
             // A mutation may finish while a newly requested search/navigation is awaiting its first page.
             // Refresh that latest intent instead of replacing it with the previously displayed context.
-            Listing target = IsLoading == Visibility.Visible ? _attempt : _view;
-            return LoadFiles(target?.ParentId ?? "Root", target?.Query, target?.Filter,
-                target?.Path ?? BreadcrumbItems.ToList(), target?.ResolvePath == true && !target.Committed);
+            Listing target = IsLoading == Visibility.Visible ? _attempt : _view ?? _attempt;
+            return RunLoad(new Listing
+            {
+                ParentId = target?.ParentId ?? "Root", Query = target?.Query, Filter = target?.Filter,
+                Path = target?.Path ?? BreadcrumbItems.ToList(), ResolvePath = target?.ResolvePath == true && !target.Committed,
+                SelectionId = target == _view ? SelectedItem?.Id ?? target?.SelectionId : target?.SelectionId,
+                RequiredSelectionId = target?.RequiredSelectionId
+            });
         }
 
         public async Task<bool> RefreshAfterMutation()
@@ -94,6 +105,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _attempt = listing;
             IsLoading = Visibility.Visible;
             ErrorMessage = string.Empty;
+            BookmarkMessage = string.Empty;
             NotifyListing();
             try
             {
@@ -145,6 +157,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                     // Render each page and process navigation/cancellation between pages.
                     await Task.Yield();
                 } while (!listing.Complete);
+                if (version == _requestVersion && listing.RequiredSelectionId != null)
+                {
+                    if (!listing.Items.ContainsKey(listing.RequiredSelectionId)) ErrorMessage = "Bookmarks_LocationChanged".GetLocalized();
+                    listing.RequiredSelectionId = null;
+                }
                 return version == _requestVersion;
             }
             catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
@@ -315,6 +332,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasError))]
         private string _errorMessage = string.Empty;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasBookmarkMessage))]
+        private string _bookmarkMessage = string.Empty;
+        public bool HasBookmarkMessage => !string.IsNullOrEmpty(BookmarkMessage);
 
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
         public Visibility ListVisibility => Layout == FileLayout.List ? Visibility.Visible : Visibility.Collapsed;

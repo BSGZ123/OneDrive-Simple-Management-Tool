@@ -94,6 +94,8 @@ namespace OneDrive_Simple_Management_Tool
                                     .AddSingleton<DriveConfigurationStore>().AddSingleton<TaskManagerViewModel>()
                                     .AddSingleton<IAppearanceSettingsStore, AppearanceSettingsStore>().AddSingleton<SettingViewModel>()
                                     .AddSingleton<IHomeDriveService, HomeDriveService>().AddTransient<HomeViewModel>()
+                                    .AddSingleton<IBookmarkStore, BookmarkStore>().AddSingleton<IBookmarkResolver, BookmarkResolver>()
+                                    .AddTransient<BookmarkViewModel>()
                                     .AddSingleton(new FolderSyncService(new FolderSyncStore(_paths.FolderSync), OneDrive.CreateFolderSyncTarget))
                                     .AddSingleton<FolderSyncViewModel>().BuildServiceProvider();
                                 Ioc.Default.ConfigureServices(Services);

@@ -1,14 +1,18 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using OneDrive_Simple_Management_Tool.Helpers;
 using OneDrive_Simple_Management_Tool.Models;
+using OneDrive_Simple_Management_Tool.Services;
 using OneDrive_Simple_Management_Tool.ViewModels;
 using OneDrive_Simple_Management_Tool.ViewModels.Tools;
 using OneDrive_Simple_Management_Tool.Views.Preview;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.Views
@@ -20,6 +24,8 @@ namespace OneDrive_Simple_Management_Tool.Views
         Delete,
         Convert,
         Share,
+        AddBookmark,
+        RemoveBookmark,
         Rename,
         Property
     }
@@ -59,6 +65,7 @@ namespace OneDrive_Simple_Management_Tool.Views
             Add(FileAction.Delete);
             if (file.CanConvert) Add(FileAction.Convert);
             Add(FileAction.Share);
+            AddBookmarkMenu(menu, owner, file);
             Add(FileAction.Rename);
             Add(FileAction.Property);
             owner.ContextFlyout = menu;
@@ -73,6 +80,40 @@ namespace OneDrive_Simple_Management_Tool.Views
                 item.Click += async (_, _) => await ExecuteAsync(action, owner, file);
                 menu.Items.Add(item);
             }
+        }
+
+        private static void AddBookmarkMenu(MenuFlyout menu, UserControl owner, FileViewModel file)
+        {
+            var store = Ioc.Default.GetService<IBookmarkStore>();
+            var item = new MenuFlyoutItem { Text = "Bookmarks_Add".GetLocalized(), IsEnabled = store != null };
+            FileAction action = FileAction.AddBookmark;
+            CancellationTokenSource request = null;
+            menu.Items.Add(item);
+            menu.Opening += async (_, _) =>
+            {
+                if (store == null) return;
+                request?.Cancel();
+                using var current = new CancellationTokenSource();
+                request = current;
+                item.IsEnabled = false;
+                try
+                {
+                    var bookmarks = await store.LoadAsync(current.Token);
+                    if (request != current || owner.DataContext != file) return;
+                    bool saved = bookmarks.Any(b => b.Identity == (file.Drive.Provider.HomeAccountId, file.Drive.Provider.DriveId, file.Id));
+                    action = saved ? FileAction.RemoveBookmark : FileAction.AddBookmark;
+                    item.Text = (saved ? "Bookmarks_Remove" : "Bookmarks_Add").GetLocalized();
+                    item.IsEnabled = true;
+                }
+                catch (OperationCanceledException) when (current.IsCancellationRequested) { }
+                catch (Exception exception)
+                {
+                    if (request == current) file.Drive.ErrorMessage = BookmarkErrors.Message(exception, "Bookmarks_LoadFailed");
+                }
+                finally { if (request == current) request = null; }
+            };
+            menu.Closed += (_, _) => { request?.Cancel(); request = null; };
+            item.Click += async (_, _) => await ExecuteAsync(action, owner, file);
         }
 
         public static async Task ExecuteAsync(FileAction action, FrameworkElement owner, FileViewModel file)
@@ -128,6 +169,20 @@ namespace OneDrive_Simple_Management_Tool.Views
                     case FileAction.Share:
                         await ShowDialogAsync(owner, new ShareFileView(file));
                         break;
+                    case FileAction.AddBookmark:
+                    case FileAction.RemoveBookmark:
+                        var store = Ioc.Default.GetRequiredService<IBookmarkStore>();
+                        file.Drive.ErrorMessage = file.Drive.BookmarkMessage = "";
+                        var bookmark = new Bookmark
+                        {
+                            AccountId = file.Drive.Provider.HomeAccountId, DriveId = file.Drive.Provider.DriveId,
+                            ItemId = file.Id, Name = file.Name, DriveName = file.Drive.DisplayName,
+                            IsFolder = file.IsFolder, AddedAt = DateTimeOffset.UtcNow
+                        };
+                        if (action == FileAction.AddBookmark) await store.AddAsync(bookmark);
+                        else await store.RemoveAsync(bookmark);
+                        file.Drive.BookmarkMessage = (action == FileAction.AddBookmark ? "Bookmarks_Added" : "Bookmarks_Removed").GetLocalized();
+                        break;
                     case FileAction.Rename:
                         await ShowDialogAsync(owner, new RenameFileView { DataContext = new RenameFileViewModel(file.Drive, file) });
                         break;
@@ -138,7 +193,8 @@ namespace OneDrive_Simple_Management_Tool.Views
             }
             catch (Exception exception)
             {
-                file.Drive.ErrorMessage = FileOperationErrors.GetMessage(exception);
+                file.Drive.ErrorMessage = action is FileAction.AddBookmark or FileAction.RemoveBookmark
+                    ? BookmarkErrors.Message(exception, "Bookmarks_SaveFailed") : FileOperationErrors.GetMessage(exception);
             }
         }
 

@@ -999,4 +999,124 @@
   <data name="Home_QuotaTimeout" xml:space="preserve">
     <value>Storage request timed out. Refresh to try again.</value>
   </data>
+  <data name="Bookmarks_Title.Text" xml:space="preserve">
+    <value>Bookmarks</value>
+  </data>
+  <data name="Bookmarks_Description.Text" xml:space="preserve">
+    <value>Save frequently used files and folders. Open location finds the saved item; removing a bookmark leaves your cloud files intact.</value>
+  </data>
+  <data name="Bookmarks_Search.Header" xml:space="preserve">
+    <value>Filter bookmarks</value>
+  </data>
+  <data name="Bookmarks_Search.PlaceholderText" xml:space="preserve">
+    <value>File or drive name</value>
+  </data>
+  <data name="Bookmarks_Reload.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Bookmarks_Restore.Content" xml:space="preserve">
+    <value>Restore previous backup</value>
+  </data>
+  <data name="Bookmarks_Rebuild.Content" xml:space="preserve">
+    <value>Rebuild bookmark list…</value>
+  </data>
+  <data name="Bookmarks_EmptyTitle.Text" xml:space="preserve">
+    <value>No bookmarks yet</value>
+  </data>
+  <data name="Bookmarks_Empty.Text" xml:space="preserve">
+    <value>Right-click a file or folder in the file list or grid and choose Add bookmark. Your saved locations will appear here.</value>
+  </data>
+  <data name="Bookmarks_Files.Content" xml:space="preserve">
+    <value>Go to My files</value>
+  </data>
+  <data name="Bookmarks_NoMatches.Text" xml:space="preserve">
+    <value>No matching bookmarks. Try another search.</value>
+  </data>
+  <data name="Bookmarks_Open.Content" xml:space="preserve">
+    <value>Open location</value>
+  </data>
+  <data name="Bookmarks_RemoveButton.Content" xml:space="preserve">
+    <value>Remove bookmark</value>
+  </data>
+  <data name="Bookmarks_Add" xml:space="preserve">
+    <value>Add bookmark</value>
+  </data>
+  <data name="Bookmarks_Remove" xml:space="preserve">
+    <value>Remove bookmark</value>
+  </data>
+  <data name="Bookmarks_Added" xml:space="preserve">
+    <value>Bookmark added. Find it on the Bookmarks page.</value>
+  </data>
+  <data name="Bookmarks_Removed" xml:space="preserve">
+    <value>Bookmark removed. The cloud item is unchanged.</value>
+  </data>
+  <data name="Bookmarks_AddedAt" xml:space="preserve">
+    <value>Saved {0}</value>
+  </data>
+  <data name="Bookmarks_Count" xml:space="preserve">
+    <value>Showing {0} of {1} bookmarks</value>
+  </data>
+  <data name="Bookmarks_Limit" xml:space="preserve">
+    <value>The bookmark limit has been reached. Remove unused bookmarks and try again.</value>
+  </data>
+  <data name="Bookmarks_AccountUnavailable" xml:space="preserve">
+    <value>This bookmark's account or drive is unavailable. Add the original account in My files and try again.</value>
+  </data>
+  <data name="Bookmarks_AccountConfiguration" xml:space="preserve">
+    <value>Could not read account settings. Check and repair the configuration in My files, then try again.</value>
+  </data>
+  <data name="Bookmarks_SignInRequired" xml:space="preserve">
+    <value>Sign-in required. Open the corresponding drive in My files, sign in again, then retry this bookmark.</value>
+  </data>
+  <data name="Bookmarks_NotFound" xml:space="preserve">
+    <value>The item was deleted or is no longer available. The bookmark is kept so you can retry or remove it.</value>
+  </data>
+  <data name="Bookmarks_InvalidTarget" xml:space="preserve">
+    <value>Could not verify that the item belongs to the original drive. Check the item in My files.</value>
+  </data>
+  <data name="Bookmarks_AccessDenied" xml:space="preserve">
+    <value>Access to this item was denied. The bookmark is kept; check the account or permissions and retry.</value>
+  </data>
+  <data name="Bookmarks_Throttled" xml:space="preserve">
+    <value>OneDrive is receiving too many requests. Try again later.</value>
+  </data>
+  <data name="Bookmarks_Network" xml:space="preserve">
+    <value>Could not connect to OneDrive. Check your connection and retry. Your bookmark is kept locally.</value>
+  </data>
+  <data name="Bookmarks_OpenFailed" xml:space="preserve">
+    <value>Could not open the bookmark. Retry or check the item in My files.</value>
+  </data>
+  <data name="Bookmarks_LoadFailed" xml:space="preserve">
+    <value>Could not read bookmarks. Refresh to retry or check local storage on the Bookmarks page.</value>
+  </data>
+  <data name="Bookmarks_SaveFailed" xml:space="preserve">
+    <value>Could not save the bookmark change. Check local storage and try again.</value>
+  </data>
+  <data name="Bookmarks_Changed" xml:space="preserve">
+    <value>Bookmark settings have changed. Refresh and try again.</value>
+  </data>
+  <data name="Bookmarks_Damaged" xml:space="preserve">
+    <value>Bookmark data is damaged, unsupported or cannot be decrypted. The original file is preserved. Retry, restore a backup or rebuild the list on the Bookmarks page.</value>
+  </data>
+  <data name="Bookmarks_RecoveryFailed" xml:space="preserve">
+    <value>Could not recover bookmarks. The original file is preserved. Check the backup and local storage, then try again.</value>
+  </data>
+  <data name="Bookmarks_Timeout" xml:space="preserve">
+    <value>The operation timed out. Try again.</value>
+  </data>
+  <data name="Bookmarks_MetadataNotSaved" xml:space="preserve">
+    <value>The item was opened, but its updated bookmark name could not be saved. Retry later on the Bookmarks page.</value>
+  </data>
+  <data name="Bookmarks_LocationChanged" xml:space="preserve">
+    <value>The bookmarked file was not found in this folder. It may have just moved or been deleted. Return to Bookmarks and open it again.</value>
+  </data>
+  <data name="Bookmarks_RebuildTitle" xml:space="preserve">
+    <value>Rebuild bookmark list?</value>
+  </data>
+  <data name="Bookmarks_RebuildDescription" xml:space="preserve">
+    <value>The bookmark data cannot be read. Rebuilding preserves encrypted recovery copies and creates an empty list. Cloud files are unchanged. You can cancel and try restoring a backup first.</value>
+  </data>
+  <data name="Bookmarks_RebuildAction" xml:space="preserve">
+    <value>Rebuild list</value>
+  </data>
 </root>

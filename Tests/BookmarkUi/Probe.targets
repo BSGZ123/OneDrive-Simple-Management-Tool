@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup><StartupObject>BookmarkUiProbe</StartupObject></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\BookmarkUi\Probe.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\Shared\HomeProbeServices.cs" />
+  </ItemGroup>
+</Project>

@@ -94,6 +94,7 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task<IReadOnlyList<DriveItem>> GetFolderPathAsync(string itemId, CancellationToken cancellationToken)
         {
+            if (!IsAuthenticated) await Login(cancellationToken);
             var root = await graphClient.Drives[DriveId].Root.GetAsync(cancellationToken: cancellationToken);
             if (string.IsNullOrWhiteSpace(root?.Id)) throw new InvalidDataException();
             var path = new List<DriveItem>();
