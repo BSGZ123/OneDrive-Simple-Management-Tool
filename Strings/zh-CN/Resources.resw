@@ -817,4 +817,9 @@
   <data name="Sync_BindCurrent.ToolTipService.ToolTip" xml:space="preserve"><value>绑定本地文件夹</value></data>
   <data name="Sync_BindCurrent.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>绑定本地文件夹</value></data>
   <data name="Sync_Transfers.Header" xml:space="preserve"><value>同步上传</value></data>
+  <data name="Upload_Preparing.Text" xml:space="preserve"><value>正在准备上传</value></data>
+  <data name="Upload_Cancelling.Text" xml:space="preserve"><value>正在取消上传，已上传的文件会保留。</value></data>
+  <data name="Upload_RemoveMenu.Text" xml:space="preserve"><value>取消上传 / 移除任务</value></data>
+  <data name="Upload_RemoveButton.ToolTipService.ToolTip" xml:space="preserve"><value>取消上传 / 移除任务。已上传的文件会保留。</value></data>
+  <data name="Upload_RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>取消上传或移除任务</value></data>
 </root>

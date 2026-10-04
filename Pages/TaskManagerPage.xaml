@@ -92,7 +92,7 @@
                 <Grid Margin="0 10 0 10">
                     <Grid.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" />
+                            <MenuFlyoutItem x:Uid="Upload_RemoveMenu" Command="{Binding CancelTaskCommand}" />
                         </MenuFlyout>
                     </Grid.ContextFlyout>
 
@@ -105,7 +105,9 @@
                     <StackPanel Orientation="Vertical">
                         
                         <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
-                        <ProgressBar Value="{Binding Progress}" ShowError="{Binding HasFailed}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                        <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsPreparing}" ShowError="{Binding HasFailed}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                        <TextBlock x:Uid="Upload_Preparing" Visibility="{Binding IsPreparing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock x:Uid="Upload_Cancelling" Visibility="{Binding IsCancelling, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <TextBlock x:Uid="TaskManagerPage_UploadCompleted" Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <StackPanel Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}">
                             <TextBlock x:Uid="TaskManagerPage_UploadFailed" />
@@ -115,11 +117,7 @@
 
                     <!--上传功能按钮-->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button Margin="0 0 10 0" Visibility="{Binding IsUploading, Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseUploadCommand}" >
-                            <FontIcon Glyph="&#xE769;" FontSize="10" />
-                        </Button>
-
-                        <Button Command="{Binding CancelTaskCommand}">
+                        <Button x:Uid="Upload_RemoveButton" Command="{Binding CancelTaskCommand}">
                             <FontIcon Glyph="&#xE711;" FontSize="10" />
                         </Button>
                     </StackPanel>

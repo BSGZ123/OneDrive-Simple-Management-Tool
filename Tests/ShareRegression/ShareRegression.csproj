@@ -13,6 +13,7 @@
     <Compile Include="../../Helpers/UploadProgressTracker.cs" Link="Production/UploadProgressTracker.cs" />
     <Compile Include="../../Models/FileType.cs" Link="Production/FileType.cs" />
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
+    <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
     <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
     <Compile Include="../../ViewModels/ShareFileViewModel.cs" Link="Production/ShareFileViewModel.cs" />
     <Compile Include="../UploadRegression/PlatformFakes.cs" Link="PlatformFakes.cs" />

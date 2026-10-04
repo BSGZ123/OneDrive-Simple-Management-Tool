@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <StartupObject>UploadUiProbe</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\UploadUi\Probe.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\UploadRegression\GraphFakes.cs" />
+  </ItemGroup>
+</Project>

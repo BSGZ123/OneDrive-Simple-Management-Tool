@@ -817,4 +817,9 @@
   <data name="Sync_BindCurrent.ToolTipService.ToolTip" xml:space="preserve"><value>Link a local folder</value></data>
   <data name="Sync_BindCurrent.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Link a local folder</value></data>
   <data name="Sync_Transfers.Header" xml:space="preserve"><value>Sync uploads</value></data>
+  <data name="Upload_Preparing.Text" xml:space="preserve"><value>Preparing upload</value></data>
+  <data name="Upload_Cancelling.Text" xml:space="preserve"><value>Cancelling upload. Files already uploaded will be kept.</value></data>
+  <data name="Upload_RemoveMenu.Text" xml:space="preserve"><value>Cancel upload / remove task</value></data>
+  <data name="Upload_RemoveButton.ToolTipService.ToolTip" xml:space="preserve"><value>Cancel upload / remove task. Files already uploaded will be kept.</value></data>
+  <data name="Upload_RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancel upload or remove task</value></data>
 </root>

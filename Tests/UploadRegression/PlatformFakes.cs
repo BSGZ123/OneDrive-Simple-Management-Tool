@@ -14,10 +14,17 @@ namespace Windows.Storage.FileProperties
 
 namespace Windows.Storage
 {
+    // Mimics WinRT's awaitable operation and AsTask(token), with cancellable storage boundaries.
+    public sealed class StorageOperation<T>(Func<CancellationToken, Task<T>> action)
+    {
+        public Task<T> AsTask(CancellationToken token) => action(token);
+        public System.Runtime.CompilerServices.TaskAwaiter<T> GetAwaiter() => action(default).GetAwaiter();
+    }
+
     public interface IStorageItem
     {
         string Name { get; }
-        Task<BasicProperties> GetBasicPropertiesAsync();
+        StorageOperation<BasicProperties> GetBasicPropertiesAsync();
     }
 
     public sealed class StorageFile(string name, int size) : IStorageItem
@@ -28,10 +35,16 @@ namespace Windows.Storage
         public byte[] WrittenContent => _writtenContent.ToArray();
         public Exception OpenError { get; init; }
         public Exception PropertiesError { get; init; }
+        public Func<CancellationToken, Task> BeforeProperties { get; init; }
+        public Func<Task> BeforeOpen { get; init; }
+        public Stream ReadStream { get; private set; }
 
-        public Task<Stream> OpenStreamForReadAsync() => OpenError == null
-            ? Task.FromResult<Stream>(new MemoryStream(new byte[size]))
-            : Task.FromException<Stream>(OpenError);
+        public async Task<Stream> OpenStreamForReadAsync()
+        {
+            if (BeforeOpen != null) await BeforeOpen();
+            if (OpenError != null) throw OpenError;
+            return ReadStream = new MemoryStream(new byte[size]);
+        }
 
         public Task<Stream> OpenStreamForWriteAsync()
         {
@@ -39,9 +52,13 @@ namespace Windows.Storage
             return Task.FromResult<Stream>(_writtenContent);
         }
 
-        public Task<BasicProperties> GetBasicPropertiesAsync() => PropertiesError == null
-            ? Task.FromResult(new BasicProperties { Size = (ulong)size })
-            : Task.FromException<BasicProperties>(PropertiesError);
+        public StorageOperation<BasicProperties> GetBasicPropertiesAsync() => new(async token =>
+        {
+            token.ThrowIfCancellationRequested();
+            if (BeforeProperties != null) await BeforeProperties(token);
+            if (PropertiesError != null) throw PropertiesError;
+            return new BasicProperties { Size = (ulong)size };
+        });
     }
 
     public sealed class StorageFolder(string name) : IStorageItem
@@ -50,13 +67,24 @@ namespace Windows.Storage
         public List<StorageFile> Files { get; } = [];
         public List<StorageFolder> Folders { get; } = [];
         public Exception EnumerationError { get; init; }
+        public Func<CancellationToken, Task> BeforeGetFiles { get; init; }
+        public Func<CancellationToken, Task> BeforeGetFolders { get; init; }
 
-        public Task<IReadOnlyList<StorageFile>> GetFilesAsync() => EnumerationError == null
-            ? Task.FromResult<IReadOnlyList<StorageFile>>(Files)
-            : Task.FromException<IReadOnlyList<StorageFile>>(EnumerationError);
+        public StorageOperation<IReadOnlyList<StorageFile>> GetFilesAsync() => new(async token =>
+        {
+            token.ThrowIfCancellationRequested();
+            if (BeforeGetFiles != null) await BeforeGetFiles(token);
+            if (EnumerationError != null) throw EnumerationError;
+            return Files;
+        });
 
-        public Task<IReadOnlyList<StorageFolder>> GetFoldersAsync() => Task.FromResult<IReadOnlyList<StorageFolder>>(Folders);
-        public Task<BasicProperties> GetBasicPropertiesAsync() => Task.FromResult(new BasicProperties());
+        public StorageOperation<IReadOnlyList<StorageFolder>> GetFoldersAsync() => new(async token =>
+        {
+            token.ThrowIfCancellationRequested();
+            if (BeforeGetFolders != null) await BeforeGetFolders(token);
+            return Folders;
+        });
+        public StorageOperation<BasicProperties> GetBasicPropertiesAsync() => new(_ => Task.FromResult(new BasicProperties()));
     }
 }
 
@@ -137,6 +165,12 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
     public sealed class TaskManagerViewModel
     {
-        public void RemoveSelectedUploadTasks(UploadTaskViewModel task) { }
+        public List<UploadTaskViewModel> Removed { get; } = [];
+        public Action<UploadTaskViewModel> OnRemove { get; set; }
+        public void RemoveSelectedUploadTasks(UploadTaskViewModel task)
+        {
+            OnRemove?.Invoke(task);
+            Removed.Add(task);
+        }
     }
 }

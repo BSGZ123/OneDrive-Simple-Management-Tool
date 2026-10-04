@@ -149,8 +149,9 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync(cancellationToken: cancellationToken);
         }
 
-        public async Task<DriveItem> CreateFolder(string parentItemId, string folderName)
+        public async Task<DriveItem> CreateFolder(string parentItemId, string folderName, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var requestBody = new DriveItem
             {
                 Name = folderName,
@@ -162,7 +163,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                     },
                 },
             };
-            return await graphClient.Drives[DriveId].Items[parentItemId].Children.PostAsync(requestBody);
+            return await graphClient.Drives[DriveId].Items[parentItemId].Children.PostAsync(requestBody, cancellationToken: cancellationToken);
         }
 
         public async Task<DriveItem> RenameFile(string itemId, string newName)
@@ -175,13 +176,18 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         // Progress reports uploaded bytes for both files and folders.
-        public async Task UploadFileAsync(StorageFile file, string itemId, IProgress<long> progress = null)
+        public async Task UploadFileAsync(StorageFile file, string itemId, IProgress<long> progress = null,
+            CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            // Opening a stream has no cancellation overload. Await it and dispose it even if cancelled meanwhile.
             using Stream stream = await file.OpenStreamForReadAsync();
+            cancellationToken.ThrowIfCancellationRequested();
             if (stream.Length == 0)
             {
                 // Empty files cannot use an upload session.
-                DriveItem emptyItem = await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(stream);
+                DriveItem emptyItem = await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(stream,
+                    cancellationToken: cancellationToken);
                 EnsureUploadedItem(emptyItem);
                 progress?.Report(0);
                 return;
@@ -202,7 +208,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 .Items[itemId]
                 .ItemWithPath(file.Name)
                 .CreateUploadSession
-                .PostAsync(uploadSessionRequestBody);
+                .PostAsync(uploadSessionRequestBody, cancellationToken: cancellationToken);
 
             if (string.IsNullOrWhiteSpace(uploadSession?.UploadUrl))
             {
@@ -212,14 +218,35 @@ namespace OneDrive_Simple_Management_Tool.Services
             int maxChunkSize = 320 * 1024;
             // The session URL is preauthenticated. Let the SDK use its anonymous adapter.
             LargeFileUploadTask<DriveItem> fileUploadTask = new(uploadSession, stream, maxChunkSize);
-            var uploadResult = await fileUploadTask.UploadAsync(progress == null ? null : new UploadSliceProgress(progress));
-            if (!uploadResult.UploadSucceeded)
+            try
             {
-                throw new InvalidOperationException("The server did not confirm the upload.");
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                var uploadResult = await fileUploadTask.UploadAsync(progress == null ? null : new UploadSliceProgress(progress),
+                    cancellationToken: cancellationToken);
+                if (!uploadResult.UploadSucceeded)
+                {
+                    throw new InvalidOperationException("The server did not confirm the upload.");
+                }
 
-            EnsureUploadedItem(uploadResult.ItemResponse);
-            progress?.Report(stream.Length);
+                // A confirmed success wins a concurrent cancellation; never delete a completed item.
+                EnsureUploadedItem(uploadResult.ItemResponse);
+                progress?.Report(stream.Length);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // The transfer has exited. Cleanup needs its own token because the upload token is cancelled.
+                using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                try
+                {
+                    await fileUploadTask.DeleteSessionAsync(cleanup.Token);
+                }
+                catch (Exception)
+                {
+                    // Best effort: expired/unreachable sessions are cleaned up by OneDrive.
+                    // Do not log the preauthenticated session URL or replace the cancellation result.
+                }
+                throw;
+            }
         }
 
         private sealed class UploadSliceProgress(IProgress<long> progress) : IProgress<long>
@@ -239,29 +266,43 @@ namespace OneDrive_Simple_Management_Tool.Services
             }
         }
 
-        public async Task UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null)
+        public async Task UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null,
+            CancellationToken cancellationToken = default)
         {
             var tracker = new UploadProgressTracker(progress);
-            await UploadFolderCoreAsync(folder, itemId, tracker);
+            await UploadFolderCoreAsync(folder, itemId, tracker, cancellationToken);
         }
 
-        private async Task UploadFolderCoreAsync(StorageFolder folder, string itemId, UploadProgressTracker tracker)
+        private async Task UploadFolderCoreAsync(StorageFolder folder, string itemId, UploadProgressTracker tracker,
+            CancellationToken cancellationToken)
         {
-            var files = await folder.GetFilesAsync();
-            DriveItem cloudFolder = await CreateFolder(itemId, folder.Name);
+            cancellationToken.ThrowIfCancellationRequested();
+            var files = await folder.GetFilesAsync().AsTask(cancellationToken);
+            DriveItem cloudFolder = await CreateFolder(itemId, folder.Name, cancellationToken);
             if (string.IsNullOrWhiteSpace(cloudFolder?.Id))
             {
                 throw new InvalidOperationException("The server did not return the created folder.");
             }
 
-            IEnumerable<Task> uploadTasks = files.Select(file =>
-                UploadFileAsync(file, cloudFolder.Id, tracker.CreateFileProgress()));
+            // Stop scheduling on cancellation, but always join every operation already started.
+            var uploadTasks = new List<Task>();
+            foreach (var file in files)
+            {
+                if (cancellationToken.IsCancellationRequested) break;
+                uploadTasks.Add(UploadFileAsync(file, cloudFolder.Id, tracker.CreateFileProgress(), cancellationToken));
+            }
             await Task.WhenAll(uploadTasks);
 
-            IReadOnlyList<StorageFolder> subfolders = await folder.GetFoldersAsync();
-            IEnumerable<Task> subfolderTasks = subfolders.Select(subfolder =>
-                UploadFolderCoreAsync(subfolder, cloudFolder.Id, tracker));
+            cancellationToken.ThrowIfCancellationRequested();
+            IReadOnlyList<StorageFolder> subfolders = await folder.GetFoldersAsync().AsTask(cancellationToken);
+            var subfolderTasks = new List<Task>();
+            foreach (var subfolder in subfolders)
+            {
+                if (cancellationToken.IsCancellationRequested) break;
+                subfolderTasks.Add(UploadFolderCoreAsync(subfolder, cloudFolder.Id, tracker, cancellationToken));
+            }
             await Task.WhenAll(subfolderTasks);
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         public async Task<string> CreateLink(string itemId, DateTimeOffset? expirationDateTime = null, string password = null, string type = "view")

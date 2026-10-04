@@ -1,9 +1,16 @@
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Graph;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
@@ -55,9 +62,25 @@ internal sealed class MetadataHandler(string uploadUrl) : HttpMessageHandler
     public int Sessions;
     public int Folders;
     public int EmptyFiles;
+    public Func<HttpRequestMessage, CancellationToken, Task> BeforeResponse { get; set; }
+    public int ActiveRequests;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        Interlocked.Increment(ref ActiveRequests);
+        try
+        {
+            return await RespondAsync(request, cancellationToken);
+        }
+        finally
+        {
+            Interlocked.Decrement(ref ActiveRequests);
+        }
+    }
+
+    private async Task<HttpResponseMessage> RespondAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         if (request.Headers.Authorization?.Parameter != "local-test-token")
         {
             throw new InvalidOperationException("Metadata requests must use the authenticated Graph client.");
@@ -103,6 +126,7 @@ internal sealed class MetadataHandler(string uploadUrl) : HttpMessageHandler
             body = new { error = new { code = "accessDenied", message = "Simulated metadata rejection." } };
         }
 
+        if (BeforeResponse != null) await BeforeResponse(request, cancellationToken);
         return new HttpResponseMessage(status)
         {
             Content = status == HttpStatusCode.NoContent ? null : new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
@@ -121,6 +145,14 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
     public ConcurrentQueue<Dictionary<string, string>> Headers { get; } = new();
     public int StatusCode { get; set; } = 200;
     public bool OmitItemId { get; set; }
+    public bool AllowDisconnects { get; set; }
+    public Func<CancellationToken, Task> BeforeSliceResponse { get; set; }
+    public Func<CancellationToken, Task> BeforeDeleteResponse { get; set; }
+    public int DeleteStatusCode { get; set; } = 204;
+    public ConcurrentQueue<Dictionary<string, string>> Deletes { get; } = new();
+    public ConcurrentQueue<string> Paths { get; } = new();
+    public TaskCompletionSource FirstSlice { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public TaskCompletionSource FirstDelete { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public string Url { get; }
 
     public LoopbackUploadServer()
@@ -145,6 +177,17 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
 
     private async Task RespondAsync(TcpClient client)
     {
+        try
+        {
+            await RespondCoreAsync(client);
+        }
+        catch (OperationCanceledException) when (_stop.IsCancellationRequested) { }
+        catch (IOException) when (AllowDisconnects) { }
+        catch (SocketException) when (AllowDisconnects) { }
+    }
+
+    private async Task RespondCoreAsync(TcpClient client)
+    {
         using (client)
         {
             var stream = client.GetStream();
@@ -165,10 +208,23 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
                 if (n > 65536) throw new IOException("Unexpectedly large HTTP headers.");
             }
 
-            var headers = Encoding.ASCII.GetString(headerBytes.ToArray()).Split("\r\n")
+            string[] lines = Encoding.ASCII.GetString(headerBytes.ToArray()).Split("\r\n");
+            string[] requestLine = lines[0].Split(' ');
+            Paths.Enqueue(requestLine[1]);
+            var headers = lines
                 .Skip(1).Where(line => line.Contains(':'))
                 .Select(line => line.Split(':', 2))
                 .ToDictionary(parts => parts[0], parts => parts[1].Trim(), StringComparer.OrdinalIgnoreCase);
+            if (requestLine[0] == "DELETE")
+            {
+                Deletes.Enqueue(headers);
+                FirstDelete.TrySetResult();
+                if (BeforeDeleteResponse != null) await BeforeDeleteResponse(_stop.Token);
+                byte[] responseHead = Encoding.ASCII.GetBytes($"HTTP/1.1 {DeleteStatusCode} Test\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+                await stream.WriteAsync(responseHead, _stop.Token);
+                return;
+            }
+            if (requestLine[0] != "PUT") throw new InvalidOperationException("Unexpected upload request method.");
             Headers.Enqueue(headers);
 
             int remaining = int.Parse(headers["Content-Length"]);
@@ -180,6 +236,8 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
                 remaining -= read;
             }
 
+            FirstSlice.TrySetResult();
+            if (BeforeSliceResponse != null) await BeforeSliceResponse(_stop.Token);
             string[] range = headers["Content-Range"].Replace("bytes ", "").Split('-', '/');
             long next = long.Parse(range[1]) + 1;
             bool last = next == long.Parse(range[2]);

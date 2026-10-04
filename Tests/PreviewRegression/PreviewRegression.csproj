@@ -22,6 +22,7 @@
     <Compile Include="../../Models/DriveItemPage.cs" Link="Production/DriveItemPage.cs" />
     <Compile Include="../../Models/FileType.cs" Link="Production/FileType.cs" />
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
+    <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
     <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
     <Compile Include="../../ViewModels/PreviewViewModel.cs" Link="Production/PreviewViewModel.cs" />
     <Compile Include="../UploadRegression/PlatformFakes.cs" Link="PlatformFakes.cs" />

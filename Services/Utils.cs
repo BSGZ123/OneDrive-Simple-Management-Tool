@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -66,20 +67,24 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         //获取文件夹内文件累计大小
-        public static async Task<ulong> GetFolderSize(StorageFolder folder)
+        public static async Task<ulong> GetFolderSize(StorageFolder folder, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             ulong res = 0;
-            foreach (StorageFile file in await folder.GetFilesAsync())
+            foreach (StorageFile file in await folder.GetFilesAsync().AsTask(cancellationToken))
             {
-                Windows.Storage.FileProperties.BasicProperties properties = await file.GetBasicPropertiesAsync();
+                cancellationToken.ThrowIfCancellationRequested();
+                Windows.Storage.FileProperties.BasicProperties properties = await file.GetBasicPropertiesAsync().AsTask(cancellationToken);
                 res += properties.Size;
             }
 
             //获取子文件并累计大小
-            foreach (StorageFolder subFolder in await folder.GetFoldersAsync())
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (StorageFolder subFolder in await folder.GetFoldersAsync().AsTask(cancellationToken))
             {
-                res += await GetFolderSize(subFolder);
+                res += await GetFolderSize(subFolder, cancellationToken);
             }
+            cancellationToken.ThrowIfCancellationRequested();
             return res;
         }
 

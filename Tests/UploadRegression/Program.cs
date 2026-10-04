@@ -9,7 +9,7 @@ using Windows.Storage;
 
 namespace OneDrive_Simple_Management_Tool.Tests.UploadRegression;
 
-internal static class Program
+internal static partial class Program
 {
     private static async Task Main()
     {
@@ -33,7 +33,8 @@ internal static class Program
             ("A session without an upload URL is rejected", InvalidSession),
             ("A completed slice response without an item ID is rejected", InvalidCompletedItem),
             ("Folder creation errors never mark completion", FolderCreationFailure),
-            ("A failed descendant prevents folder completion", DescendantFailure)
+            ("A failed descendant prevents folder completion", DescendantFailure),
+            .. CancellationCases()
         ];
 
         foreach (var test in cases)
