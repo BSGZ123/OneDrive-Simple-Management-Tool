@@ -29,6 +29,17 @@ msbuild "OneDrive Simple Management Tool.csproj" /restore /t:Publish /p:Configur
 
 # 操作说明
 
+## 外观设置（页面补全第一轮）
+
+设置页支持浅色、深色、跟随系统，以及无特殊材质、Mica、Mica Alt、Acrylic。选择立即应用到主窗口；偏好保存到 `%LOCALAPPDATA%\OneDriveSimpleManagementTool\Configuration\appearance.json`，下次启动恢复。外观文件只保存主题和材质，不包含账号信息。
+
+- 材质不可用时使用普通背景并保留选择；页面说明和错误提示提供中英文，窄窗口可以滚动查看诊断和版本信息。
+- 读取失败使用默认外观并在设置页提示，不自动覆盖原文件；重新选择后保存新偏好。
+- 保存失败保留当前外观并提供重试；快速切换按顺序保存，窗口关闭时等待正在进行的保存。
+- 版本发布入口打开项目发布页面。
+
+2026-10-04：新增 12 组设置回归通过，既有七组业务回归通过；Debug/x64、Release/x64 及独立 WinUI 构建通过。中英文生产设置控件与页面布局已在隔离环境验证。用户确认本轮设置页验收通过，并授权提交、推送；具体系统主题、材质和重启场景未逐项记录。详见 [设置业务回归](Tests/SettingsRegression/README.md) 与 [设置界面验收](Tests/SettingsUi/README.md)。
+
 ## 基础文件共享
 
 在网盘的列表或网格视图中，右键单个文件或文件夹，选择“分享”，然后点击“生成链接”。生成成功后，点击“复制链接”，也可以在链接框内手动选中复制。
@@ -229,7 +240,7 @@ dotnet run --project Tests/FolderSyncRegression/FolderSyncRegression.csproj
 - [X] 属性
 - [X] 转换常见格式文件（PDF，基础功能已完成；2026-10-03 用户实测通过）
 - [ ] 新标签打开
-- [ ] 自选主题
+- [X] 外观设置（明暗主题、跟随系统、窗口材质和偏好保存；2026-10-04 用户验收通过）
 - [X] 多账户
 - [ ] 语言国际化
 - [ ] 工具页 

@@ -1,82 +1,46 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using OneDrive_Simple_Management_Tool.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.Helpers
 {
     public static class ThemeHelper
     {
-        private static Window currentApplicationWindow = App.StartupWindow;
-
-        /// <summary>
-        /// 根据根元素所请求的主题获取应用程序的当前实际主题，
-        /// 或者如果该值为默认值，则获取应用程序所请求的主题。
-        /// </summary>
-        public static ElementTheme ActualTheme
+        // Explicitly receive the live window; the app replaces its startup window.
+        public static bool Apply(MainWindow window, AppearancePreferences preferences)
         {
-            get
+            if (window.Content is FrameworkElement root)
             {
-                if (currentApplicationWindow.Content is FrameworkElement frameworkElement)
+                root.RequestedTheme = preferences.Theme switch
                 {
-                    if (frameworkElement.RequestedTheme != ElementTheme.Default)
-                    {
-                        return frameworkElement.RequestedTheme;
-                    }
-                }
-
-                return (ElementTheme)Enum.Parse(typeof(ElementTheme), Application.Current.RequestedTheme.ToString());
+                    AppearanceTheme.Light => ElementTheme.Light,
+                    AppearanceTheme.Dark => ElementTheme.Dark,
+                    _ => ElementTheme.Default
+                };
             }
 
-        }
-
-        /// <summary>
-        /// 获取或设置（使用 LocalSettings 持久性）根元素的请求主题。
-        /// </summary>
-        public static ElementTheme RootTheme
-        {
-            get
+            bool supported;
+            try
             {
-                if (currentApplicationWindow.Content is FrameworkElement rootElement)
+                SystemBackdrop backdrop = preferences.Material switch
                 {
-                    return rootElement.RequestedTheme;
-                }
-
-                return ElementTheme.Default;
+                    AppearanceMaterial.Mica when MicaController.IsSupported() => new MicaBackdrop { Kind = MicaKind.Base },
+                    AppearanceMaterial.MicaAlt when MicaController.IsSupported() => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+                    AppearanceMaterial.Acrylic when DesktopAcrylicController.IsSupported() => new DesktopAcrylicBackdrop(),
+                    _ => null
+                };
+                window.SystemBackdrop = backdrop;
+                supported = preferences.Material == AppearanceMaterial.None || backdrop != null;
             }
-            set
+            catch (Exception)
             {
-                if (currentApplicationWindow.Content is FrameworkElement rootElement)
-                {
-                    rootElement.RequestedTheme = value;
-                }
+                window.SystemBackdrop = null;
+                supported = false;
             }
+            window.SetBackdropActive(window.SystemBackdrop != null);
+            return supported;
         }
-
-
-        public static SystemBackdrop Material
-        {
-            get => App.StartupWindow.SystemBackdrop;
-            set
-            {
-                if (value is SystemBackdrop backdrop)
-                {
-                    App.StartupWindow.SystemBackdrop = backdrop;
-                }
-            }
-        }
-
-        public static bool IsDarkTheme()
-        {
-            if (RootTheme == ElementTheme.Default)
-            {
-                return Application.Current.RequestedTheme == ApplicationTheme.Dark;
-            }
-            return RootTheme == ElementTheme.Dark;
-        }
-
     }
 }

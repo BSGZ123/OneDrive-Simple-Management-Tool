@@ -92,6 +92,7 @@ namespace OneDrive_Simple_Management_Tool
                                 Services = new ServiceCollection().AddSingleton(_paths).AddSingleton(_cache).AddSingleton(_publicClient)
                                     .AddSingleton<IAccountAuthenticationService, MsalAccountAuthenticationService>()
                                     .AddSingleton<DriveConfigurationStore>().AddSingleton<TaskManagerViewModel>()
+                                    .AddSingleton<IAppearanceSettingsStore, AppearanceSettingsStore>().AddSingleton<SettingViewModel>()
                                     .AddSingleton(new FolderSyncService(new FolderSyncStore(_paths.FolderSync), OneDrive.CreateFolderSyncTarget))
                                     .AddSingleton<FolderSyncViewModel>().BuildServiceProvider();
                                 Ioc.Default.ConfigureServices(Services);
@@ -111,12 +112,25 @@ namespace OneDrive_Simple_Management_Tool
                                 SafeDiagnostics.Current.Record(DiagnosticEvent.ConfigurationFailure);
                             }
                             await Services.GetRequiredService<FolderSyncService>().InitializeAsync();
+                            await Services.GetRequiredService<SettingViewModel>().InitializeAsync();
                             break;
                     }
                 });
                 var startup = m_window;
                 var window = new MainWindow();
                 m_window = window;
+                var appearance = Services.GetRequiredService<SettingViewModel>();
+                appearance.AttachAppearance(preferences => Helpers.ThemeHelper.Apply(window, preferences));
+                bool waitingForPreferences = false;
+                window.AppWindow.Closing += async (_, args) =>
+                {
+                    if (!appearance.IsSaving) return;
+                    args.Cancel = true;
+                    if (waitingForPreferences) return;
+                    waitingForPreferences = true;
+                    await appearance.FlushAsync();
+                    window.Close();
+                };
                 window.Closed += (_, _) =>
                 {
                     Services.GetRequiredService<FolderSyncService>().Stop();

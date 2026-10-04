@@ -63,6 +63,9 @@ namespace OneDrive_Simple_Management_Tool
 
         public Frame Rootframe => contentFrame;
 
+        public void SetBackdropActive(bool active) =>
+            FallbackBackground.Visibility = active ? Visibility.Collapsed : Visibility.Visible;
+
         public void ShowStartupNotice(string message)
         {
             StartupNotice.Message = message;

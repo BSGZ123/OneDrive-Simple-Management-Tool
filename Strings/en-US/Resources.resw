@@ -238,7 +238,7 @@
     <value>About</value>
   </data>
   <data name="SettingPage_AppearanceTitle.Text" xml:space="preserve">
-    <value>Appearance behavior</value>
+    <value>Appearance</value>
   </data>
   <data name="SettingPage_AppTheme.Header" xml:space="preserve">
     <value>App Theme</value>
@@ -875,4 +875,20 @@
   <data name="Sync_RestoreConfiguration.Content" xml:space="preserve"><value>Restore failed configurations from backups</value></data>
   <data name="Sync_RestoreConfirm" xml:space="preserve"><value>Restore unreadable sync configurations from their valid encrypted backups? Original files will be archived encrypted. Tasks resume according to the saved switch.</value></data>
   <data name="Diagnostics_CopyFailed" xml:space="preserve"><value>Could not copy the diagnostic summary. Please retry.</value></data>
+  <data name="Settings_Material.Header" xml:space="preserve"><value>Window material</value></data>
+  <data name="Settings_Material.Description" xml:space="preserve"><value>Choose a window background effect. Its appearance depends on system settings.</value></data>
+  <data name="Settings_Material_None.Content" xml:space="preserve"><value>None</value></data>
+  <data name="Settings_RetrySave.Content" xml:space="preserve"><value>Retry save</value></data>
+  <data name="Settings_Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Settings_LoadFailed" xml:space="preserve"><value>Could not read appearance preferences. Using defaults without changing the file. Choose an appearance to save new preferences.</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>Appearance applied, but preferences could not be saved. Previous settings may return after restarting. Please retry.</value></data>
+  <data name="Settings_Saving" xml:space="preserve"><value>Saving…</value></data>
+  <data name="Settings_Saved" xml:space="preserve"><value>Preferences saved</value></data>
+  <data name="Settings_MaterialFallback" xml:space="preserve"><value>The selected material is unavailable here. A plain background is shown and your preference is kept.</value></data>
+  <data name="Settings_About.Header" xml:space="preserve"><value>OneDrive Simple Management Tool</value></data>
+  <data name="Settings_About.Description" xml:space="preserve"><value>Manage OneDrive files, transfers, and folder sync.</value></data>
+  <data name="Settings_Source.Header" xml:space="preserve"><value>Source code</value></data>
+  <data name="Settings_SourceLink.Content" xml:space="preserve"><value>View on GitHub</value></data>
+  <data name="Settings_Release.Header" xml:space="preserve"><value>Releases</value></data>
+  <data name="Settings_ReleaseLink.Content" xml:space="preserve"><value>View releases</value></data>
 </root>

@@ -238,10 +238,10 @@
     <value>关于</value>
   </data>
   <data name="SettingPage_AppearanceTitle.Text" xml:space="preserve">
-    <value>显示</value>
+    <value>外观</value>
   </data>
   <data name="SettingPage_AppTheme.Header" xml:space="preserve">
-    <value>App主题</value>
+    <value>应用主题</value>
   </data>
   <data name="SettingPage_Theme_Dark.Content" xml:space="preserve">
     <value>深色</value>
@@ -875,4 +875,20 @@
   <data name="Sync_RestoreConfiguration.Content" xml:space="preserve"><value>从备份恢复失败配置</value></data>
   <data name="Sync_RestoreConfirm" xml:space="preserve"><value>从有效的加密备份恢复不可读的同步配置？原文件会加密归档，任务将按保存的开关恢复。</value></data>
   <data name="Diagnostics_CopyFailed" xml:space="preserve"><value>无法复制诊断摘要，请重试。</value></data>
+  <data name="Settings_Material.Header" xml:space="preserve"><value>窗口材质</value></data>
+  <data name="Settings_Material.Description" xml:space="preserve"><value>选择窗口背景效果，实际效果受系统设置影响。</value></data>
+  <data name="Settings_Material_None.Content" xml:space="preserve"><value>无特殊材质</value></data>
+  <data name="Settings_RetrySave.Content" xml:space="preserve"><value>重试保存</value></data>
+  <data name="Settings_Version" xml:space="preserve"><value>版本 {0}</value></data>
+  <data name="Settings_LoadFailed" xml:space="preserve"><value>无法读取外观偏好，已使用默认外观。原文件未更改；重新选择外观后可保存新的偏好。</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>外观已应用，但偏好保存失败，重启后可能恢复旧设置。请重试保存。</value></data>
+  <data name="Settings_Saving" xml:space="preserve"><value>正在保存…</value></data>
+  <data name="Settings_Saved" xml:space="preserve"><value>偏好已保存</value></data>
+  <data name="Settings_MaterialFallback" xml:space="preserve"><value>当前环境无法使用所选材质，已显示普通背景。你的材质选择仍会保留。</value></data>
+  <data name="Settings_About.Header" xml:space="preserve"><value>OneDrive Simple Management Tool</value></data>
+  <data name="Settings_About.Description" xml:space="preserve"><value>管理 OneDrive 文件、传输和文件夹同步。</value></data>
+  <data name="Settings_Source.Header" xml:space="preserve"><value>项目源码</value></data>
+  <data name="Settings_SourceLink.Content" xml:space="preserve"><value>在 GitHub 查看</value></data>
+  <data name="Settings_Release.Header" xml:space="preserve"><value>版本发布</value></data>
+  <data name="Settings_ReleaseLink.Content" xml:space="preserve"><value>查看发布页面</value></data>
 </root>

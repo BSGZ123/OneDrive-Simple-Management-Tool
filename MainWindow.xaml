@@ -13,6 +13,8 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
+        <Border x:Name="FallbackBackground" Grid.RowSpan="2" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
+
         <Grid x:Name="AppTitleBar">
             <Image Source="ms-appx:///Assets/Square44x44Logo.scale-200.png"
                    HorizontalAlignment="Left"

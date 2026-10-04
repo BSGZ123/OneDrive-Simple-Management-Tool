@@ -3,91 +3,69 @@
     x:Class="OneDrive_Simple_Management_Tool.Pages.SettingPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:OneDrive_Simple_Management_Tool.Pages"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    Background="Transparent">
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Page.Resources>
-
-    <Grid Padding="36 0 36 0">
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <TextBlock x:Uid="SettingPage_Title" FontSize="20" FontWeight="Medium"  Margin="0 20 0 0"/>
-        <TextBlock Grid.Row="1" x:Uid="SettingPage_AppearanceTitle" FontWeight="Bold"  Margin="0 10 0 10"/>
-
-        <StackPanel Grid.Row="2" Orientation="Vertical">
-
-            <!--系统主题明暗或系统跟随-->
-            <controls:SettingsCard x:Uid="SettingPage_AppTheme">
-
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE790;"/>
-                </controls:SettingsCard.HeaderIcon>
-
-                <ComboBox x:Name="themeMode" SelectionChanged="themeMode_SelectionChanged">
-                    <ComboBoxItem x:Uid="SettingPage_Theme_Default" Tag="Default" />
-                    <ComboBoxItem x:Uid="SettingPage_Theme_Light" Tag="Light" />
-                    <ComboBoxItem x:Uid="SettingPage_Theme_Dark" Tag="Dark" />
-                </ComboBox>
-                
-            </controls:SettingsCard>
-
-            <!--系统主题颜色切换-->
-            <controls:SettingsCard Header="Material">
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE790;" />
-                </controls:SettingsCard.HeaderIcon>
-                <ComboBox x:Name="materialMode" SelectionChanged="materialMode_SelectionChanged">
-                    <ComboBoxItem Content="Mica" Tag="Mica" />
-                    <ComboBoxItem Content="MicaAlt" Tag="MicaAlt" />
-                    <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
-                    <ComboBoxItem Content="Default" Tag="Default" />
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+        <StackPanel Padding="24,20,24,32" Spacing="12" MaxWidth="960" HorizontalAlignment="Stretch">
+            <TextBlock x:Uid="SettingPage_Title" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock x:Uid="SettingPage_AppearanceTitle" FontWeight="SemiBold" Margin="0,8,0,0" />
+            <controls:SettingsCard x:Name="ThemeCard" x:Uid="SettingPage_AppTheme">
+                <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE790;" /></controls:SettingsCard.HeaderIcon>
+                <ComboBox x:Name="ThemeMode" SelectedIndex="{Binding ThemeIndex, Mode=TwoWay}" MinWidth="160"
+                          AutomationProperties.Name="{Binding Header, ElementName=ThemeCard}">
+                    <ComboBoxItem x:Uid="SettingPage_Theme_Default" />
+                    <ComboBoxItem x:Uid="SettingPage_Theme_Light" />
+                    <ComboBoxItem x:Uid="SettingPage_Theme_Dark" />
                 </ComboBox>
             </controls:SettingsCard>
+            <controls:SettingsCard x:Name="MaterialCard" x:Uid="Settings_Material">
+                <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7F4;" /></controls:SettingsCard.HeaderIcon>
+                <ComboBox x:Name="MaterialMode" SelectedIndex="{Binding MaterialIndex, Mode=TwoWay}" MinWidth="160"
+                          AutomationProperties.Name="{Binding Header, ElementName=MaterialCard}">
+                    <ComboBoxItem x:Uid="Settings_Material_None" />
+                    <ComboBoxItem Content="Mica" />
+                    <ComboBoxItem Content="Mica Alt" />
+                    <ComboBoxItem Content="Acrylic" />
+                </ComboBox>
+            </controls:SettingsCard>
+            <TextBlock Text="{Binding MaterialNotice}" TextWrapping="Wrap"
+                       Visibility="{Binding HasMaterialNotice, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <TextBlock Text="{Binding SaveStatus}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Visibility="{Binding HasSaveStatus, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}">
+                <InfoBar.ActionButton>
+                    <Button x:Uid="Settings_RetrySave" Command="{Binding RetrySaveCommand}" />
+                </InfoBar.ActionButton>
+            </InfoBar>
 
-            <TextBlock x:Uid="Diagnostics_Title" FontWeight="Bold" Margin="0 10 0 10" />
+            <TextBlock x:Uid="Diagnostics_Title" FontWeight="SemiBold" Margin="0,12,0,0" />
             <TextBlock x:Uid="Diagnostics_Description" TextWrapping="Wrap" />
-            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,8">
-                <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" />
-                <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" />
+            <VariableSizedWrapGrid Orientation="Horizontal" ItemHeight="40">
+                <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" Margin="0,0,8,0" />
+                <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" Margin="0,0,8,0" />
                 <Button x:Uid="Diagnostics_Copy" Click="CopyDiagnostics" />
-            </StackPanel>
-            <TextBlock x:Name="DiagnosticsStatus" TextWrapping="Wrap" />
-            <TextBlock x:Uid="SettingPage_AboutTitle" FontWeight="Bold" Margin="0 10 0 10" />
+            </VariableSizedWrapGrid>
+            <TextBlock x:Name="DiagnosticsStatus" TextWrapping="Wrap" Visibility="Collapsed" />
 
-            <!--程序的版权更新简要信息-->
-            <controls:SettingsExpander Header="OneDrive Simple Management Tool" Description="It's totally free for you ! ">
-
-                <controls:SettingsExpander.HeaderIcon>
-                    <FontIcon Glyph="&#xE753;" />
-                </controls:SettingsExpander.HeaderIcon>
-
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           IsTextSelectionEnabled="True"
-                           Text="{x:Bind }"/>
-
+            <TextBlock x:Uid="SettingPage_AboutTitle" FontWeight="SemiBold" Margin="0,12,0,0" />
+            <controls:SettingsExpander x:Uid="Settings_About">
+                <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE946;" /></controls:SettingsExpander.HeaderIcon>
+                <TextBlock Text="{Binding Version}" IsTextSelectionEnabled="True" />
                 <controls:SettingsExpander.Items>
-                    <controls:SettingsCard Header="Github">
-                        <HyperlinkButton Content="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool" NavigateUri="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool" />
+                    <controls:SettingsCard x:Uid="Settings_Source">
+                        <HyperlinkButton x:Uid="Settings_SourceLink"
+                                         NavigateUri="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool" />
                     </controls:SettingsCard>
-
-                    <controls:SettingsCard Header="Update" Visibility="Visible">
-                        <HyperlinkButton Content="Update" NavigateUri="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool/releases/latest" />
+                    <controls:SettingsCard x:Uid="Settings_Release">
+                        <HyperlinkButton x:Uid="Settings_ReleaseLink"
+                                         NavigateUri="https://github.com/BSGZ123/OneDrive-Simple-Management-Tool/releases/latest" />
                     </controls:SettingsCard>
                 </controls:SettingsExpander.Items>
-
             </controls:SettingsExpander>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </Page>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Models/AppearancePreferences.cs" Link="Production/AppearancePreferences.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/AppearanceSettingsStore.cs" Link="Production/AppearanceSettingsStore.cs" />
+    <Compile Include="../../ViewModels/SettingViewModel.cs" Link="Production/SettingViewModel.cs" />
+    <Compile Include="../UploadRegression/ResourceFake.cs" Link="ResourceFake.cs" />
+    <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+  </ItemGroup>
+</Project>
