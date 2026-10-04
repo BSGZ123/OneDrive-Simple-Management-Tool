@@ -161,7 +161,9 @@ dotnet run --project Tests/DownloadRegression/DownloadRegression.csproj
 dotnet run --project Tests/FolderSyncRegression/FolderSyncRegression.csproj
 ```
 
-2026-10-04 在 Linux（.NET SDK 8.0.131）上运行：分享 10、上传 37、文件管理 35、预览 23、同步 20 项全部通过。下载回归中“目标文件被锁定时保存失败”一项失败：该项用 `FileShare.None` 模拟文件占用，而 Linux 上的文件锁只是建议性锁，无法阻止写入，因此这一项只能在 Windows 上验证；失败后该组中止，其余下载检查以 Windows 结果为准。界面回归（`Tests/*Ui`）需要在 Windows 上用 msbuild 构建。
+2026-10-04 在 Linux（.NET SDK 8.0.131）上运行：分享 10、上传 37、文件管理 35、预览 23、同步 20 项全部通过。下载回归中“目标文件被锁定时保存失败”一项失败：该项用 `FileShare.None` 模拟文件占用，而 Linux 上的文件锁只是建议性锁，无法阻止写入，因此这一项只能在 Windows 上验证；失败后该组中止，其余下载检查以 Windows 结果为准。
+
+2026-10-04 用户在本地 Windows 上运行上述六组回归，全部通过（包括下载回归）。界面回归（`Tests/*Ui`）需要在 Windows 上用 msbuild 构建。
 
 # 点点滴滴
 
@@ -197,9 +199,9 @@ dotnet run --project Tests/FolderSyncRegression/FolderSyncRegression.csproj
 
 原因：下载组件缓存释放较慢，稍稍等等就行了
 
-- [ ] 文件上传执行异步上传线程时，抛出 Microsoft.Graph.ServiceException
+- [X] 文件上传执行异步上传线程时，抛出 Microsoft.Graph.ServiceException
 
-2026-10-03 起上传流程已重写：失败会显示错误而不会被标记为成功，2026-10-04 补全取消流程。原异常尚未在真实账号上复现确认，暂不关闭。
+2026-10-03 起上传流程已重写：失败会显示错误而不会被标记为成功，2026-10-04 补全取消流程。2026-10-04 用户确认该问题已修复。
 
 
 ### 2024-08-04
