@@ -18,46 +18,12 @@ namespace OneDrive_Simple_Management_Tool.Services
 {
     public partial class OneDrive
     {
-        private static readonly object SyncAuthenticationLock = new();
-        private static IPublicClientApplication _syncRegisteredApp;
-
         public static GraphFolderSyncTarget CreateFolderSyncTarget(FolderSyncBinding binding)
         {
-            var app = Ioc.Default.GetService<IPublicClientApplication>();
-            lock (SyncAuthenticationLock)
-            {
-                if (_syncRegisteredApp != app)
-                {
-                    Ioc.Default.GetService<MsalCacheHelper>().RegisterCache(app.UserTokenCache);
-                    _syncRegisteredApp = app;
-                }
-            }
-            var authentication = new BaseBearerTokenAuthenticationProvider(new SyncTokenProvider(app, binding.AccountId));
-            return new GraphFolderSyncTarget(new GraphServiceClient(authentication), binding);
-        }
-
-        private sealed class SyncTokenProvider(IPublicClientApplication app, string accountId) : IAccessTokenProvider
-        {
-            public AllowedHostsValidator AllowedHostsValidator { get; } = new(new[] { "graph.microsoft.com" });
-
-            public async Task<string> GetAuthorizationTokenAsync(Uri uri,
-                Dictionary<string, object> additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
-            {
-                if (!AllowedHostsValidator.IsUrlHostValid(uri)) throw new FolderSyncException("Sync_AccessDenied");
-                var account = (await app.GetAccountsAsync()).SingleOrDefault(a => a.HomeAccountId.Identifier == accountId);
-                if (account == null) throw new FolderSyncException("Sync_LoginNeeded");
-                try
-                {
-                    var result = await app.AcquireTokenSilent(new[] { "User.Read", "Files.ReadWrite.All" }, account)
-                        .ExecuteAsync(cancellationToken);
-                    if (result.Account.HomeAccountId.Identifier != accountId) throw new FolderSyncException("Sync_LoginNeeded");
-                    return result.AccessToken;
-                }
-                catch (MsalException) { throw new FolderSyncException("Sync_LoginNeeded"); }
-            }
+            var authentication = Ioc.Default.GetService<IAccountAuthenticationService>();
+            return new GraphFolderSyncTarget(GraphAccountDriveResolver.CreateClient(authentication, binding.AccountId), binding);
         }
     }
-
     // This adapter never downloads or deletes content and never requests conflictBehavior=rename.
     public sealed class GraphFolderSyncTarget(GraphServiceClient client, FolderSyncBinding binding) : IFolderSyncTarget, IFolderSyncBrowser
     {

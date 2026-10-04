@@ -63,7 +63,9 @@
                 <Button Grid.Column="2" x:Uid="Drive_RetryLoading" Command="{Binding RetryLoadingCommand}" Visibility="{Binding RetryVisibility}" VerticalAlignment="Center" />
             </Grid>
             <InfoBar x:Uid="FileOperation_ErrorBar" IsOpen="{Binding HasError}"
-                     Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
+                     Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False">
+                <InfoBar.ActionButton><Button x:Uid="Account_SignInButton" Command="{Binding SignInCommand}" /></InfoBar.ActionButton>
+            </InfoBar>
             <InfoBar x:Name="UploadErrorInfoBar" Severity="Error" IsOpen="False" IsClosable="True" />
         </StackPanel>
         <Grid Grid.Row="3" x:Name="CloudControl" Background="Transparent" AllowDrop="True"

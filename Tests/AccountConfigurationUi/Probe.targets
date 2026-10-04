@@ -1,0 +1,4 @@
+<Project>
+  <PropertyGroup><StartupObject>AccountConfigurationUiProbe</StartupObject></PropertyGroup>
+  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\AccountConfigurationUi\Probe.cs" /></ItemGroup>
+</Project>

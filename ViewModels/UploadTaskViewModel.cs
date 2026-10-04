@@ -110,7 +110,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.Message;
+                ErrorMessage = Helpers.FileOperationErrors.GetMessage(ex);
                 State = UploadTaskState.Failed;
             }
             finally

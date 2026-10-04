@@ -37,5 +37,28 @@ namespace OneDrive_Simple_Management_Tool.Pages
         {
 
         }
+
+        private void StartDiagnostics(object sender, RoutedEventArgs e)
+        {
+            Services.SafeDiagnostics.Current.BeginSession();
+            DiagnosticsStatus.Text = Helpers.ResourceHelper.GetLocalized("Diagnostics_Started");
+        }
+
+        private void StopDiagnostics(object sender, RoutedEventArgs e)
+        {
+            Services.SafeDiagnostics.Current.EndSession();
+            DiagnosticsStatus.Text = Helpers.ResourceHelper.GetLocalized("Diagnostics_Stopped");
+        }
+
+        private void CopyDiagnostics(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var data = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                data.SetText(Services.SafeDiagnostics.Current.GetSummary());
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(data);
+            }
+            catch { DiagnosticsStatus.Text = Helpers.ResourceHelper.GetLocalized("Diagnostics_CopyFailed"); }
+        }
     }
 }

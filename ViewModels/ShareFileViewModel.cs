@@ -61,6 +61,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 StatusMessage = string.Empty;
                 string resourceKey = exception switch
                 {
+                    Services.AccountAuthenticationException auth when auth.Failure == Services.AuthenticationFailure.Network => "ShareFile_NetworkFailed",
+                    Services.AccountAuthenticationException => "ShareFile_AuthenticationFailed",
                     ApiException api when api.ResponseStatusCode == 403 => "ShareFile_AccessDenied",
                     ApiException api when api.ResponseStatusCode == 404 => "ShareFile_NotFound",
                     ApiException api when api.ResponseStatusCode == 401 => "ShareFile_AuthenticationFailed",

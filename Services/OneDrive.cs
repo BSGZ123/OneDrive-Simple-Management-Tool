@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Drives.Item.Items.Item.Restore;
 using Microsoft.Graph;
@@ -21,22 +21,27 @@ namespace OneDrive_Simple_Management_Tool.Services
 {
     public partial class OneDrive
     {
-        public OneDrive()
-        {
-            PublicClientApp = Ioc.Default.GetService<IPublicClientApplication>();
-        }
+        public OneDrive() : this(null, null) { }
 
         public OneDrive(string driveId, string homeAccountId)
+            : this(driveId, homeAccountId, Ioc.Default.GetService<IAccountAuthenticationService>()) { }
+
+        public OneDrive(string driveId, string homeAccountId, IAccountAuthenticationService authentication, IAccountDriveResolver resolver = null)
         {
             DriveId = driveId;
             HomeAccountId = homeAccountId;
-            PublicClientApp = Ioc.Default.GetService<IPublicClientApplication>();
+            _authentication = authentication;
+            if (authentication != null)
+            {
+                _session = new DriveAuthenticationSession(authentication, resolver ?? new GraphAccountDriveResolver(authentication));
+                if (homeAccountId != null) graphClient = GraphAccountDriveResolver.CreateClient(authentication, homeAccountId);
+            }
         }
 
         public async Task<DriveItemPage> GetFilePageAsync(string parentId, string keyword,
             string nextLink, CancellationToken cancellationToken)
         {
-            if (!IsAuthenticated) await Login();
+            if (!IsAuthenticated) await Login(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (nextLink != null) ValidateNextLink(nextLink);
 
@@ -141,6 +146,11 @@ namespace OneDrive_Simple_Management_Tool.Services
             catch (MsalException exception)
             {
                 throw new DownloadFailureException(DownloadFailure.AccessDenied, exception);
+            }
+            catch (AccountAuthenticationException exception)
+            {
+                throw new DownloadFailureException(exception.Failure == AuthenticationFailure.Network
+                    ? DownloadFailure.Network : DownloadFailure.AccessDenied, exception);
             }
         }
 
@@ -389,87 +399,35 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].Items[itemId].Restore.PostAsync(requestBody);
         }
 
-        //获取受限资源的访问令牌，委托getTokenDelegate，scopes限定权限范围
-        private class TokenProvider(Func<string[], Task<string>> getTokenDelegate, string[] scopes) : IAccessTokenProvider
+        public Task Login(CancellationToken cancellationToken = default) => AuthenticateAsync(false, cancellationToken);
+
+        public Task SignInAsync(CancellationToken cancellationToken = default) => AuthenticateAsync(true, cancellationToken);
+
+        private async Task AuthenticateAsync(bool interactive, CancellationToken token)
         {
-            private readonly Func<string[], Task<string>> getTokenDelegate = getTokenDelegate;
-            private readonly string[] scopes = scopes;
-
-            public Task<string> GetAuthorizationTokenAsync(Uri uri, Dictionary<string, object> additionalAuthenticationContext = default,
-                CancellationToken cancellationToken = default)
+            if (_authentication == null) throw new AccountAuthenticationException(AuthenticationFailure.RequiresSignIn);
+            long attempt;
+            string accountId, driveId;
+            lock (_authenticationGate) { attempt = ++_authenticationAttempt; accountId = HomeAccountId; driveId = DriveId; }
+            var identity = await _session.AuthenticateAsync(accountId, driveId, interactive, token);
+            lock (_authenticationGate)
             {
-                return getTokenDelegate(scopes);
-            }
-
-            public AllowedHostsValidator AllowedHostsValidator { get; }
-        }
-
-        public async Task Login()
-        {
-            TokenProvider tokenProvider = new(async Task<string> (string[] scopes) =>
-            {
-                IEnumerable<IAccount> accounts = await PublicClientApp.GetAccountsAsync().ConfigureAwait(false);
-
-                try
-                {
-                    //尝试使用静默方式获取令牌 (AcquireTokenSilent)，如果失败则尝试交互式方式获取令牌 (AcquireTokenInteractive)
-                    authResult = await PublicClientApp
-                                    .AcquireTokenSilent(scopes, accounts.First(account => account.HomeAccountId.Identifier == HomeAccountId))
-                                    .ExecuteAsync();
-                }
-                catch (Exception exception) when (exception is MsalUiRequiredException || exception is InvalidOperationException)
-                {
-                    try
-                    {
-                        authResult = await PublicClientApp.AcquireTokenInteractive(scopes).ExecuteAsync();
-                    }
-                    catch (MsalException msalex)
-                    {
-                        Console.WriteLine(msalex);
-                    }
-                    catch (Exception odataEx)
-                    {
-                        Debug.WriteLine($"OData Error: {odataEx}");
-                    }
-                }
-                if (authResult != null)
-                {
-                    //身份验证通过
-                    IsAuthenticated = true;
-                }
-                HomeAccountId = authResult?.Account.HomeAccountId.Identifier;
-                return authResult?.AccessToken;
-            }, scopes);
-
-            BaseBearerTokenAuthenticationProvider authProvider = new(tokenProvider);
-            graphClient = new(authProvider);
-            await Task.FromResult(graphClient);
-            SaveTokenCache();
-            try
-            {
-                Drive driveItem = await graphClient.Me.Drive.GetAsync();
-                DriveId = driveItem.Id;
-            }
-            catch
-            {
+                token.ThrowIfCancellationRequested();
+                if (attempt != _authenticationAttempt) throw new OperationCanceledException();
+                graphClient = GraphAccountDriveResolver.CreateClient(_authentication, identity.AccountId);
+                HomeAccountId = identity.AccountId;
+                DriveId = identity.DriveId;
+                IsAuthenticated = true;
             }
         }
 
-        public static void SaveTokenCache()
-        {
-            MsalCacheHelper cacheHelper = Ioc.Default.GetService<MsalCacheHelper>();
-            cacheHelper.RegisterCache(PublicClientApp.UserTokenCache);
-        }
-
-        private static IPublicClientApplication PublicClientApp;
-        private readonly string[] scopes = ["User.Read", "Files.ReadWrite.All"];
-        private static AuthenticationResult authResult;
+        private readonly IAccountAuthenticationService _authentication;
+        private readonly DriveAuthenticationSession _session;
+        private readonly object _authenticationGate = new();
+        private long _authenticationAttempt;
         private GraphServiceClient graphClient;
-
         public string DriveId;
         public bool IsAuthenticated = false;
-        public string ClientId;
-        // 暂时用来识别账户
         public string HomeAccountId;
     }
 }

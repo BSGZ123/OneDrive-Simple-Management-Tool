@@ -42,7 +42,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public DriveViewModel(OneDrive provider, string displayName = null)
         {
             Provider = provider;
-            DisplayName = displayName ?? provider.DriveId;
+            DisplayName = string.IsNullOrWhiteSpace(displayName) ? "Account_DefaultName".GetLocalized() : displayName;
             BreadcrumbItems.Add(RootBreadcrumb());
         }
 
@@ -283,8 +283,19 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [RelayCommand]
         private async Task GetCapacity()
         {
-            Quota quota = await Provider.GetStorageInfo();
-            StorageInfo = Utils.ReadableFileSize(quota.Used) + " / " + Utils.ReadableFileSize(quota.Total);
+            try
+            {
+                Quota quota = await Provider.GetStorageInfo();
+                StorageInfo = Utils.ReadableFileSize(quota.Used) + " / " + Utils.ReadableFileSize(quota.Total);
+            }
+            catch (Exception exception) { StorageInfo = FileOperationErrors.GetMessage(exception); }
+        }
+
+        [RelayCommand]
+        private async Task SignIn()
+        {
+            try { await Provider.SignInAsync(); await TryRefresh(); }
+            catch (Exception exception) { ErrorMessage = AccountConfigurationErrors.Message(exception); }
         }
 
         private void NotifyListing()

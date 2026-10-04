@@ -36,11 +36,14 @@ internal static class FolderSyncUiProbe
             await File.WriteAllTextAsync(Path.Combine(directory, "项目资料", "说明.txt"), "Local sync UI test");
             var service = new FolderSyncService(new FolderSyncStore(Path.Combine(directory, "state", Guid.NewGuid().ToString("N"))),
                 _ => new Target());
+            var paths = new ApplicationDataPaths(Path.Combine(directory, "configuration", Guid.NewGuid().ToString("N")), directory);
+            var drives = new DriveConfigurationStore(paths);
+            await drives.AddAsync(new OneDrive_Simple_Management_Tool.Models.DTO.DriveDTO
+            {
+                DisplayName = "本地模拟网盘", Provider = new() { HomeAccountId = "fake-account", DriveId = "fake-drive" }
+            }, 0);
             Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(service).AddSingleton<FolderSyncViewModel>()
-                .AddSingleton<TaskManagerViewModel>().BuildServiceProvider());
-            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "cache"));
-            await File.WriteAllTextAsync(Path.Combine(AppContext.BaseDirectory, "cache", "drives.json"),
-                "[{\"DisplayName\":\"本地模拟网盘\",\"Provider\":{\"HomeAccountId\":\"fake-account\",\"DriveId\":\"fake-drive\"}}]");
+                .AddSingleton(drives).AddSingleton<TaskManagerViewModel>().BuildServiceProvider());
             await service.AddAsync(Binding("项目资料", "folder", true));
             await service.AddAsync(Binding("照片归档", "photos", false));
             var window = new MainWindow { Title = "Folder sync UI test — LOCAL ONLY" };

@@ -12,6 +12,8 @@ namespace OneDrive_Simple_Management_Tool.Helpers
         public static PreviewException Classify(Exception exception) => exception switch
         {
             PreviewException preview => preview,
+            Services.AccountAuthenticationException auth when auth.Failure == Services.AuthenticationFailure.Network => new(PreviewFailure.Network, true),
+            Services.AccountAuthenticationException => new(PreviewFailure.Authentication),
             ApiException api when api.ResponseStatusCode == 401 => new(PreviewFailure.Authentication),
             ApiException api when api.ResponseStatusCode == 403 => new(PreviewFailure.AccessDenied),
             ApiException api when api.ResponseStatusCode == 404 => new(PreviewFailure.NotFound),

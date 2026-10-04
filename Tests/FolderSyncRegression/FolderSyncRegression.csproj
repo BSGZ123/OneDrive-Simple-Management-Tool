@@ -15,4 +15,10 @@
     <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/AccountAuthenticationService.cs" Link="Production/AccountAuthenticationService.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
+  </ItemGroup>
 </Project>

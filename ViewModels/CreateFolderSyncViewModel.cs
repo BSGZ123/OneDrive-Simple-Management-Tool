@@ -51,13 +51,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         {
             try
             {
-                string file = Path.Combine(AppContext.BaseDirectory, "cache", "drives.json");
-                if (File.Exists(file))
-                {
-                    var drives = JsonSerializer.Deserialize(await File.ReadAllTextAsync(file), DriveDTOSourceGenerationContext.Default.ListDriveDTO);
-                    foreach (var drive in drives ?? new())
-                        if (!string.IsNullOrWhiteSpace(drive.Provider?.DriveId) && !string.IsNullOrWhiteSpace(drive.Provider.HomeAccountId)) Drives.Add(drive);
-                }
+                Drives.Clear();
+                var store = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<DriveConfigurationStore>();
+                var snapshot = await store.LoadAsync();
+                foreach (var drive in snapshot.Data) Drives.Add(drive);
                 if (Drives.Count == 0) ErrorMessage = "Sync_NoDrives".GetLocalized();
                 else if (_preferredDrive != null)
                     SelectedDrive = Drives.FirstOrDefault(d => d.Provider.DriveId == _preferredDrive.Provider.DriveId &&

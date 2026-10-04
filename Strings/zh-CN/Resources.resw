@@ -822,4 +822,57 @@
   <data name="Upload_RemoveMenu.Text" xml:space="preserve"><value>取消上传 / 移除任务</value></data>
   <data name="Upload_RemoveButton.ToolTipService.ToolTip" xml:space="preserve"><value>取消上传 / 移除任务。已上传的文件会保留。</value></data>
   <data name="Upload_RemoveButton.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>取消上传或移除任务</value></data>
+  <data name="Account_DefaultName" xml:space="preserve"><value>OneDrive 网盘</value></data>
+  <data name="Account_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Account_Cancelled" xml:space="preserve"><value>已取消登录，未添加网盘。</value></data>
+  <data name="Account_RequiresSignIn" xml:space="preserve"><value>请登录此网盘原来绑定的账户。</value></data>
+  <data name="Account_AccountMismatch" xml:space="preserve"><value>选择了其他账户，原网盘绑定未改变。</value></data>
+  <data name="Account_Failed" xml:space="preserve"><value>认证或网盘验证失败，请重试。</value></data>
+  <data name="Account_Network" xml:space="preserve"><value>无法连接，请检查网络后重试。</value></data>
+  <data name="Account_SignInButton.Content" xml:space="preserve"><value>重新登录</value></data>
+  <data name="CreateDrive_Dialog.Title" xml:space="preserve"><value>添加网盘</value></data>
+  <data name="CreateDrive_Dialog.PrimaryButtonText" xml:space="preserve"><value>添加</value></data>
+  <data name="CreateDrive_Dialog.CloseButtonText" xml:space="preserve"><value>取消</value></data>
+  <data name="CreateDrive_Name.Header" xml:space="preserve"><value>显示名称（可选）</value></data>
+  <data name="CreateDrive_Name.PlaceholderText" xml:space="preserve"><value>网盘名称</value></data>
+  <data name="CloudPage_Open.Text" xml:space="preserve"><value>打开</value></data>
+  <data name="CloudPage_SignIn.Text" xml:space="preserve"><value>重新登录</value></data>
+  <data name="Configuration_Invalid" xml:space="preserve"><value>配置无效，原文件已保留。请恢复备份或明确选择重建；旧数据可能尚未完成加密保护。</value></data>
+  <data name="Configuration_Version" xml:space="preserve"><value>此配置需要兼容的应用版本，文件未被更改。</value></data>
+  <data name="Configuration_Protection" xml:space="preserve"><value>配置加密或解密失败。请检查 Windows 用户和设备后重试，或恢复可用备份。原有数据已保留。</value></data>
+  <data name="Configuration_Conflict" xml:space="preserve"><value>配置已被其他操作更新，请重新加载后重试。</value></data>
+  <data name="Configuration_Unavailable" xml:space="preserve"><value>配置不可用或被占用。请检查存储权限、可用空间和其他运行实例后重试。</value></data>
+  <data name="Configuration_Missing" xml:space="preserve"><value>已保存的配置文件缺失，请恢复备份或明确选择重建。</value></data>
+  <data name="Configuration_Duplicate" xml:space="preserve"><value>此账户和网盘已在列表中。旧配置若有重复身份，请选择要保留的记录进行修复。</value></data>
+  <data name="Configuration_LegacyCleanup" xml:space="preserve"><value>加密配置可用，但迁移清理尚未完成。请关闭旧实例、检查权限后重试。</value></data>
+  <data name="Configuration_Retry" xml:space="preserve"><value>重试</value></data>
+  <data name="Configuration_Rebuild" xml:space="preserve"><value>重建</value></data>
+  <data name="Configuration_RebuildTitle" xml:space="preserve"><value>重建网盘列表？</value></data>
+  <data name="Configuration_RebuildExplanation" xml:space="preserve"><value>此操作会创建空网盘列表，需要重新添加网盘。原数据将保存为加密恢复副本，云端文件不受影响。</value></data>
+  <data name="Configuration_Repair" xml:space="preserve"><value>修复重复记录</value></data>
+  <data name="Configuration_ChooseRecord" xml:space="preserve"><value>选择要保留的记录</value></data>
+  <data name="Configuration_DuplicateExplanation" xml:space="preserve"><value>为每组重复身份选择一条记录。同名的不同网盘会保留，原记录将保存为加密恢复副本。</value></data>
+  <data name="Configuration_RetryButton.Content" xml:space="preserve"><value>重新加载 / 重试</value></data>
+  <data name="Configuration_RestoreButton.Content" xml:space="preserve"><value>恢复备份</value></data>
+  <data name="Configuration_RebuildButton.Content" xml:space="preserve"><value>重建列表</value></data>
+  <data name="Configuration_RepairButton.Content" xml:space="preserve"><value>修复重复记录</value></data>
+  <data name="Startup_Loading" xml:space="preserve"><value>正在初始化账户与加密配置…</value></data>
+  <data name="Startup_Exit" xml:space="preserve"><value>退出</value></data>
+  <data name="Startup_Settings" xml:space="preserve"><value>应用设置缺失或无效。请修复应用目录中的 appsettings.json 后重试。</value></data>
+  <data name="Startup_Directory" xml:space="preserve"><value>无法打开用户数据目录。请关闭其他版本的应用、检查权限后重试。</value></data>
+  <data name="Startup_Cache" xml:space="preserve"><value>本地登录数据不可用。请检查 Windows 用户和存储权限后重试，缓存未被清除。</value></data>
+  <data name="Startup_Services" xml:space="preserve"><value>应用服务初始化失败，请重试或退出。</value></data>
+  <data name="Startup_Configurations" xml:space="preserve"><value>用户配置初始化失败，请重试或退出。</value></data>
+  <data name="Startup_CacheCleanup" xml:space="preserve"><value>登录数据已迁移，但旧加密缓存未能移除。请关闭旧版本并重启以重试清理。</value></data>
+  <data name="Diagnostics_Title.Text" xml:space="preserve"><value>安全诊断</value></data>
+  <data name="Diagnostics_Description.Text" xml:space="preserve"><value>仅记录经过过滤的事件。生产诊断最长 30 分钟，退出即结束；Debug 诊断持续至手动结束或退出。文件仅保存在本机。</value></data>
+  <data name="Diagnostics_Start.Content" xml:space="preserve"><value>开始文件诊断</value></data>
+  <data name="Diagnostics_Stop.Content" xml:space="preserve"><value>结束诊断</value></data>
+  <data name="Diagnostics_Copy.Content" xml:space="preserve"><value>复制安全摘要</value></data>
+  <data name="Diagnostics_Started" xml:space="preserve"><value>本次诊断已开启，将在时限到达或退出时自动结束。</value></data>
+  <data name="Diagnostics_Stopped" xml:space="preserve"><value>文件诊断已结束。</value></data>
+  <data name="Sync_RetryConfiguration.Content" xml:space="preserve"><value>重新加载失败配置</value></data>
+  <data name="Sync_RestoreConfiguration.Content" xml:space="preserve"><value>从备份恢复失败配置</value></data>
+  <data name="Sync_RestoreConfirm" xml:space="preserve"><value>从有效的加密备份恢复不可读的同步配置？原文件会加密归档，任务将按保存的开关恢复。</value></data>
+  <data name="Diagnostics_CopyFailed" xml:space="preserve"><value>无法复制诊断摘要，请重试。</value></data>
 </root>

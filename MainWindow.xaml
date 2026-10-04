@@ -54,7 +54,11 @@
             </NavigationView.MenuItems>
 
             
-            <Frame x:Name="contentFrame" />
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                <InfoBar x:Name="StartupNotice" Severity="Warning" IsOpen="False" IsClosable="True" />
+                <Frame x:Name="contentFrame" Grid.Row="1" />
+            </Grid>
         </NavigationView>
         
     </Grid>

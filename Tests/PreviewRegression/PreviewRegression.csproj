@@ -34,4 +34,11 @@
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/AccountAuthenticationService.cs" Link="Production/AccountAuthenticationService.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
+  </ItemGroup>
+  <ItemGroup><Compile Include="../../Helpers/FileOperationErrors.cs" Link="Production/FileOperationErrors.cs" /></ItemGroup>
 </Project>

@@ -16,6 +16,9 @@ namespace OneDrive_Simple_Management_Tool
     /// </summary>
     public sealed partial class MainWindow : Microsoft.UI.Xaml.Window
     {
+        private bool _selectionInitialized;
+        private bool _explicitNavigation;
+
         public MainWindow()
         {
             this.InitializeComponent();
@@ -30,6 +33,10 @@ namespace OneDrive_Simple_Management_Tool
         //NavigationView 控件的导航功能
         private void NvSample_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
+            bool initialSelection = !_selectionInitialized;
+            _selectionInitialized = true;
+            if (initialSelection && _explicitNavigation) return;
+            if (args.SelectedItem == null && !args.IsSettingsSelected) return;
             if(args.IsSettingsSelected)
             {
                 contentFrame.Navigate(typeof(SettingPage));
@@ -50,10 +57,17 @@ namespace OneDrive_Simple_Management_Tool
         //三个参数，分别代表目标页面的类型、传递给目标页面的参数和导航动画信息
         public void Navigate(Type pageType,object targetPageArguments = null, NavigationTransitionInfo navigationTransitionInfo = null)
         {
+            _explicitNavigation = true;
             Rootframe.Navigate(pageType, targetPageArguments, navigationTransitionInfo);
         }
 
         public Frame Rootframe => contentFrame;
+
+        public void ShowStartupNotice(string message)
+        {
+            StartupNotice.Message = message;
+            StartupNotice.IsOpen = true;
+        }
 
     }
 }

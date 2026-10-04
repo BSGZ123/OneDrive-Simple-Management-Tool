@@ -8,13 +8,13 @@
     xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
     d:DataContext="{x:Bind viewmodels:CreateDriveViewModel}"
     mc:Ignorable="d"
-    Title="Create Drive"
+    x:Uid="CreateDrive_Dialog"
     DefaultButton="Primary"
-    PrimaryButtonText="Create"
-    PrimaryButtonCommand="{Binding CreateDriveCommand}" 
-    CloseButtonText="Cancel">
+    IsPrimaryButtonEnabled="{Binding CanCreate}">
 
-    <Grid>
-        <TextBox x:Name="DriveName" Header="Display Name(Optional)" PlaceholderText="Drive Name" Text="{Binding DisplayName, Mode=TwoWay}" Margin="10,10,10,0" />
-    </Grid>
+    <StackPanel Spacing="12">
+        <TextBox x:Name="DriveName" x:Uid="CreateDrive_Name" Text="{Binding DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanCreate}" />
+        <ProgressRing IsActive="{Binding IsBusy}" Width="24" Height="24" />
+        <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" MaxWidth="420" />
+    </StackPanel>
 </ContentDialog>

@@ -36,6 +36,30 @@ namespace OneDrive_Simple_Management_Tool.Pages
             finally { _dialogOpen = false; }
         }
 
+        private async void RetryConfiguration(object sender, RoutedEventArgs args)
+        {
+            try { await _service.RetryFailedAsync(); await _model.InitializeAsync(); }
+            catch (Exception exception) { _model.ErrorMessage = AccountConfigurationErrors.Message(exception); }
+        }
+
+        private async void RestoreConfiguration(object sender, RoutedEventArgs args)
+        {
+            if (_dialogOpen) return;
+            _dialogOpen = true;
+            try
+            {
+                var dialog = new ContentDialog
+                {
+                    XamlRoot = XamlRoot, Title = "Configuration_Repair".GetLocalized(), Content = "Sync_RestoreConfirm".GetLocalized(),
+                    PrimaryButtonText = "Configuration_Repair".GetLocalized(), CloseButtonText = "Account_Cancel".GetLocalized(),
+                    DefaultButton = ContentDialogButton.Close
+                };
+                if (await dialog.ShowAsync() == ContentDialogResult.Primary) { await _service.RetryFailedAsync(true); await _model.InitializeAsync(); }
+            }
+            catch (Exception exception) { _model.ErrorMessage = AccountConfigurationErrors.Message(exception); }
+            finally { _dialogOpen = false; }
+        }
+
         private async void RemoveBinding(object sender, RoutedEventArgs args)
         {
             if (_dialogOpen || (sender as Button)?.Tag is not FolderSyncItemViewModel item) return;

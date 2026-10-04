@@ -15,9 +15,12 @@
     <!--这里是网盘列表模板（每个已登录的网盘将以行记录展示），右键菜单获取当前网盘容量情况-->
     <Page.Resources>
         <DataTemplate x:Key="DriveItemTemplate" x:DataType="viewmodels:DriveViewModel">
-            <Grid Tag="{Binding DisplayName}" DoubleTapped="NavigateToDrive">
+            <Grid DoubleTapped="NavigateToDrive">
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                 <Grid.ContextFlyout>
                     <MenuFlyout>
+                        <MenuFlyoutItem x:Uid="CloudPage_Open" Click="OpenFromMenu" />
+                        <MenuFlyoutItem x:Uid="CloudPage_SignIn" Command="{Binding SignInCommand}" />
                         <MenuFlyoutItem x:Uid="CloudPage_Flyout_GetCapacity" Command="{Binding GetCapacityCommand}" />
                         <!--<MenuFlyoutItem x:Uid="CloudPage_Flyout_RemoveDrive" Command="{Binding Cloud.RemoveDriveCommand}" CommandParameter="{Binding}" />-->
                     </MenuFlyout>
@@ -25,6 +28,7 @@
 
                 <TextBlock Text="{Binding DisplayName}" />
                 <TextBlock Text="{Binding StorageInfo}" HorizontalAlignment="Right" />
+                <InfoBar Grid.Row="1" IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
             </Grid>
         </DataTemplate>
     </Page.Resources>
@@ -32,6 +36,7 @@
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -42,11 +47,25 @@
             Grid.Row="1"
             x:Uid="CloudPage_CreateDrive"
             Margin="0 10 0 10"
+            IsEnabled="{Binding CanAdd}"
             Click="ShowCreateDriveDialogAsync"/>
+
+        <StackPanel Grid.Row="2" Spacing="8" Margin="0,0,0,12">
+            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Uid="Configuration_RetryButton" Click="Retry" />
+                <Button x:Uid="Configuration_RestoreButton" Click="RestoreBackup" IsEnabled="{Binding NeedsRecovery}" />
+                <Button x:Uid="Configuration_RebuildButton" Click="Rebuild" IsEnabled="{Binding NeedsRecovery}" />
+                <Button x:Uid="Configuration_RepairButton" Click="RepairDuplicates" IsEnabled="{Binding HasDuplicates}" />
+            </StackPanel>
+        </StackPanel>
 
         <!--这里网盘列表显示，套用DriveItemTemplate-->
         <ListView
-            Grid.Row="2"
+            x:Name="DriveList"
+            HorizontalContentAlignment="Stretch"
+            Grid.Row="3"
+            SelectedItem="{Binding SelectedDrive, Mode=TwoWay}"
             ItemTemplate="{StaticResource DriveItemTemplate}"
             ItemsSource="{Binding Drives}"/>
     </Grid>

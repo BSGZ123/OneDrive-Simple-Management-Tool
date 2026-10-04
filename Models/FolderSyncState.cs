@@ -6,17 +6,29 @@ namespace OneDrive_Simple_Management_Tool.Models
 {
     public sealed class FolderSyncBinding
     {
+        [JsonIgnore]
+        public long StorageRevision { get; set; }
+        [JsonRequired]
         public string Id { get; set; } = Guid.NewGuid().ToString("N");
+        [JsonRequired]
         public string LocalPath { get; set; }
+        [JsonRequired]
         public string FolderName { get; set; }
+        [JsonRequired]
         public string AccountId { get; set; }
+        [JsonRequired]
         public string DriveId { get; set; }
         public string DriveName { get; set; }
+        [JsonRequired]
         public string RemoteFolderId { get; set; }
+        [JsonRequired]
         public string RemotePath { get; set; }
+        [JsonRequired]
         public List<string> RemoteAncestorIds { get; set; } = new();
+        [JsonRequired]
         public bool Enabled { get; set; } = true;
         public DateTimeOffset? LastSuccess { get; set; }
+        [JsonRequired]
         public Dictionary<string, FolderSyncStamp> Files { get; set; } = new(StringComparer.Ordinal);
     }
 

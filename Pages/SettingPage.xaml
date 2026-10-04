@@ -56,6 +56,14 @@
                 </ComboBox>
             </controls:SettingsCard>
 
+            <TextBlock x:Uid="Diagnostics_Title" FontWeight="Bold" Margin="0 10 0 10" />
+            <TextBlock x:Uid="Diagnostics_Description" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,8">
+                <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" />
+                <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" />
+                <Button x:Uid="Diagnostics_Copy" Click="CopyDiagnostics" />
+            </StackPanel>
+            <TextBlock x:Name="DiagnosticsStatus" TextWrapping="Wrap" />
             <TextBlock x:Uid="SettingPage_AboutTitle" FontWeight="Bold" Margin="0 10 0 10" />
 
             <!--程序的版权更新简要信息-->

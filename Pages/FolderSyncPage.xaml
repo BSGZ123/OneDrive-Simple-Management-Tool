@@ -18,7 +18,12 @@
             <TextBlock x:Uid="Sync_Description" TextWrapping="Wrap" />
             <TextBlock x:Uid="Sync_Lifetime" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </StackPanel>
-        <InfoBar Grid.Row="2" IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
+        <InfoBar Grid.Row="2" IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Uid="Sync_RetryConfiguration" Click="RetryConfiguration" />
+                <Button x:Uid="Sync_RestoreConfiguration" Click="RestoreConfiguration" />
+            </StackPanel>
+        </InfoBar>
         <Grid Grid.Row="3">
             <InfoBar IsOpen="{Binding IsEmpty}" x:Uid="Sync_Empty" Severity="Informational" IsClosable="False" VerticalAlignment="Top" />
             <ListView ItemsSource="{Binding Bindings}" SelectionMode="None" HorizontalContentAlignment="Stretch">

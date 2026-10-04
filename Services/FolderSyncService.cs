@@ -19,8 +19,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public string ErrorKey { get; private set; }
         public event Action Changed;
 
-        public FolderSyncService() : this(new FolderSyncStore(Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OneDriveSimpleManagementTool", "FolderSync")),
+        public FolderSyncService() : this(new FolderSyncStore(new ApplicationDataPaths().FolderSync),
             OneDrive.CreateFolderSyncTarget) { }
 
         public FolderSyncService(FolderSyncStore store, Func<FolderSyncBinding, IFolderSyncTarget> factory)
@@ -30,6 +29,18 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         public Task InitializeAsync() => _initialization ??= LoadAsync();
+
+        public async Task RetryFailedAsync(bool restoreBackups = false)
+        {
+            await InitializeAsync();
+            await _changes.WaitAsync();
+            try
+            {
+                if (restoreBackups) await _store.RestoreUnreadableBackupsAsync(_jobs.Select(j => j.Binding.Id).ToList());
+                await LoadAsync();
+            }
+            finally { _changes.Release(); }
+        }
 
         public IFolderSyncBrowser CreateBrowser(FolderSyncBinding binding)
         {
@@ -44,9 +55,10 @@ namespace OneDrive_Simple_Management_Tool.Services
             try
             {
                 var loaded = await _store.LoadAsync(CancellationToken.None);
-                ErrorKey = loaded.Errors > 0 ? "Sync_ConfigError" : null;
+                ErrorKey = _store.LegacyCleanupPending ? "Configuration_LegacyCleanup" : loaded.Errors > 0 ? "Sync_ConfigError" : null;
                 foreach (var binding in loaded.Bindings)
                 {
+                    if (_jobs.Any(j => j.Binding.Id == binding.Id)) continue;
                     try { CheckOverlap(binding); }
                     catch { ErrorKey = "Sync_ConfigError"; continue; }
                     AddJob(binding);
@@ -64,7 +76,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             {
                 var other = job.Binding;
                 if (FolderSyncRules.Overlaps(binding.LocalPath, other.LocalPath) ||
-                    (binding.DriveId == other.DriveId && (binding.RemoteFolderId == other.RemoteFolderId ||
+                    (binding.AccountId == other.AccountId && binding.DriveId == other.DriveId && (binding.RemoteFolderId == other.RemoteFolderId ||
                         binding.RemoteAncestorIds.Contains(other.RemoteFolderId) || other.RemoteAncestorIds.Contains(binding.RemoteFolderId))))
                     throw new FolderSyncException("Sync_Overlap");
             }
@@ -102,7 +114,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             try
             {
                 await job.SetEnabledAsync(false);
-                _store.Remove(job.Binding.Id);
+                await _store.RemoveAsync(job.Binding);
                 await job.StopAsync();
                 _jobs.Remove(job);
                 Changed?.Invoke();
@@ -262,6 +274,8 @@ namespace OneDrive_Simple_Management_Tool.Services
                 401 => "Sync_LoginNeeded", 403 => "Sync_AccessDenied", 404 => "Sync_RemoteMissing",
                 409 or 412 => "Sync_RemoteChanged", 507 => "Sync_Quota", _ => "Sync_NetworkError"
             },
+            AccountAuthenticationException auth when auth.Failure is AuthenticationFailure.RequiresSignIn or AuthenticationFailure.AccountMismatch => "Sync_LoginNeeded",
+            AccountAuthenticationException => "Sync_NetworkError",
             _ => FolderSyncEngine.ErrorKey(exception)
         };
 

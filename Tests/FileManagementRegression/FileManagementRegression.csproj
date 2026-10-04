@@ -36,4 +36,17 @@
     <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/AccountAuthenticationService.cs" Link="Production/AccountAuthenticationService.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Helpers/AccountConfigurationErrors.cs" Link="Production/AccountConfigurationErrors.cs" />
+    <Compile Include="../../Services/DriveConfigurationStore.cs" Link="Production/DriveConfigurationStore.cs" />
+    <Compile Include="../../Models/DTO/DriveDTO.cs" Link="Production/DriveDTO.cs" />
+    <Compile Include="../../ViewModels/CloudViewModel.cs" Link="Production/CloudViewModel.cs" />
+    <Compile Include="../../ViewModels/CreateDriveViewModel.cs" Link="Production/CreateDriveViewModel.cs" />
+  </ItemGroup>
 </Project>
