@@ -273,6 +273,15 @@ await Test("stalled body times out with finite retries and can be retried", asyn
     fixture.AssertCompleted(session);
 });
 
+await Test("overlong chunked bodies stop at the metadata byte budget", async fixture =>
+{
+    fixture.Server.OmitLength = true;
+    using var client = new HttpClient(new DownloadResponseHandler(1024));
+    using var stream = await client.GetStreamAsync(fixture.Server.Url);
+    using var destination = new MemoryStream();
+    try { await stream.CopyToAsync(destination); throw new Exception("Overlong response was accepted"); }
+    catch (InvalidDataException) { Check(destination.Length <= 1024, "Excess response bytes reached the destination"); }
+});
 Console.WriteLine("All download regression checks passed.");
 
 static void Check(bool condition, string message)

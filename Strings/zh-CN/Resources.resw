@@ -1170,7 +1170,7 @@
   <data name="Reader_StorageFailure" xml:space="preserve"><value>阅读记录或设置未能保存。你可以继续阅读，或重试保存；损坏的记录需要恢复备份或重建。</value></data>
   <data name="Reader_Approximate" xml:space="preserve"><value>已从上次阅读的大致位置继续。</value></data>
   <data name="Reader_Restarted" xml:space="preserve"><value>上次位置无法恢复，已回到开头。</value></data>
-  <data name="Reader_BookLimit" xml:space="preserve"><value>这本书超出当前阅读器的容量限制。EPUB 文件上限为 100 MB。</value></data>
+  <data name="Reader_BookLimit" xml:space="preserve"><value>书籍大小或图片、样式资源超出当前支持范围。EPUB 文件上限为 100 MB。</value></data>
   <data name="Reader_InvalidBook" xml:space="preserve"><value>这不是有效或受支持的 EPUB 文件。</value></data>
   <data name="Reader_Encryption" xml:space="preserve"><value>暂不支持这本书使用的加密或 DRM。</value></data>
   <data name="Reader_Runtime" xml:space="preserve"><value>WebView2 运行环境不可用。请安装或修复 Microsoft Edge WebView2 Runtime 后重试。</value></data>
@@ -1183,4 +1183,18 @@
   <data name="Reader_Continue" xml:space="preserve"><value>继续</value></data>
   <data name="Reader_ConfirmRestore" xml:space="preserve"><value>将保留损坏的文件，并使用现有备份恢复阅读记录或设置。是否继续？</value></data>
   <data name="Reader_ConfirmRebuild" xml:space="preserve"><value>将保留损坏的文件，并重建无法读取的阅读记录或设置。旧的阅读位置可能无法恢复。是否继续？</value></data>
+  <data name="FileView_Flyout_Read.Text" xml:space="preserve"><value>用阅读器打开</value></data>
+  <data name="Reader_Downloading" xml:space="preserve"><value>正在下载书籍… {0}</value></data>
+  <data name="Reader_AccessDenied" xml:space="preserve"><value>无法访问此书籍。请返回网盘重新登录，或确认你仍有访问权限。</value></data>
+  <data name="Reader_NotFound" xml:space="preserve"><value>书籍已被删除或无法找到，请返回网盘刷新列表。</value></data>
+  <data name="Reader_Network" xml:space="preserve"><value>无法在线验证书籍，请检查网络后重试。</value></data>
+  <data name="Reader_SourceChanged" xml:space="preserve"><value>下载期间书籍发生变化，请重试以获取最新版本。</value></data>
+  <data name="Reader_CacheStorage" xml:space="preserve"><value>无法保存或读取书籍缓存，请检查可用空间，或在设置中清理阅读缓存。</value></data>
+  <data name="Reader_CacheCorrupt" xml:space="preserve"><value>阅读缓存索引损坏。请在设置中清理阅读缓存后重试；阅读进度会保留。</value></data>
+  <data name="Reader_CacheTitle.Text" xml:space="preserve"><value>阅读缓存</value></data>
+  <data name="Reader_CacheDescription.Text" xml:space="preserve"><value>书籍缓存最多 500 MB，正文以未加密文件保存在本机。每次打开需联网确认权限和版本。清理缓存会保留阅读进度。</value></data>
+  <data name="Reader_ClearCache.Content" xml:space="preserve"><value>清理阅读缓存</value></data>
+  <data name="Reader_CacheCleared" xml:space="preserve"><value>阅读缓存已清理。</value></data>
+  <data name="Reader_CacheRetained" xml:space="preserve"><value>已清理可删除的缓存；正在使用的书籍将在关闭后允许清理。</value></data>
+  <data name="Reader_CacheClearFailed" xml:space="preserve"><value>阅读缓存清理失败，请关闭阅读器后重试。</value></data>
 </root>

@@ -15,6 +15,10 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Graphics.Imaging;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using OneDrive_Simple_Management_Tool.ViewModels;
+using OneDrive_Simple_Management_Tool.Views.Layout;
+using OneDrive_Simple_Management_Tool.Helpers;
 
 internal static class ReaderUiProbe
 {
@@ -42,6 +46,7 @@ internal static class ReaderUiProbe
         private ApplicationDataPaths Paths => new(_root);
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
+            Ioc.Default.ConfigureServices(new ProbeServices());
             File.WriteAllText(_log, "Reader UI probe: isolated local data only\n");
             _host = new Grid(); _host.RowDefinitions.Add(new() { Height = GridLength.Auto }); _host.RowDefinitions.Add(new());
             var toolbar = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Padding = new Thickness(8) };
@@ -83,12 +88,18 @@ internal static class ReaderUiProbe
             _running = true;
             try
             {
+                if (Environment.GetEnvironmentVariable("CLOUDFLOW_READER_AUTORUN") == "cloud")
+                {
+                    VerifyMenus();
+                    await RunCloudAsync(); Record("ALL READER UI CHECKS PASSED"); return;
+                }
                 await NewPageAsync();
                 await _reader.OpenLocalAsync(Book);
                 var session = _reader.ViewModel.Session;
                 Require(session.State == ReaderState.Ready, "Open:" + session.ErrorCode);
                 Require(session.Toc.Count > 0 && session.Location?.Cfi != null, "MissingContentsOrPosition");
                 Record("PASS native WebView2 ready, TOC and confirmed location");
+                Record("WebView2 runtime: " + _reader.Controller.RuntimeVersion);
                 if (Environment.GetEnvironmentVariable("CLOUDFLOW_READER_AUTORUN") == "restore")
                 {
                     Require(session.Location.Fraction > 0.1, "CrossProcessProgressNotRestored");
@@ -234,6 +245,56 @@ internal static class ReaderUiProbe
             using var timeout = new CancellationTokenSource(8000);
             while (!condition()) await Task.Delay(20, timeout.Token);
         }
+        private async Task RunCloudAsync()
+        {
+            await using var cloud = new ReaderCloudFixture(Book);
+            await NewPageAsync(); await _reader.OpenAsync(cloud.Request);
+            var session = _reader.ViewModel.Session;
+            Require(session.State == ReaderState.Ready, "CloudOpen:" + session.ErrorCode);
+            Record("PASS native download, protected cache index and cloud identity open");
+            await session.NavigateAsync(session.Toc.Last().Id); var saved = session.Location; await _reader.CloseAsync();
+            int downloads = cloud.Gets;
+            await NewPageAsync(); await _reader.OpenAsync(cloud.Request);
+            session = _reader.ViewModel.Session;
+            Require(session.State == ReaderState.Ready && cloud.Gets == downloads && Math.Abs(session.Location.Fraction.Value - saved.Fraction.Value) < .02, "CloudReopen");
+            Record("PASS cache hit, new page and cloud reading progress restore");
+            await _reader.CloseAsync(); cloud.Version = "ctag:native-v2";
+            await NewPageAsync(); await _reader.OpenAsync(cloud.Request); session = _reader.ViewModel.Session;
+            Require(session.State == ReaderState.Ready && cloud.Gets > downloads && session.NoticeKey == "Reader_Approximate", "CloudVersionChange");
+            Record("PASS changed cloud version downloads and restores approximate position");
+            await _reader.CloseAsync(); cloud.Failure = "AccessDenied";
+            await NewPageAsync(); await _reader.OpenAsync(cloud.Request); session = _reader.ViewModel.Session;
+            Require(session.State == ReaderState.Failed && session.ErrorCode == "AccessDenied", "CloudPermission");
+            cloud.Failure = null; await session.RetryAsync();
+            Require(session.State == ReaderState.Ready, "CloudPermissionRetry");
+            Record("PASS permission failure blocks cache and explicit retry recovers");
+            await CaptureLayoutAsync();
+            await _reader.CloseAsync();
+            await new ReaderCacheService(Paths).ClearAsync();
+            Require(File.Exists(Paths.ReaderProgress) && !Directory.EnumerateFiles(Paths.ReaderCache, "*.epub").Any(), "CloudCacheClear");
+            Record("PASS native close and cache clear preserve encrypted progress");
+        }
+        private void VerifyMenus()
+        {
+            var drive = new DriveViewModel(new OneDrive("test-drive", "test-account", null));
+            foreach (var view in new UserControl[] { new ColumnFileView(), new GirdFileView() })
+            {
+                foreach (var (item, expected) in new[]
+                {
+                    (new Microsoft.Graph.Models.DriveItem { Id = "book", Name = "sample.EPUB", File = new() }, true),
+                    (new Microsoft.Graph.Models.DriveItem { Id = "text", Name = "sample.txt", File = new() }, false),
+                    (new Microsoft.Graph.Models.DriveItem { Id = "folder", Name = "sample.epub", Folder = new() }, false),
+                    (new Microsoft.Graph.Models.DriveItem { Id = "remote", Name = "sample.epub", File = new(), RemoteItem = new() }, false)
+                })
+                {
+                    var file = new FileViewModel(drive, item); view.DataContext = file;
+                    Require(file.CanRead == expected && ((MenuFlyout)view.ContextFlyout).Items.OfType<MenuFlyoutItem>()
+                        .Any(entry => entry.Text == "FileView_Flyout_Read/Text".GetLocalized()) == expected, "ReaderMenuScope");
+                }
+            }
+            Record("PASS native list/grid menus restrict reader entry to ordinary EPUB files");
+        }
+        private sealed class ProbeServices : IServiceProvider { public object GetService(Type serviceType) => null; }
         private static IEnumerable<JsonElement> Frames(JsonElement element)
         {
             if (element.ValueKind == JsonValueKind.Object)

@@ -349,6 +349,29 @@ try {
             return samples;
         });
     }
+    await test('raster headers, SVG complexity, CSS effects and Data images obey resource budgets', async () => {
+        const { page } = await pageFor('text');
+        const result = await page.evaluate(async () => {
+            const { rasterPixels, checkSvg, checkCss } = await import('/reader/resource-budget.js');
+            const fails = action => { try { action(); return false; } catch (e) { return e.message === 'BookLimit'; } };
+            const png = new Uint8Array(45); const view = new DataView(png.buffer);
+            png.set([137,80,78,71,13,10,26,10]); view.setUint32(8, 13); png.set([73,72,68,82], 12);
+            view.setUint32(16, 512); view.setUint32(20, 512); png.set([73,69,78,68], 37);
+            const normal = rasterPixels(png) === 512 * 512;
+            view.setUint32(16, 1_000_000); const huge = fails(() => rasterPixels(png)); view.setUint32(16, 512);
+            png.set([97,99,84,76], 37); const animation = fails(() => rasterPixels(png));
+            const svg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg"><filter/></svg>', 'application/xml');
+            const svgBlocked = fails(() => checkSvg(svg.documentElement));
+            const cssBlocked = fails(() => checkCss('*{filter:blur(999px)}'));
+            const refused = await new Promise(resolve => {
+                const image = new Image(); image.onload = () => resolve(false); image.onerror = () => resolve(true);
+                image.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            });
+            return { normal, huge, animation, svgBlocked, cssBlocked, refused };
+        });
+        assert.ok(Object.values(result).every(Boolean), JSON.stringify(result));
+        await dispose(page);
+    });
     await test('chapter layout and close produce no uncaught browser errors', async () => {
         assert.deepEqual(pageErrors, []);
     });

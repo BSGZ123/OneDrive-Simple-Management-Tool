@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OneDrive_Simple_Management_Tool.Models
 {
-    public enum ReaderState { Idle, Preparing, Loading, Restoring, Ready, Failed, Closing, Closed }
+    public enum ReaderState { Idle, Preparing, Downloading, Loading, Restoring, Ready, Failed, Closing, Closed }
 
     // Local identities never masquerade as an authenticated OneDrive account.
     public sealed record ReaderIdentity(string Kind, string AccountId, string DriveId, string ItemId);
@@ -28,7 +30,10 @@ namespace OneDrive_Simple_Management_Tool.Models
     {
         public override string ToString() => Label;
     }
-    public sealed record ReaderOpenRequest(string LocalPath);
+    // Delegates and preauthenticated URLs stay in native memory, never in the message bridge or stores.
+    public sealed record ReaderOpenRequest(string LocalPath = null, ReaderIdentity Identity = null,
+        Func<CancellationToken, Task<DownloadSource>> ResolveSource = null);
+    public sealed record ReaderCacheEntry(ReaderIdentity Identity, string Version, string FileName, string Sha256, long Size, DateTimeOffset LastUsed);
     public sealed class ReaderException(string code) : Exception(code) { public string Code { get; } = code; }
     public sealed record ReaderWireMessage(int Version, string SessionId, string RequestId, string Type, JsonElement Payload);
     public sealed record ReaderOpenPayload(ReaderSettings Settings, ReaderLocation Location);
@@ -46,5 +51,6 @@ namespace OneDrive_Simple_Management_Tool.Models
     [JsonSerializable(typeof(ReaderLocation))]
     [JsonSerializable(typeof(List<ReaderProgress>))]
     [JsonSerializable(typeof(ReaderPreferences))]
+    [JsonSerializable(typeof(List<ReaderCacheEntry>))]
     internal partial class ReaderJsonContext : JsonSerializerContext { }
 }

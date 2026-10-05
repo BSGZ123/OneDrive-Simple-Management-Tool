@@ -1170,7 +1170,7 @@
   <data name="Reader_StorageFailure" xml:space="preserve"><value>Reading progress or settings could not be saved. Continue reading or retry saving. Damaged records require backup recovery or rebuilding.</value></data>
   <data name="Reader_Approximate" xml:space="preserve"><value>Resumed near your previous position.</value></data>
   <data name="Reader_Restarted" xml:space="preserve"><value>Your previous position could not be restored. Returned to the beginning.</value></data>
-  <data name="Reader_BookLimit" xml:space="preserve"><value>This book exceeds the reader limits. EPUB files must be at most 100 MB.</value></data>
+  <data name="Reader_BookLimit" xml:space="preserve"><value>The book size, images or styles exceed the supported limits. EPUB files must be at most 100 MB.</value></data>
   <data name="Reader_InvalidBook" xml:space="preserve"><value>This is not a valid or supported EPUB file.</value></data>
   <data name="Reader_Encryption" xml:space="preserve"><value>This book uses unsupported encryption or DRM.</value></data>
   <data name="Reader_Runtime" xml:space="preserve"><value>WebView2 is unavailable. Install or repair Microsoft Edge WebView2 Runtime and retry.</value></data>
@@ -1183,4 +1183,18 @@
   <data name="Reader_Continue" xml:space="preserve"><value>Continue</value></data>
   <data name="Reader_ConfirmRestore" xml:space="preserve"><value>Keep the damaged files and restore reading records or settings from existing backups?</value></data>
   <data name="Reader_ConfirmRebuild" xml:space="preserve"><value>Keep the damaged files and rebuild unreadable reading records or settings? Previous reading positions may be unavailable.</value></data>
+  <data name="FileView_Flyout_Read.Text" xml:space="preserve"><value>Open in reader</value></data>
+  <data name="Reader_Downloading" xml:space="preserve"><value>Downloading book… {0}</value></data>
+  <data name="Reader_AccessDenied" xml:space="preserve"><value>This book is not accessible. Return to Files to sign in again or check your access.</value></data>
+  <data name="Reader_NotFound" xml:space="preserve"><value>This book was deleted or cannot be found. Return to Files and refresh.</value></data>
+  <data name="Reader_Network" xml:space="preserve"><value>Cannot verify the book online. Check your connection and retry.</value></data>
+  <data name="Reader_SourceChanged" xml:space="preserve"><value>The book changed during download. Retry to get the latest version.</value></data>
+  <data name="Reader_CacheStorage" xml:space="preserve"><value>Cannot read or save the book cache. Check free space or clear the reading cache in Settings.</value></data>
+  <data name="Reader_CacheCorrupt" xml:space="preserve"><value>The reading cache index is damaged. Clear the reading cache in Settings and retry. Your reading progress is kept.</value></data>
+  <data name="Reader_CacheTitle.Text" xml:space="preserve"><value>Reading cache</value></data>
+  <data name="Reader_CacheDescription.Text" xml:space="preserve"><value>Up to 500 MB of books are cached locally as unencrypted files. Opening a book requires an online access and version check. Clearing the cache keeps reading progress.</value></data>
+  <data name="Reader_ClearCache.Content" xml:space="preserve"><value>Clear reading cache</value></data>
+  <data name="Reader_CacheCleared" xml:space="preserve"><value>Reading cache cleared.</value></data>
+  <data name="Reader_CacheRetained" xml:space="preserve"><value>Unused cache cleared. Books in use can be cleared after they close.</value></data>
+  <data name="Reader_CacheClearFailed" xml:space="preserve"><value>Could not clear the reading cache. Close the reader and retry.</value></data>
 </root>

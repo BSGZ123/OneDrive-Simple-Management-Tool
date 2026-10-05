@@ -190,6 +190,7 @@ await Check("workspace tracks a reopened page and closes it when the app exits",
     await workspace.OpenAsync(session, new(f.Book)); Assert(workspace.HasOpenSessions);
     await workspace.CloseAllAsync(); Assert(session.State == ReaderState.Closed && !workspace.HasOpenSessions);
 });
+await CacheChecks.RunAsync(Check);
 Console.WriteLine($"Passed {passed} reader regression checks.");
 
 async Task Check(string name, Func<Task> action) { await action(); passed++; Console.WriteLine("PASS " + name); }

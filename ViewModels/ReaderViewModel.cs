@@ -19,7 +19,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [ObservableProperty] private int _flowIndex;
         [ObservableProperty] private int _zoomIndex;
         public string Title => string.IsNullOrWhiteSpace(Session.Title) ? "Reader_Title".GetLocalized() : Session.Title;
-        public bool IsBusy => Session.State is ReaderState.Preparing or ReaderState.Loading or ReaderState.Restoring or ReaderState.Closing;
+        public bool IsBusy => Session.State is ReaderState.Preparing or ReaderState.Downloading or ReaderState.Loading or ReaderState.Restoring or ReaderState.Closing;
         public bool IsReady => Session.State == ReaderState.Ready && !Session.IsCommandBusy;
         public bool IsReflowableReady => IsReady && !Session.FixedLayout;
         public bool IsFixedReady => IsReady && Session.FixedLayout;
@@ -27,7 +27,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool HasNotice => Session.SaveFailed || Session.NoticeKey != null;
         public bool SaveFailed => Session.SaveFailed;
         public string Notice => (Session.SaveFailed ? "Reader_StorageFailure" : Session.NoticeKey ?? "Reader_Empty").GetLocalized();
-        public string Status => (Session.State switch
+        public string Status => Session.State == ReaderState.Downloading ? string.Format("Reader_Downloading".GetLocalized(), Session.DownloadFraction.ToString("P0")) : (Session.State switch
         {
             ReaderState.Preparing => "Reader_Preparing", ReaderState.Loading => "Reader_Loading",
             ReaderState.Restoring => "Reader_Restoring", ReaderState.Closing => "Reader_Closing",
@@ -36,7 +36,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public string Error => (Session.ErrorCode switch
         {
             "BookLimit" => "Reader_BookLimit", "InvalidBook" => "Reader_InvalidBook", "UnsupportedEncryption" => "Reader_Encryption",
-            "RuntimeUnavailable" => "Reader_Runtime", "ProcessFailed" => "Reader_Crashed", "TimedOut" => "Reader_Timeout", _ => "Reader_LoadFailed"
+            "RuntimeUnavailable" => "Reader_Runtime", "ProcessFailed" => "Reader_Crashed", "TimedOut" => "Reader_Timeout",
+            "AccessDenied" => "Reader_AccessDenied", "NotFound" => "Reader_NotFound", "Network" => "Reader_Network",
+            "SourceChanged" => "Reader_SourceChanged", "CacheStorage" => "Reader_CacheStorage", "CacheCorrupt" => "Reader_CacheCorrupt", _ => "Reader_LoadFailed"
         }).GetLocalized();
         public string Progress => Session.Location?.Fraction is double fraction ? fraction.ToString("P0") : "—";
         private void Refresh()

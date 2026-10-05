@@ -22,6 +22,7 @@ namespace OneDrive_Simple_Management_Tool.Services
     {
         private readonly IReaderStore _store;
         private readonly Func<IReaderHost> _hostFactory;
+        private readonly Func<ReaderOpenRequest, IProgress<double>, CancellationToken, Task<ReaderLocalBook>> _openBook;
         private readonly SemaphoreSlim _writes = new(1, 1);
         private readonly List<ReaderTocEntry> _toc = new();
         private CancellationTokenSource _attempt;
@@ -38,7 +39,12 @@ namespace OneDrive_Simple_Management_Tool.Services
         private int _tocTotal = -1;
         private bool _opened;
         private Task _closing;
-        public ReaderSession(IReaderStore store, Func<IReaderHost> hostFactory) { _store = store; _hostFactory = hostFactory; }
+        public ReaderSession(IReaderStore store, Func<IReaderHost> hostFactory,
+            Func<ReaderOpenRequest, IProgress<double>, CancellationToken, Task<ReaderLocalBook>> openBook = null)
+        {
+            _store = store; _hostFactory = hostFactory;
+            _openBook = openBook ?? ((request, _, token) => ReaderLocalBook.OpenAsync(request.LocalPath, token));
+        }
         public event Action Changed;
         public event Action<Uri> ExternalLinkRequested;
         public event Action BackRequested;
@@ -48,6 +54,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public bool SaveFailed { get; private set; }
         public bool IsCommandBusy => _completed != null;
         public string Title { get; private set; }
+        public double DownloadFraction { get; private set; }
         public bool FixedLayout { get; private set; }
         public ReaderLocation Location { get; private set; }
         public ReaderSettings Settings { get; private set; } = new();
@@ -58,9 +65,10 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task OpenAsync(ReaderOpenRequest request)
         {
-            if (State is ReaderState.Preparing or ReaderState.Loading or ReaderState.Restoring or ReaderState.Closing) return;
+            if (State is ReaderState.Preparing or ReaderState.Downloading or ReaderState.Loading or ReaderState.Restoring or ReaderState.Closing) return;
             await ReleaseAsync();
             await FlushAsync();
+            if (Request != request) _resume = null;
             Request = request;
             _closing = null;
             _attempt = new();
@@ -70,12 +78,18 @@ namespace OneDrive_Simple_Management_Tool.Services
             ErrorCode = null; NoticeKey = null; Title = null; FixedLayout = false; Location = null;
             State = ReaderState.Preparing; Notify();
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(attempt.Token);
-            timeout.CancelAfter(TimeSpan.FromSeconds(30));
+            timeout.CancelAfter(request.Identity == null ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(5));
             try
             {
-                var book = await ReaderLocalBook.OpenAsync(request.LocalPath, timeout.Token);
+                var progress = new Progress<double>(fraction =>
+                {
+                    if (attempt != _attempt || attempt.IsCancellationRequested || State is not (ReaderState.Preparing or ReaderState.Downloading)) return;
+                    DownloadFraction = fraction; State = ReaderState.Downloading; Notify();
+                });
+                var book = await _openBook(request, progress, timeout.Token);
                 if (attempt.IsCancellationRequested) { book.Dispose(); return; }
                 _book = book;
+                timeout.CancelAfter(TimeSpan.FromSeconds(30));
                 ReaderProgress saved = null;
                 try
                 {
@@ -109,7 +123,8 @@ namespace OneDrive_Simple_Management_Tool.Services
             catch (Exception error)
             {
                 if (attempt == _attempt && !attempt.IsCancellationRequested)
-                    await FailAsync(error is ReaderException known ? known.Code : error is OperationCanceledException ? "TimedOut" : "LoadFailed");
+                    await FailAsync(error is ReaderException known ? known.Code : error is OperationCanceledException ? "TimedOut"
+                        : error is ConfigurationException ? "CacheCorrupt" : error is System.IO.IOException or UnauthorizedAccessException ? "CacheStorage" : "LoadFailed");
             }
         }
         public async Task RetryAsync()

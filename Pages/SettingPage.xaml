@@ -43,6 +43,10 @@
                 </InfoBar.ActionButton>
             </InfoBar>
 
+            <TextBlock x:Uid="Reader_CacheTitle" FontWeight="SemiBold" Margin="0,12,0,0" />
+            <TextBlock x:Uid="Reader_CacheDescription" TextWrapping="Wrap" />
+            <Button x:Name="ClearReaderCacheButton" x:Uid="Reader_ClearCache" Click="ClearReaderCache" />
+            <TextBlock x:Name="ReaderCacheStatus" TextWrapping="Wrap" Visibility="Collapsed" />
             <TextBlock x:Uid="Diagnostics_Title" FontWeight="SemiBold" Margin="0,12,0,0" />
             <TextBlock x:Uid="Diagnostics_Description" TextWrapping="Wrap" />
             <localControls:WrapPanel>

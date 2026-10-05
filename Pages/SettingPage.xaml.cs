@@ -20,6 +20,18 @@ namespace OneDrive_Simple_Management_Tool.Pages
             DiagnosticsStatus.Visibility = Visibility.Visible;
         }
 
+        private async void ClearReaderCache(object sender, RoutedEventArgs e)
+        {
+            ClearReaderCacheButton.IsEnabled = false;
+            try
+            {
+                int retained = await Ioc.Default.GetRequiredService<Services.ReaderWorkspace>().ClearCacheAsync();
+                ReaderCacheStatus.Text = Helpers.ResourceHelper.GetLocalized(retained == 0 ? "Reader_CacheCleared" : "Reader_CacheRetained");
+            }
+            catch { ReaderCacheStatus.Text = Helpers.ResourceHelper.GetLocalized("Reader_CacheClearFailed"); }
+            finally { ReaderCacheStatus.Visibility = Visibility.Visible; ClearReaderCacheButton.IsEnabled = true; }
+        }
+
         private void StopDiagnostics(object sender, RoutedEventArgs e)
         {
             Services.SafeDiagnostics.Current.EndSession();

@@ -10,12 +10,13 @@ namespace OneDrive_Simple_Management_Tool.Services
     {
         private readonly HashSet<ReaderSession> _sessions = new();
         private readonly IReaderStore _store;
-        public ReaderWorkspace(ApplicationDataPaths paths) { Paths = paths; _store = new ReaderStore(paths); }
+        private readonly ReaderCacheService _cache;
+        public ReaderWorkspace(ApplicationDataPaths paths) { Paths = paths; _store = new ReaderStore(paths); _cache = new(paths); }
         public ApplicationDataPaths Paths { get; }
         public bool HasOpenSessions => _sessions.Any(x => x.State != Models.ReaderState.Closed);
         public ReaderSession CreateSession(Func<IReaderHost> factory)
         {
-            var session = new ReaderSession(_store, factory);
+            var session = new ReaderSession(_store, factory, _cache.OpenAsync);
             Track(session);
             return session;
         }
@@ -40,5 +41,6 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
         public Task CloseOthersAsync(ReaderSession active) => Task.WhenAll(_sessions.Where(x => x != active).ToArray().Select(x => x.CloseAsync()));
         public Task CloseAllAsync() => Task.WhenAll(_sessions.ToArray().Select(x => x.CloseAsync()));
+        public Task<int> ClearCacheAsync() => _cache.ClearAsync();
     }
 }

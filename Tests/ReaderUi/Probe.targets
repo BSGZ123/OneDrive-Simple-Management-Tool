@@ -1,4 +1,4 @@
 <Project>
   <PropertyGroup><StartupObject>ReaderUiProbe</StartupObject></PropertyGroup>
-  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\ReaderUi\Probe.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\ReaderUi\Probe.cs" /><Compile Include="$(MSBuildProjectDirectory)\Tests\ReaderUi\CloudFixture.cs" /></ItemGroup>
 </Project>

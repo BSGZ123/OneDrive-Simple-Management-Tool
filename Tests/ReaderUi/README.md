@@ -1,6 +1,6 @@
 # WinUI EPUB 本地验证
 
-这是阶段二显式启用的测试入口，使用生产 ReaderPage、ReaderSession、WebView2 控制器和 DPAPI 存储。启动时跳过应用登录、OneDrive 和同步初始化；数据写入独立根目录。普通应用构建不会包含 Probe.cs，也未新增正式文件菜单入口。
+这是显式启用的隔离测试入口，使用生产 ReaderPage、ReaderSession、WebView2 控制器和 DPAPI 存储。启动时跳过应用登录、OneDrive 和同步初始化；数据写入独立根目录。普通应用构建不会包含测试入口。第三阶段已新增正式文件右键入口；真实账户与发布机验收单独记录。
 
 ## 构建及手工试读
 
@@ -35,6 +35,7 @@ Get-Content bin/ReaderUi/reader-ui-results.log
 | `full` | smoke 加 CSP、书内脚本禁用、frame 消息隔离、外部导航、所属渲染进程故障恢复、窄窗口/深色/滚动、5 次正常开关和初始化中关闭；使用文字样书 |
 | `restore` | 新进程复用 smoke 的根目录和书，验证进度及字号 26/深色设置恢复；先运行 smoke，再运行此模式 |
 | `bookscan` | smoke 加逐一导航所有目录项；适用于用户授权的本地 EPUB |
+| `cloud` | 原生列表/网格菜单范围、回环 HTTP 下载、生产缓存、云身份进度、版本变化、权限拒绝/重试及清理；使用自建文字样书，与真实 Graph 账户验收分开 |
 
 `full` 通过当前测试 WebView 的 CDP `Page.crash` 触发其渲染进程故障，随后验证手动重试路径；不查杀其他应用进程。特殊测试 frame 临时允许脚本，确认 frame 确实发送了消息，但宿主返回操作未触发；生产正文 frame 仍必须只有 `allow-same-origin`。
 
@@ -42,7 +43,7 @@ Get-Content bin/ReaderUi/reader-ui-results.log
 
 ## 实现边界
 
-- 仅本地测试身份：路径散列识别书籍，内容 SHA-256 判断版本；不把路径传入 JS。云端身份字段已预留，尚未接通 OneDrive。
+- 本地测试用路径散列和内容 SHA-256；正式入口固定账户/网盘/项目身份并使用 cTag（缺失时 eTag），标记版本来源。不把路径或 Graph 下载 URL 传入 JS。
 - 原始 EPUB 以只读租约和受控流提供给本次会话。路由、CSP、MIME、导航及消息来源由宿主校验；无 host object，禁止下载、权限请求和新窗口。HTTP/HTTPS 外链必须经原生确认对话框。
 - 进度与设置分别使用当前用户 DPAPI、版本封套、原子替换及备份，损坏时提示；恢复/重建必须由用户主动确认。关闭保存等待预算 2 秒，超时显示未保存；底层任务未结束前仍持有写入序列锁。
-- 正文缓存、Graph 下载、离线读取及正式文件菜单属于下一阶段。复杂排版/图片解码预算和物理键盘/输入法等验收仍见 [RESULTS.md](RESULTS.md)。
+- 正文缓存和 Graph 下载已接入；首版每次打开要求联网，缓存 500 MB，超限按最近使用时间清理未被租用的文件。图片资源范围与阶段三待验收项见 [STAGE3-RESULTS.md](STAGE3-RESULTS.md)。阶段二历史结果保留在 [RESULTS.md](RESULTS.md)。

@@ -30,6 +30,7 @@ namespace OneDrive_Simple_Management_Tool.Views.Reader
         public event Action<string, string> MessageReceived;
         public event Action<string> Failed;
         internal CoreWebView2 Core => _core;
+        internal string RuntimeVersion => _environment?.BrowserVersionString;
         internal int OutstandingRequests => _requests.Count;
         internal int ResponseStreamCount => _responseStreams.Count;
 

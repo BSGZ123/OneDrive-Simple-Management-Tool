@@ -1,6 +1,7 @@
 import { configure, ZipReader, BlobReader } from './foliate/vendor/zip.js';
 import { EPUB } from './foliate/epub.js';
 import { LIMITS } from './protocol.js';
+import { rasterPixels, checkSvg, checkCss } from './resource-budget.js';
 
 configure({ useWebWorkers: false, useCompressionStream: true, chunkSize: 64 * 1024 });
 const check = (condition, code = 'BookLimit') => { if (!condition) throw new Error(code); };
@@ -37,6 +38,7 @@ export async function openEpub(blob, signal) {
     const zip = new ZipReader(new BlobReader(blob), { checkSignature: true });
     const entries = new Map();
     const expandedSizes = new Map();
+    const imageSizes = new Map();
     let declaredTotal = 0, expandedTotal = 0, book, failure;
     const guard = operation => async (...args) => {
         try { return await operation(...args); }
@@ -83,7 +85,7 @@ export async function openEpub(blob, signal) {
             if (!value) return null;
             const text = await value.text();
             // Reject entity declarations, excessive DOM size/depth before upstream recursive navigation parsing.
-            if (/\.(?:xml|opf|ncx|xhtml|html|svg)$/i.test(name)) {
+            if (/\.(?:xml|opf|ncx|xhtml|html|svg)$/i.test(name) || text.trimStart().startsWith('<')) {
                 check(!/<!ENTITY|<!DOCTYPE[^>]*\[/i.test(text), 'InvalidBook');
                 const doc = new DOMParser().parseFromString(text, /\.html$/i.test(name) ? 'text/html' : 'application/xml');
                 check(!doc.querySelector('parsererror'), 'InvalidBook');
@@ -94,7 +96,12 @@ export async function openEpub(blob, signal) {
                     let depth = 0, parent = node;
                     while ((parent = parent.parentElement)) check(++depth <= 64);
                 }
+                for (const svg of doc.querySelectorAll('svg')) checkSvg(svg);
+                if (doc.documentElement?.localName === 'svg') checkSvg(doc.documentElement);
+                for (const style of doc.querySelectorAll('style')) checkCss(style.textContent);
+                for (const element of doc.querySelectorAll('[style]')) checkCss(`*{${element.getAttribute('style')}}`);
             }
+            if (/\.css$/i.test(name) || book?.resources.manifest.some(item => item.href === name && item.mediaType === 'text/css')) checkCss(text);
             return text;
         });
         check(await loadText('mimetype') === 'application/epub+zip', 'InvalidBook');
@@ -105,7 +112,29 @@ export async function openEpub(blob, signal) {
                 check(['http://www.idpf.org/2008/embedding', 'http://ns.adobe.com/pdf/enc#RC']
                     .includes(method.getAttribute('Algorithm')), 'UnsupportedEncryption');
         }
-        book = await new EPUB({ loadText, loadBlob: (name, type) => read(name, LIMITS.entryBytes, type),
+        const loadBlob = guard(async (name, type) => {
+            const value = await read(name, LIMITS.entryBytes, type);
+            if (!value) return null;
+            const bytes = new Uint8Array(await value.arrayBuffer());
+            const signature = String.fromCharCode(...bytes.subarray(0, 4));
+            const font = ['OTTO', 'wOFF', 'wOF2', 'true'].includes(signature)
+                || bytes[0] === 0 && bytes[1] === 1 && bytes[2] === 0 && bytes[3] === 0;
+            if (font) {
+                check(bytes.length <= 16 * 1024 * 1024);
+                if (signature === 'wOFF' || signature === 'wOF2') check(bytes.length >= 20
+                    && new DataView(bytes.buffer).getUint32(16) <= 16 * 1024 * 1024);
+            } else if (/^\s*(?:<\?xml|<svg)/i.test(new TextDecoder().decode(bytes.subarray(0, 256)))) {
+                const text = await loadText(name);
+                const doc = new DOMParser().parseFromString(text, 'application/xml');
+                check(doc.documentElement?.localName === 'svg'); checkSvg(doc.documentElement);
+            } else {
+                const count = rasterPixels(bytes);
+                imageSizes.set(name, count);
+                check([...imageSizes.values()].reduce((sum, size) => sum + size, 0) <= 64_000_000);
+            }
+            return value;
+        });
+        book = await new EPUB({ loadText, loadBlob,
             getSize: name => entries.get(name)?.uncompressedSize ?? 0 }).init();
         signal.throwIfAborted();
         check(book.sections.length > 0 && book.sections.length <= LIMITS.tocNodes, 'InvalidBook');

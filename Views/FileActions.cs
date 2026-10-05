@@ -20,6 +20,7 @@ namespace OneDrive_Simple_Management_Tool.Views
     public enum FileAction
     {
         Open,
+        Read,
         Download,
         Delete,
         Convert,
@@ -61,6 +62,7 @@ namespace OneDrive_Simple_Management_Tool.Views
             if (owner.DataContext is not FileViewModel file) return;
             MenuFlyout menu = new();
             Add(FileAction.Open, file.CanOpen);
+            if (file.CanRead) Add(FileAction.Read);
             Add(FileAction.Download, file.IsFile);
             Add(FileAction.Delete);
             if (file.CanConvert) Add(FileAction.Convert);
@@ -125,6 +127,9 @@ namespace OneDrive_Simple_Management_Tool.Views
             {
                 switch (action)
                 {
+                    case FileAction.Read when file.CanRead:
+                        (App.StartupWindow as MainWindow)?.Navigate(typeof(Pages.ReaderPage), GraphReaderSource.Create(file.Drive.Provider, file.Id));
+                        break;
                     case FileAction.Open when file.IsFolder:
                         await file.Drive.OpenFolder(file);
                         break;

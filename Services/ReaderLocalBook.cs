@@ -13,18 +13,21 @@ namespace OneDrive_Simple_Management_Tool.Services
         private readonly FileStream _lease;
         private readonly string _path;
         private bool _disposed;
-        private ReaderLocalBook(string path, FileStream lease, string hash)
+        private ReaderLocalBook(string path, FileStream lease, string hash, ReaderIdentity identity = null, string version = null)
         {
             _path = path;
             _lease = lease;
-            Identity = new("local", null, null, Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(path.ToUpperInvariant()))));
-            ContentVersion = hash;
+            Identity = identity ?? new("local", null, null, Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(path.ToUpperInvariant()))));
+            ContentVersion = version ?? hash;
+            ContentHash = hash;
             Length = lease.Length;
         }
         public ReaderIdentity Identity { get; }
         public string ContentVersion { get; }
+        public string ContentHash { get; }
         public long Length { get; }
-        public static async Task<ReaderLocalBook> OpenAsync(string path, CancellationToken token)
+        public static Task<ReaderLocalBook> OpenAsync(string path, CancellationToken token) => OpenCachedAsync(path, null, null, null, token);
+        public static async Task<ReaderLocalBook> OpenCachedAsync(string path, ReaderIdentity identity, string version, string expectedHash, CancellationToken token)
         {
             if (!string.Equals(Path.GetExtension(path), ".epub", StringComparison.OrdinalIgnoreCase)) throw new ReaderException("InvalidBook");
             path = Path.GetFullPath(path);
@@ -37,7 +40,8 @@ namespace OneDrive_Simple_Management_Tool.Services
                 if (signature[0] != 'P' || signature[1] != 'K' || signature[2] != 3 || signature[3] != 4) throw new ReaderException("InvalidBook");
                 lease.Position = 0;
                 string hash = Convert.ToHexString(await SHA256.HashDataAsync(lease, token).ConfigureAwait(false));
-                return new(path, lease, hash);
+                if (expectedHash != null && !hash.Equals(expectedHash, StringComparison.OrdinalIgnoreCase)) throw new ReaderException("InvalidBook");
+                return new(path, lease, hash, identity, version);
             }
             catch { lease.Dispose(); throw; }
         }

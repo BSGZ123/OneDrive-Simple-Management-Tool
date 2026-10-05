@@ -8,6 +8,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Services/OneDrive.cs" Link="Production/OneDrive.cs" />
+    <Compile Include="../../Services/GraphReaderSource.cs" Link="Production/GraphReaderSource.cs" />
+    <Compile Include="../../Services/ReaderProtocol.cs" Link="Production/ReaderProtocol.cs" />
+    <Compile Include="../../Models/ReaderModels.cs" Link="Production/ReaderModels.cs" />
     <Compile Include="../../Helpers/SearchQueryRules.cs" Link="Production/SearchQueryRules.cs" />
     <Compile Include="../../Models/DriveItemPage.cs" Link="Production/DriveItemPage.cs" />
     <Compile Include="../../Services/Utils.cs" Link="Production/Utils.cs" />

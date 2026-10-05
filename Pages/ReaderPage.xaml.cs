@@ -37,8 +37,9 @@ namespace OneDrive_Simple_Management_Tool.Pages
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (e.Parameter is ReaderOpenRequest request) await OpenLocalAsync(request.LocalPath);
+            if (e.Parameter is ReaderOpenRequest request) await OpenAsync(request);
         }
+        public Task OpenAsync(ReaderOpenRequest request) => _workspace.OpenAsync(ViewModel.Session, request);
         public Task OpenLocalAsync(string path) => _workspace.OpenAsync(ViewModel.Session, new(path));
         public Task CloseAsync() => ViewModel.Session.CloseAsync();
         private void RefreshContents()

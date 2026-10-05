@@ -74,6 +74,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             OnPropertyChanged(nameof(CanConvert));
             OnPropertyChanged(nameof(CanPreview));
             OnPropertyChanged(nameof(CanOpen));
+            OnPropertyChanged(nameof(CanRead));
         }
         [ObservableProperty] private BitmapImage _image;
         [ObservableProperty] private string _content;
@@ -86,6 +87,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool IsImage => IsFile && _file.Image != null;
         public bool CanConvert => IsFile && FileConversionRules.Supports(Name);
         public bool CanOpen => IsFolder || CanPreview;
+        public bool CanRead => _file.File != null && _file.Folder == null && _file.RemoteItem == null && _file.Deleted == null
+            && string.Equals(Path.GetExtension(Name), ".epub", StringComparison.OrdinalIgnoreCase);
         public int? ChildrenCount { get => _file.Folder?.ChildCount; }
         public DriveViewModel Drive { get; }
         public string ItemType { get; }

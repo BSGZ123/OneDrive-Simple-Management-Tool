@@ -25,5 +25,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public string ReaderProgress => Path.Combine(Root, "Configuration", "reader-progress.dat");
         public string ReaderSettings => Path.Combine(Root, "Configuration", "reader-settings.dat");
         public string ReaderRuntime => Path.Combine(Root, "Reader", "WebView2");
+        public string ReaderCache => Path.Combine(Root, "Reader", "Cache");
+        public string ReaderCacheIndex => Path.Combine(Root, "Configuration", "reader-cache.dat");
     }
 }

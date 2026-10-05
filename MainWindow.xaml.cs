@@ -65,7 +65,7 @@ namespace OneDrive_Simple_Management_Tool
             try
             {
                 // Drive details belong to Files; Settings uses the built-in item.
-                string tag = pageType == typeof(DrivePage) ? nameof(CloudPage) : pageType.Name;
+                string tag = pageType == typeof(DrivePage) || pageType == typeof(ReaderPage) ? nameof(CloudPage) : pageType.Name;
                 object selected = pageType == typeof(SettingPage) ? nvSample.SettingsItem : null;
                 foreach (var item in nvSample.MenuItems)
                     if (item is NavigationViewItem navigationItem && (string)navigationItem.Tag == tag) selected = item;
