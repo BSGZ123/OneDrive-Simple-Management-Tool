@@ -24,6 +24,11 @@
     <PRIResource Remove="Tests\**\*" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Assets\Reader\**\*" />
+    <Content Remove="Assets\Reader\**\*" />
+    <Content Include="Assets\Reader\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Controls\ItemCard.xaml" />
     <None Remove="Pages\FolderSyncPage.xaml" />
     <None Remove="Views\CreateFolderSyncView.xaml" />

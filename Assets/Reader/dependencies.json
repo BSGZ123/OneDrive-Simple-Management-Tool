@@ -1,0 +1,85 @@
+{
+  "foliate": {
+    "repository": "https://github.com/johnfactotum/foliate-js",
+    "commit": "78914aef4466eb960965702401634c2cb348e9b1",
+    "retrieved": "2026-10-05"
+  },
+  "zip": {
+    "version": "2.8.22",
+    "source": "https://registry.npmjs.org/@zip.js/zip.js/-/zip.js-2.8.22.tgz",
+    "bundle": "foliate-js vendor/zip.js at the pinned commit; version from upstream package-lock.json",
+    "integrity": "sha512-0KlzbVR6r8irIX2o3zvUlosBDef62VDl47oUfa1U/qgEs67h4/eGBrX/6HWa1RQbt+J6sAeVmtyFKbTHNdF8qQ=="
+  },
+  "patches": [
+    "view.js: remove general file/URL/directory detection; require an EPUB book object; prevent late renderer creation after close",
+    "paginator.js, fixed-layout.js: remove allow-scripts from chapter iframe sandbox",
+    "epub.js: reject late Blob creation after destroy; clear loader maps",
+    "paginator.js: ignore detached/destroyed document layout and stale font/animation callbacks; disconnect the container resize observer on destroy"
+  ],
+  "files": [
+    {
+      "path": "foliate/view.js",
+      "upstreamSha256": "e0093af921feb03bb58fb51aeedc321fa108a4158d215f6913ecf7925415c945",
+      "sha256": "6f5aa282ef5186f0338017f24a79a73ceb38b177f722e73075cc35cf6f40c0a7"
+    },
+    {
+      "path": "foliate/epub.js",
+      "upstreamSha256": "dfe347495039e9b5991478986ec6b7713cf9efbcd8f475a77ef7b967c5176298",
+      "sha256": "1d8893a7ca9e174e9f06093d9366a28c7ba50a87d9c920a50bc61f1f53532cc1"
+    },
+    {
+      "path": "foliate/epubcfi.js",
+      "upstreamSha256": "e1a688ad5c84bf31f33cef467f92c7a6d060a0f17ec37c1d3c048e9c7b1cf645",
+      "sha256": "e1a688ad5c84bf31f33cef467f92c7a6d060a0f17ec37c1d3c048e9c7b1cf645"
+    },
+    {
+      "path": "foliate/progress.js",
+      "upstreamSha256": "544f5e90babc0cb31c5caf971a5f06dd6249ec06600cb62f672fa7179811fde1",
+      "sha256": "544f5e90babc0cb31c5caf971a5f06dd6249ec06600cb62f672fa7179811fde1"
+    },
+    {
+      "path": "foliate/overlayer.js",
+      "upstreamSha256": "d3d3396e3083277ccbd4f17c407621159b22a407107e43ce75ca3014578094fb",
+      "sha256": "d3d3396e3083277ccbd4f17c407621159b22a407107e43ce75ca3014578094fb"
+    },
+    {
+      "path": "foliate/text-walker.js",
+      "upstreamSha256": "4ad740ab6142b5be428700ef4d270253cef6649cf6e047ae7d2698a7aec65e92",
+      "sha256": "4ad740ab6142b5be428700ef4d270253cef6649cf6e047ae7d2698a7aec65e92"
+    },
+    {
+      "path": "foliate/paginator.js",
+      "upstreamSha256": "51cec81572d5d182e231fe68ce9c3b5489a0976b36172060516336ba893565ea",
+      "sha256": "fbafa10b8f84e1e16c8e836a3a8c92b3b0b6715f54bcbc82cd56fa20e77df878"
+    },
+    {
+      "path": "foliate/fixed-layout.js",
+      "upstreamSha256": "7aee1d15d8e0479b8a6c59a20304b250dafc4c7dc158147a2b2c6bed9e180b4c",
+      "sha256": "84cf585943535710804c277a13d4b72af3c53e5c14e7c0c56a250e1f29e2ad40"
+    },
+    {
+      "path": "foliate/search.js",
+      "upstreamSha256": "31e846bdc095a645de0e94f7baa2c9e136561a363a2f774d4032e72cfa1fb0ef",
+      "sha256": "31e846bdc095a645de0e94f7baa2c9e136561a363a2f774d4032e72cfa1fb0ef"
+    },
+    {
+      "path": "foliate/tts.js",
+      "upstreamSha256": "530d34605b758a5e2260438964a85bb9909bcb49e8848e303fe22cac63859026",
+      "sha256": "530d34605b758a5e2260438964a85bb9909bcb49e8848e303fe22cac63859026"
+    },
+    {
+      "path": "foliate/LICENSE",
+      "upstreamSha256": "b621ffc351fe263bc9b09dd0bc1c9332fda9c462a3904c1e4f0b4d3236b9c28c",
+      "sha256": "b621ffc351fe263bc9b09dd0bc1c9332fda9c462a3904c1e4f0b4d3236b9c28c"
+    },
+    {
+      "path": "foliate/vendor/zip.js",
+      "upstreamSha256": "2a0d43157e4a447c6e43351225758795b75a33e8dfec10c6767248df2182949a",
+      "sha256": "2a0d43157e4a447c6e43351225758795b75a33e8dfec10c6767248df2182949a"
+    },
+    {
+      "path": "foliate/vendor/zip-LICENSE",
+      "sha256": "1b7ebc8d7889ed25491484ab2b102370742ca6c0b26650a0c62cc2269b579b84"
+    }
+  ]
+}

@@ -29,6 +29,10 @@ msbuild "OneDrive Simple Management Tool.csproj" /restore /t:Publish /p:Configur
 
 # 操作说明
 
+## EPUB 阅读器（实施中）
+
+2026-10-05：开始独立 EPUB 阅读器的第一阶段实现，已加入固定版本的 foliate-js、受限 EPUB 加载器、消息适配层，以及真实 Chromium 的阅读、安全和生命周期回归。复现命令、当前预算与尚待验证的边界见 [EPUB 浏览器验证](Tests/ReaderWeb/README.md)。正式阅读页面、OneDrive 入口、缓存和加密进度将在后续阶段接入。
+
 ## 外观设置（页面补全第一轮）
 
 设置页支持浅色、深色、跟随系统，以及无特殊材质、Mica、Mica Alt、Acrylic。选择立即应用到主窗口；偏好保存到 `%LOCALAPPDATA%\OneDriveSimpleManagementTool\Configuration\appearance.json`，下次启动恢复。外观文件只保存主题和材质，不包含账号信息。

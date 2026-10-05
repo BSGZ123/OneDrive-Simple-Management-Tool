@@ -1,0 +1,16 @@
+{
+  "name": "onedrive-reader-web-regression",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run.mjs",
+    "verify-book": "node verify-book.mjs",
+    "serve": "node server.mjs",
+    "fixtures": "node fixtures.mjs",
+    "verify-vendor": "node verify-vendor.mjs"
+  },
+  "devDependencies": {
+    "@zip.js/zip.js": "2.8.22",
+    "playwright": "1.63.0"
+  }
+}

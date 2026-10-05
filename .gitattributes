@@ -3,6 +3,9 @@
 ###############################################################################
 * text=auto
 
+# Keep the vendored reader's recorded SHA-256 hashes stable on Windows checkout.
+Assets/Reader/** text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
