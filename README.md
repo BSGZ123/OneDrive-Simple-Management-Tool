@@ -31,7 +31,7 @@ msbuild "OneDrive Simple Management Tool.csproj" /restore /t:Publish /p:Configur
 
 ## EPUB 阅读器（实施中）
 
-2026-10-05：开始独立 EPUB 阅读器的第一阶段实现，已加入固定版本的 foliate-js、受限 EPUB 加载器、消息适配层，以及真实 Chromium 的阅读、安全和生命周期回归。复现命令、当前预算与尚待验证的边界见 [EPUB 浏览器验证](Tests/ReaderWeb/README.md)。正式阅读页面、OneDrive 入口、缓存和加密进度将在后续阶段接入。
+2026-10-05：已实现浏览器引擎与第二阶段 WinUI/WebView2 本地阅读会话，包括目录、翻页、阅读设置、加密进度、异常重试及关闭清理。浏览器预算与兼容性范围见 [浏览器验证](Tests/ReaderWeb/README.md)，本地测试入口与原生验证记录见 [WinUI 阅读器验证](Tests/ReaderUi/README.md)。目前通过显式启用的隔离测试入口打开本地 EPUB；OneDrive 文件入口、下载缓存和正式发布验收属于第三阶段。
 
 ## 外观设置（页面补全第一轮）
 

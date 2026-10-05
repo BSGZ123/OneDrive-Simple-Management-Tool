@@ -1134,4 +1134,53 @@
   <data name="Home_AllBookmarks.Content" xml:space="preserve">
     <value>View all bookmarks</value>
   </data>
+  <data name="Reader_Title" xml:space="preserve"><value>EPUB reader</value></data>
+  <data name="Reader_Back.AutomationProperties.Name" xml:space="preserve"><value>Back</value></data>
+  <data name="Reader_Previous.AutomationProperties.Name" xml:space="preserve"><value>Previous page</value></data>
+  <data name="Reader_Next.AutomationProperties.Name" xml:space="preserve"><value>Next page</value></data>
+  <data name="Reader_Contents.Label" xml:space="preserve"><value>Contents</value></data>
+  <data name="Reader_Settings.Label" xml:space="preserve"><value>Reading settings</value></data>
+  <data name="Reader_TocTitle.Text" xml:space="preserve"><value>Contents</value></data>
+  <data name="Reader_FontSize.Header" xml:space="preserve"><value>Font size</value></data>
+  <data name="Reader_LineHeight.Header" xml:space="preserve"><value>Line height</value></data>
+  <data name="Reader_Width.Header" xml:space="preserve"><value>Reading width</value></data>
+  <data name="Reader_Theme.Header" xml:space="preserve"><value>Reading background (independent of app theme)</value></data>
+  <data name="Reader_Light.Content" xml:space="preserve"><value>Light</value></data>
+  <data name="Reader_Dark.Content" xml:space="preserve"><value>Dark</value></data>
+  <data name="Reader_Sepia.Content" xml:space="preserve"><value>Sepia</value></data>
+  <data name="Reader_Flow.Header" xml:space="preserve"><value>Reading mode</value></data>
+  <data name="Reader_Paginated.Content" xml:space="preserve"><value>Pages</value></data>
+  <data name="Reader_Scrolled.Content" xml:space="preserve"><value>Scroll within chapter</value></data>
+  <data name="Reader_Zoom.Header" xml:space="preserve"><value>Fixed layout zoom</value></data>
+  <data name="Reader_FitPage.Content" xml:space="preserve"><value>Fit page</value></data>
+  <data name="Reader_FitWidth.Content" xml:space="preserve"><value>Fit width</value></data>
+  <data name="Reader_Apply.Content" xml:space="preserve"><value>Apply</value></data>
+  <data name="Reader_SaveOptions.Content" xml:space="preserve"><value>Save options</value></data>
+  <data name="Reader_RetrySave.Text" xml:space="preserve"><value>Retry save</value></data>
+  <data name="Reader_RestoreBackup.Text" xml:space="preserve"><value>Restore backup</value></data>
+  <data name="Reader_Rebuild.Text" xml:space="preserve"><value>Rebuild reading records</value></data>
+  <data name="Reader_Retry.Content" xml:space="preserve"><value>Retry</value></data>
+  <data name="Reader_Empty" xml:space="preserve"><value>No book is open</value></data>
+  <data name="Reader_Preparing" xml:space="preserve"><value>Preparing book…</value></data>
+  <data name="Reader_Loading" xml:space="preserve"><value>Loading reader…</value></data>
+  <data name="Reader_Restoring" xml:space="preserve"><value>Restoring your position…</value></data>
+  <data name="Reader_Closing" xml:space="preserve"><value>Saving and closing…</value></data>
+  <data name="Reader_Ready" xml:space="preserve"><value>Ready to read</value></data>
+  <data name="Reader_Failed" xml:space="preserve"><value>Could not open book</value></data>
+  <data name="Reader_StorageFailure" xml:space="preserve"><value>Reading progress or settings could not be saved. Continue reading or retry saving. Damaged records require backup recovery or rebuilding.</value></data>
+  <data name="Reader_Approximate" xml:space="preserve"><value>Resumed near your previous position.</value></data>
+  <data name="Reader_Restarted" xml:space="preserve"><value>Your previous position could not be restored. Returned to the beginning.</value></data>
+  <data name="Reader_BookLimit" xml:space="preserve"><value>This book exceeds the reader limits. EPUB files must be at most 100 MB.</value></data>
+  <data name="Reader_InvalidBook" xml:space="preserve"><value>This is not a valid or supported EPUB file.</value></data>
+  <data name="Reader_Encryption" xml:space="preserve"><value>This book uses unsupported encryption or DRM.</value></data>
+  <data name="Reader_Runtime" xml:space="preserve"><value>WebView2 is unavailable. Install or repair Microsoft Edge WebView2 Runtime and retry.</value></data>
+  <data name="Reader_Crashed" xml:space="preserve"><value>The reading process stopped unexpectedly. Retry to resume from the latest recorded position.</value></data>
+  <data name="Reader_Timeout" xml:space="preserve"><value>Opening or navigation timed out. Please retry.</value></data>
+  <data name="Reader_LoadFailed" xml:space="preserve"><value>The book could not be loaded. Check the file and retry.</value></data>
+  <data name="Reader_ExternalTitle" xml:space="preserve"><value>Open link in your browser?</value></data>
+  <data name="Reader_OpenBrowser" xml:space="preserve"><value>Open browser</value></data>
+  <data name="Reader_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Reader_Continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Reader_ConfirmRestore" xml:space="preserve"><value>Keep the damaged files and restore reading records or settings from existing backups?</value></data>
+  <data name="Reader_ConfirmRebuild" xml:space="preserve"><value>Keep the damaged files and rebuild unreadable reading records or settings? Previous reading positions may be unavailable.</value></data>
 </root>

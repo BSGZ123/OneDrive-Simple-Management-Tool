@@ -1134,4 +1134,53 @@
   <data name="Home_AllBookmarks.Content" xml:space="preserve">
     <value>查看全部书签</value>
   </data>
+  <data name="Reader_Title" xml:space="preserve"><value>EPUB 阅读器</value></data>
+  <data name="Reader_Back.AutomationProperties.Name" xml:space="preserve"><value>返回</value></data>
+  <data name="Reader_Previous.AutomationProperties.Name" xml:space="preserve"><value>上一页</value></data>
+  <data name="Reader_Next.AutomationProperties.Name" xml:space="preserve"><value>下一页</value></data>
+  <data name="Reader_Contents.Label" xml:space="preserve"><value>目录</value></data>
+  <data name="Reader_Settings.Label" xml:space="preserve"><value>阅读设置</value></data>
+  <data name="Reader_TocTitle.Text" xml:space="preserve"><value>目录</value></data>
+  <data name="Reader_FontSize.Header" xml:space="preserve"><value>字号</value></data>
+  <data name="Reader_LineHeight.Header" xml:space="preserve"><value>行距</value></data>
+  <data name="Reader_Width.Header" xml:space="preserve"><value>阅读宽度</value></data>
+  <data name="Reader_Theme.Header" xml:space="preserve"><value>阅读背景（独立于应用主题）</value></data>
+  <data name="Reader_Light.Content" xml:space="preserve"><value>浅色</value></data>
+  <data name="Reader_Dark.Content" xml:space="preserve"><value>深色</value></data>
+  <data name="Reader_Sepia.Content" xml:space="preserve"><value>暖色</value></data>
+  <data name="Reader_Flow.Header" xml:space="preserve"><value>阅读方式</value></data>
+  <data name="Reader_Paginated.Content" xml:space="preserve"><value>分页</value></data>
+  <data name="Reader_Scrolled.Content" xml:space="preserve"><value>章节内滚动</value></data>
+  <data name="Reader_Zoom.Header" xml:space="preserve"><value>固定版式缩放</value></data>
+  <data name="Reader_FitPage.Content" xml:space="preserve"><value>适应页面</value></data>
+  <data name="Reader_FitWidth.Content" xml:space="preserve"><value>适应宽度</value></data>
+  <data name="Reader_Apply.Content" xml:space="preserve"><value>应用</value></data>
+  <data name="Reader_SaveOptions.Content" xml:space="preserve"><value>保存选项</value></data>
+  <data name="Reader_RetrySave.Text" xml:space="preserve"><value>重试保存</value></data>
+  <data name="Reader_RestoreBackup.Text" xml:space="preserve"><value>恢复备份</value></data>
+  <data name="Reader_Rebuild.Text" xml:space="preserve"><value>重建阅读记录</value></data>
+  <data name="Reader_Retry.Content" xml:space="preserve"><value>重试打开</value></data>
+  <data name="Reader_Empty" xml:space="preserve"><value>尚未打开书籍</value></data>
+  <data name="Reader_Preparing" xml:space="preserve"><value>正在准备书籍…</value></data>
+  <data name="Reader_Loading" xml:space="preserve"><value>正在加载阅读器…</value></data>
+  <data name="Reader_Restoring" xml:space="preserve"><value>正在恢复阅读位置…</value></data>
+  <data name="Reader_Closing" xml:space="preserve"><value>正在保存并关闭…</value></data>
+  <data name="Reader_Ready" xml:space="preserve"><value>可以开始阅读</value></data>
+  <data name="Reader_Failed" xml:space="preserve"><value>无法打开书籍</value></data>
+  <data name="Reader_StorageFailure" xml:space="preserve"><value>阅读记录或设置未能保存。你可以继续阅读，或重试保存；损坏的记录需要恢复备份或重建。</value></data>
+  <data name="Reader_Approximate" xml:space="preserve"><value>已从上次阅读的大致位置继续。</value></data>
+  <data name="Reader_Restarted" xml:space="preserve"><value>上次位置无法恢复，已回到开头。</value></data>
+  <data name="Reader_BookLimit" xml:space="preserve"><value>这本书超出当前阅读器的容量限制。EPUB 文件上限为 100 MB。</value></data>
+  <data name="Reader_InvalidBook" xml:space="preserve"><value>这不是有效或受支持的 EPUB 文件。</value></data>
+  <data name="Reader_Encryption" xml:space="preserve"><value>暂不支持这本书使用的加密或 DRM。</value></data>
+  <data name="Reader_Runtime" xml:space="preserve"><value>WebView2 运行环境不可用。请安装或修复 Microsoft Edge WebView2 Runtime 后重试。</value></data>
+  <data name="Reader_Crashed" xml:space="preserve"><value>阅读进程意外结束。重试可从最近记录的位置继续。</value></data>
+  <data name="Reader_Timeout" xml:space="preserve"><value>打开或定位超时，请重试。</value></data>
+  <data name="Reader_LoadFailed" xml:space="preserve"><value>书籍加载失败，请检查文件后重试。</value></data>
+  <data name="Reader_ExternalTitle" xml:space="preserve"><value>在浏览器中打开链接？</value></data>
+  <data name="Reader_OpenBrowser" xml:space="preserve"><value>打开浏览器</value></data>
+  <data name="Reader_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Reader_Continue" xml:space="preserve"><value>继续</value></data>
+  <data name="Reader_ConfirmRestore" xml:space="preserve"><value>将保留损坏的文件，并使用现有备份恢复阅读记录或设置。是否继续？</value></data>
+  <data name="Reader_ConfirmRebuild" xml:space="preserve"><value>将保留损坏的文件，并重建无法读取的阅读记录或设置。旧的阅读位置可能无法恢复。是否继续？</value></data>
 </root>

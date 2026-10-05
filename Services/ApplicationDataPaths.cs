@@ -22,5 +22,8 @@ namespace OneDrive_Simple_Management_Tool.Services
         public string Diagnostics => Path.Combine(Root, "Diagnostics");
         public string Appearance => Path.Combine(Root, "Configuration", "appearance.json");
         public string Bookmarks => Path.Combine(Root, "Configuration", "bookmarks.dat");
+        public string ReaderProgress => Path.Combine(Root, "Configuration", "reader-progress.dat");
+        public string ReaderSettings => Path.Combine(Root, "Configuration", "reader-settings.dat");
+        public string ReaderRuntime => Path.Combine(Root, "Reader", "WebView2");
     }
 }

@@ -95,6 +95,7 @@ namespace OneDrive_Simple_Management_Tool
                                     .AddSingleton<IAppearanceSettingsStore, AppearanceSettingsStore>().AddSingleton<SettingViewModel>()
                                     .AddSingleton<IHomeDriveService, HomeDriveService>().AddTransient<HomeViewModel>()
                                     .AddSingleton<IBookmarkStore, BookmarkStore>().AddSingleton<IBookmarkResolver, BookmarkResolver>()
+                                    .AddSingleton<ReaderWorkspace>()
                                     .AddTransient<BookmarkViewModel>()
                                     .AddSingleton(new FolderSyncService(new FolderSyncStore(_paths.FolderSync), OneDrive.CreateFolderSyncTarget))
                                     .AddSingleton<FolderSyncViewModel>().BuildServiceProvider();
@@ -127,10 +128,13 @@ namespace OneDrive_Simple_Management_Tool
                 bool waitingForPreferences = false;
                 window.AppWindow.Closing += async (_, args) =>
                 {
-                    if (!appearance.IsSaving) return;
+                    var readers = Services.GetRequiredService<ReaderWorkspace>();
+                    bool readerOpen = readers.HasOpenSessions;
+                    if (!appearance.IsSaving && !readerOpen) return;
                     args.Cancel = true;
                     if (waitingForPreferences) return;
                     waitingForPreferences = true;
+                    if (readerOpen) await readers.CloseAllAsync();
                     await appearance.FlushAsync();
                     window.Close();
                 };

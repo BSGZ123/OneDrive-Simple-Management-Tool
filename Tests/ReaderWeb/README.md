@@ -54,7 +54,7 @@ npm run verify-vendor
 
 ## 协议与边界
 
-每个原生宿主尝试应创建新的 WebView2 与新的不可猜测 `sessionId`，导航到 `https://reader.invalid/reader/index.html#<sessionId>`。阅读页发送版本 1 的 `ready` 后，宿主发送 `openBook`。宿主须在注册所有拦截器后才导航，并且核验实际 `WebMessageReceived.Source`、请求关联和状态；这些平台侧规则还没有实现。
+每个原生宿主尝试创建新的 WebView2 与新的不可猜测 `sessionId`，导航到 `https://reader.invalid/reader/index.html#<sessionId>`。阅读页发送版本 1 的 `ready` 后，宿主发送 `openBook`。宿主在注册所有拦截器后才导航，并且核验实际 `WebMessageReceived.Source`、请求关联和状态；这些平台侧规则已在第二阶段实现，见 [WinUI 验证](../ReaderUi/README.md)。
 
 宿主用固定路由 `/book/<sessionId>.epub` 提供当前 EPUB，不向 JS 发送本机路径、账户信息或 Graph 下载地址。阅读页只绑定顶层 WebView2 的消息事件，不监听/转发普通 `window.postMessage`。所有输入经过 `protocol.js` 校验，参数使用有限枚举/数值；目录目标由适配层的会话内 ID 映射。目录同时按节点数和 UTF-8 消息字节数分块。
 

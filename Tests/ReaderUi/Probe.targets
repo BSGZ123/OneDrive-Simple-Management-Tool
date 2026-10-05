@@ -1,0 +1,4 @@
+<Project>
+  <PropertyGroup><StartupObject>ReaderUiProbe</StartupObject></PropertyGroup>
+  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\ReaderUi\Probe.cs" /></ItemGroup>
+</Project>

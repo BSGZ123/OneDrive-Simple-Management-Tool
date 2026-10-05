@@ -1,6 +1,6 @@
 # EPUB 阶段一实施记录
 
-日期：2026-10-05，Asia/Shanghai。状态：第一阶段基础实现及自动检查已完成；完整阶段一验收尚未完成，阶段二/三未开始。
+日期：2026-10-05，Asia/Shanghai。本文保留阶段一实施时的结果；完整阶段一兼容性验收尚未完成，后续阶段二进展见 [WinUI 验证记录](../ReaderUi/RESULTS.md)，阶段三未开始。
 
 后续补充：用户提供的真实 EPUB 已完成专项验证并触发目录、异步排版、监听释放及初始化取消修复；最新自建回归为 **32/32**。真实样本 **12/12**，默认按用户确认的正常使用范围运行 **5 次开关**。以下保留首轮 29 项历史记录，当前结果、历史压力数据及本轮提交范围见 [LOCAL-BOOK-RESULTS.md](LOCAL-BOOK-RESULTS.md)。
 
@@ -81,6 +81,6 @@ msbuild "OneDrive Simple Management Tool.sln" /p:Configuration=Release /p:Platfo
 
 ## 进入下一阶段前的验收缺口
 
-图片解码像素/动画帧限制、Data 图片及复杂 SVG/CSS 预算、书内字体/混淆字体和复杂授权样书仍需补齐；本轮 ZIP 字节限制不能替代这些边界。真实 WebView2 来源校验、frame 绕行、进程故障、资源流/deferral、DPAPI 进度、应用关闭和 OneDrive 权限/cache 路径均未实现或验收。完整待办见 [README](README.md#下一阶段之前需要补齐)。
+图片解码像素/动画帧限制、Data 图片及复杂 SVG/CSS 预算、书内字体/混淆字体和复杂授权样书仍需补齐；本轮 ZIP 字节限制不能替代这些边界。本文记录阶段一当时的浏览器结果；随后完成的真实 WebView2 来源/frame 隔离、故障恢复、资源流/deferral 与 DPAPI 验证见 [阶段二记录](../ReaderUi/RESULTS.md)。OneDrive 权限/cache 路径仍属于第三阶段。
 
 因此本次交付为阶段一可重复运行的基础实现，未把正式阅读页面或账户入口开放给用户，也未将计划的阶段门槛标记为全部通过。

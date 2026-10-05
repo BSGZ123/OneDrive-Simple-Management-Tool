@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><LangVersion>12</LangVersion></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Models/ReaderModels.cs" Link="Production/ReaderModels.cs" />
+    <Compile Include="../../Services/Reader*.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../ViewModels/ReaderViewModel.cs" Link="Production/ReaderViewModel.cs" />
+    <Compile Include="../UploadRegression/ResourceFake.cs" Link="ResourceFake.cs" />
+    <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+  </ItemGroup>
+</Project>
