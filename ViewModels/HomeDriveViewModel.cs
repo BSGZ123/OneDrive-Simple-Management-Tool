@@ -11,8 +11,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public HomeDrive Drive { get; } = drive;
         public string DisplayName => Drive.DisplayName;
         [ObservableProperty] private bool _isLoading = true;
-        [ObservableProperty] private bool _hasUsage;
-        [ObservableProperty] private double _usagePercent;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(UsagePercentText))]
+        private bool _hasUsage;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(UsagePercentText), nameof(IsNearlyFull))]
+        private double _usagePercent;
+        public string UsagePercentText => HasUsage ? (UsagePercent / 100).ToString("P0", CultureInfo.CurrentCulture) : "";
+        public bool IsNearlyFull => UsagePercent >= 90;
+        // Set only while HasUsage is true, so totals never count an unknown capacity as zero.
+        public long? UsedBytes { get; private set; }
+        public long? TotalBytes { get; private set; }
         [ObservableProperty] private string _capacityText = "Home_LoadingQuota".GetLocalized();
         [ObservableProperty] private string _remainingText = "";
         [ObservableProperty] private string _errorMessage = "";
@@ -22,7 +31,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public void Apply(HomeQuota quota)
         {
             long? total = Valid(quota?.Total), used = Valid(quota?.Used), remaining = Valid(quota?.Remaining);
-            HasUsage = total > 0 && used.HasValue;
+            bool hasUsage = total > 0 && used.HasValue;
+            UsedBytes = hasUsage ? used : null;
+            TotalBytes = hasUsage ? total : null;
+            HasUsage = hasUsage;
             UsagePercent = HasUsage ? Math.Clamp(used.Value * 100d / total.Value, 0, 100) : 0;
             CapacityText = total == null && used == null ? "Home_QuotaUnavailable".GetLocalized() :
                 string.Format("Home_Capacity".GetLocalized(), FormatBytes(used), FormatBytes(total));
@@ -33,6 +45,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         public void Fail(string message)
         {
+            UsedBytes = TotalBytes = null;
             HasUsage = false;
             CapacityText = "Home_QuotaUnavailable".GetLocalized();
             RemainingText = "";
@@ -42,7 +55,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         private static long? Valid(long? value) => value >= 0 ? value : null;
 
-        private static string FormatBytes(long? value)
+        internal static string FormatBytes(double? value)
         {
             if (!value.HasValue) return "Home_Unknown".GetLocalized();
             string[] units = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };

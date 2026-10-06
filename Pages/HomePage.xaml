@@ -4,16 +4,45 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:localConverters="using:OneDrive_Simple_Management_Tool.Converters"
     xmlns:localControls="using:OneDrive_Simple_Management_Tool.Controls"
     Background="Transparent">
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:StringVisibilityConverter x:Key="StringVisibilityConverter" />
+        <converters:BoolToObjectConverter x:Key="BookmarkGlyphConverter" TrueValue="&#xE8B7;" FalseValue="&#xE8A5;" />
+        <localConverters:CountToOpacityConverter x:Key="CountToOpacityConverter" />
         <Style x:Key="HomeCard" TargetType="Border">
             <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
             <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style x:Key="HomeStat" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="12,8" />
+        </Style>
+        <Style x:Key="HomeStatValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="HomeStatLabel" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="HomeTile" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="14,12" />
+        </Style>
+        <Style x:Key="HomeIconBadge" TargetType="Border">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
         </Style>
     </Page.Resources>
     <Page.KeyboardAccelerators>
@@ -35,111 +64,281 @@
         </VisualStateManager.VisualStateGroups>
         <ScrollViewer x:Name="HomeScroll" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
             <StackPanel Padding="24,20,24,32" Spacing="16" MaxWidth="1120" HorizontalAlignment="Stretch">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection><EntranceThemeTransition IsStaggeringEnabled="True" /></TransitionCollection>
+                </StackPanel.ChildrenTransitions>
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                    <StackPanel Spacing="6">
-                        <TextBlock x:Uid="Home_Title" FontSize="28" FontWeight="SemiBold" />
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Uid="Home_Title" Style="{StaticResource TitleTextBlockStyle}" />
                         <TextBlock x:Uid="Home_Description" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
                     <Button x:Name="RefreshHome" x:Uid="Home_Refresh" Grid.Column="1" VerticalAlignment="Center" Command="{Binding RefreshCommand}" />
                 </Grid>
-                <localControls:WrapPanel>
-                    <Button x:Name="FilesShortcut" x:Uid="Home_Files" Click="OpenFiles" Margin="0,0,8,4" />
-                    <Button x:Name="TasksShortcut" x:Uid="Home_Tasks" Click="OpenTasks" Margin="0,0,8,4" />
-                    <Button x:Name="SyncShortcut" x:Uid="Home_Sync" Click="OpenSync" Margin="0,0,8,4" />
-                    <Button x:Name="BookmarksShortcut" x:Uid="Home_Bookmarks" Click="OpenBookmarks" Margin="0,0,8,4" />
-                    <Button x:Name="SettingsShortcut" x:Uid="Home_Settings" Click="OpenSettings" Margin="0,0,8,4" />
-                </localControls:WrapPanel>
-                <Border Style="{StaticResource HomeCard}" DataContext="{Binding Bookmarks}">
-                    <StackPanel Spacing="10">
-                        <TextBlock x:Uid="Home_RecentBookmarksTitle" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="Home_RecentBookmarksDescription" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <ProgressBar IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <TextBlock x:Uid="Home_NoBookmarks" TextWrapping="Wrap" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
-                        <ItemsControl x:Name="RecentBookmarkCards" ItemsSource="{Binding RecentItems}" IsEnabled="{Binding CanUseItems}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Spacing="6" Margin="0,0,0,12">
-                                        <Button Click="OpenRecentBookmark" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                                AutomationProperties.Name="{Binding Name}">
-                                            <StackPanel Spacing="4">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2"
-                                                           TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
-                                                <TextBlock Text="{Binding DriveName}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                            </StackPanel>
-                                        </Button>
-                                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <Button x:Uid="Home_AllBookmarks" Click="OpenBookmarks" />
-                    </StackPanel>
-                </Border>
-                <Grid ColumnSpacing="12" RowSpacing="12">
-                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                    <Border x:Name="TransfersCard" Grid.ColumnSpan="2" Style="{StaticResource HomeCard}">
-                        <StackPanel Spacing="8">
-                            <TextBlock x:Uid="Home_TransfersTitle" FontSize="18" FontWeight="SemiBold" />
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock x:Name="ActiveTransferCount" Text="{Binding ActiveTransfers}" FontSize="36" FontWeight="SemiBold" />
-                                <TextBlock x:Uid="Home_ActiveTransfers" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding TransferSummary}" TextWrapping="Wrap" />
-                            <TextBlock x:Uid="Home_TransferScope" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock x:Uid="Home_NoTransfers" TextWrapping="Wrap" Visibility="{Binding HasNoTransfers, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        </StackPanel>
-                    </Border>
-                    <Border x:Name="SyncCard" Grid.ColumnSpan="2" Grid.Row="1" Style="{StaticResource HomeCard}">
-                        <StackPanel Spacing="8">
-                            <TextBlock x:Uid="Home_SyncTitle" FontSize="18" FontWeight="SemiBold" />
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{Binding SyncCount}" FontSize="36" FontWeight="SemiBold" />
-                                <TextBlock x:Uid="Home_SyncFolders" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding SyncSummary}" TextWrapping="Wrap" />
-                            <TextBlock x:Uid="Home_NoSyncs" TextWrapping="Wrap" Visibility="{Binding HasNoSyncs, Converter={StaticResource BoolToVisibilityConverter}}" />
-                            <InfoBar IsOpen="{Binding HasSyncError}" Severity="Warning" IsClosable="False" Message="{Binding SyncErrorMessage}" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
-                <StackPanel Spacing="6" Margin="0,8,0,0">
-                    <TextBlock x:Uid="Home_DrivesTitle" FontSize="20" FontWeight="SemiBold" />
+                <!-- Content stays a localized string so automation and label checks read the same text. -->
+                <localControls:AdaptiveGridPanel MinItemWidth="132" ColumnSpacing="8" RowSpacing="8">
+                    <Button x:Name="FilesShortcut" x:Uid="Home_Files" Click="OpenFiles" Style="{StaticResource HomeTile}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE8B7;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button x:Name="TasksShortcut" x:Uid="Home_Tasks" Click="OpenTasks" Style="{StaticResource HomeTile}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE8CB;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button x:Name="SyncShortcut" x:Uid="Home_Sync" Click="OpenSync" Style="{StaticResource HomeTile}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE895;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button x:Name="BookmarksShortcut" x:Uid="Home_Bookmarks" Click="OpenBookmarks" Style="{StaticResource HomeTile}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE8A4;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <Button x:Name="SettingsShortcut" x:Uid="Home_Settings" Click="OpenSettings" Style="{StaticResource HomeTile}">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE713;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                </localControls:AdaptiveGridPanel>
+                <StackPanel Spacing="4" Margin="0,8,0,0">
+                    <TextBlock x:Uid="Home_DrivesTitle" Style="{StaticResource SubtitleTextBlockStyle}" />
                     <TextBlock Text="{Binding LastRefreshed}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <ProgressBar IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
                 </StackPanel>
                 <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}">
                     <InfoBar.ActionButton><Button x:Uid="Home_ManageDrives" Click="OpenFiles" /></InfoBar.ActionButton>
                 </InfoBar>
+                <Border x:Name="TotalCard" Style="{StaticResource HomeCard}" Visibility="{Binding HasTotalUsage, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Uid="Home_TotalTitle" Style="{StaticResource HomeStatLabel}" />
+                            <TextBlock x:Name="TotalPercent" Text="{Binding TotalUsagePercentText}" FontSize="36" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding TotalUsageText}" TextWrapping="Wrap" />
+                            <ProgressBar Value="{Binding TotalUsagePercent}" Maximum="100" MinHeight="8" CornerRadius="4">
+                                <ProgressBar.Resources>
+                                    <x:Double x:Key="ProgressBarTrackHeight">8</x:Double>
+                                    <CornerRadius x:Key="ProgressBarTrackCornerRadius">4</CornerRadius>
+                                </ProgressBar.Resources>
+                            </ProgressBar>
+                            <TextBlock Text="{Binding TotalScopeText}" Style="{StaticResource HomeStatLabel}"
+                                       Visibility="{Binding TotalScopeText, Converter={StaticResource StringVisibilityConverter}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
                 <Border Style="{StaticResource HomeCard}" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Home_NoDrivesTitle" FontSize="18" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="Home_NoDrives" TextWrapping="Wrap" />
-                        <Button x:Uid="Home_AddDrive" Click="OpenFiles" Margin="0,8,0,0" />
-                    </StackPanel>
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <FontIcon Glyph="&#xE753;" FontSize="40" VerticalAlignment="Top" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock x:Uid="Home_NoDrivesTitle" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="Home_NoDrives" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <Button x:Uid="Home_AddDrive" Click="OpenFiles" Margin="0,4,0,0" Style="{StaticResource AccentButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
                 </Border>
                 <ItemsControl x:Name="DriveCards" ItemsSource="{Binding Drives}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <localControls:AdaptiveGridPanel MinItemWidth="320" ColumnSpacing="12" RowSpacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource HomeCard}" Margin="0,0,0,12">
-                                <StackPanel Spacing="10">
+                            <Border Style="{StaticResource HomeCard}">
+                                <StackPanel Spacing="12">
                                     <Grid ColumnSpacing="12">
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding DisplayName}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
-                                        <Button x:Uid="Home_OpenDrive" Grid.Column="1" Click="OpenDrive" />
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <Border Style="{StaticResource HomeIconBadge}" VerticalAlignment="Top">
+                                            <FontIcon Glyph="&#xE753;" FontSize="18" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap"
+                                                   MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding DisplayName}" />
+                                        <Button x:Uid="Home_OpenDrive" Grid.Column="2" Click="OpenDrive" VerticalAlignment="Top" />
                                     </Grid>
                                     <ProgressBar IsIndeterminate="True" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                    <TextBlock Text="{Binding CapacityText}" TextWrapping="Wrap" />
-                                    <ProgressBar Value="{Binding UsagePercent}" Maximum="100" Visibility="{Binding HasUsage, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                    <TextBlock Text="{Binding RemainingText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding UsagePercentText}" FontSize="28" FontWeight="SemiBold"
+                                                   Visibility="{Binding HasUsage, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        <TextBlock Text="{Binding CapacityText}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <!-- ShowPaused only supplies the caution color for a nearly full drive. -->
+                                    <ProgressBar Value="{Binding UsagePercent}" Maximum="100" MinHeight="6" CornerRadius="3" ShowPaused="{Binding IsNearlyFull}"
+                                                 Visibility="{Binding HasUsage, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <ProgressBar.Resources>
+                                            <x:Double x:Key="ProgressBarTrackHeight">6</x:Double>
+                                            <CornerRadius x:Key="ProgressBarTrackCornerRadius">3</CornerRadius>
+                                        </ProgressBar.Resources>
+                                    </ProgressBar>
+                                    <TextBlock Text="{Binding RemainingText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Visibility="{Binding RemainingText, Converter={StaticResource StringVisibilityConverter}}" />
                                     <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <Grid ColumnSpacing="12" RowSpacing="12">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Border x:Name="TransfersCard" Grid.ColumnSpan="2" Style="{StaticResource HomeCard}">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE8CB;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Uid="Home_TransfersTitle" Grid.Column="1" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                <HyperlinkButton x:Uid="Home_ViewTransfers" Grid.Column="2" Click="OpenTasks" Margin="0,-6,-12,-6" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock x:Name="ActiveTransferCount" Text="{Binding ActiveTransfers}" FontSize="36" FontWeight="SemiBold" />
+                                <TextBlock x:Uid="Home_ActiveTransfers" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <localControls:AdaptiveGridPanel MinItemWidth="104" ColumnSpacing="8" RowSpacing="8">
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding WaitingTransfers}" Style="{StaticResource HomeStatValue}"
+                                                   Opacity="{Binding WaitingTransfers, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatWaiting" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding FailedTransfers}" Style="{StaticResource HomeStatValue}" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                   Opacity="{Binding FailedTransfers, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatFailed" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding CompletedTransfers}" Style="{StaticResource HomeStatValue}" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                   Opacity="{Binding CompletedTransfers, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatCompleted" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding CancelledTransfers}" Style="{StaticResource HomeStatValue}"
+                                                   Opacity="{Binding CancelledTransfers, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatCancelled" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                            </localControls:AdaptiveGridPanel>
+                            <TextBlock x:Uid="Home_NoTransfers" TextWrapping="Wrap" Visibility="{Binding HasNoTransfers, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Home_TransferScope" Style="{StaticResource HomeStatLabel}" />
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="SyncCard" Grid.ColumnSpan="2" Grid.Row="1" Style="{StaticResource HomeCard}">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE895;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Uid="Home_SyncTitle" Grid.Column="1" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                <HyperlinkButton x:Uid="Home_ViewSync" Grid.Column="2" Click="OpenSync" Margin="0,-6,-12,-6" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{Binding SyncCount}" FontSize="36" FontWeight="SemiBold" />
+                                <TextBlock x:Uid="Home_SyncFolders" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <localControls:AdaptiveGridPanel MinItemWidth="104" ColumnSpacing="8" RowSpacing="8">
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding ActiveSyncs}" Style="{StaticResource HomeStatValue}"
+                                                   Opacity="{Binding ActiveSyncs, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatSyncing" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding PausedSyncs}" Style="{StaticResource HomeStatValue}"
+                                                   Opacity="{Binding PausedSyncs, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatPaused" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource HomeStat}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SyncIssues}" Style="{StaticResource HomeStatValue}" Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                   Opacity="{Binding SyncIssues, Converter={StaticResource CountToOpacityConverter}}" />
+                                        <TextBlock x:Uid="Home_StatAttention" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
+                            </localControls:AdaptiveGridPanel>
+                            <TextBlock x:Uid="Home_NoSyncs" TextWrapping="Wrap" Visibility="{Binding HasNoSyncs, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <InfoBar IsOpen="{Binding HasSyncError}" Severity="Warning" IsClosable="False" Message="{Binding SyncErrorMessage}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Border Style="{StaticResource HomeCard}" DataContext="{Binding Bookmarks}">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE8A4;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock x:Uid="Home_RecentBookmarksTitle" Grid.Column="1" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <HyperlinkButton x:Uid="Home_AllBookmarks" Grid.Column="2" Click="OpenBookmarks" Margin="0,-6,-12,-6" />
+                        </Grid>
+                        <TextBlock x:Uid="Home_RecentBookmarksDescription" Style="{StaticResource HomeStatLabel}" />
+                        <ProgressBar IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock x:Uid="Home_NoBookmarks" TextWrapping="Wrap" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
+                        <ItemsControl x:Name="RecentBookmarkCards" ItemsSource="{Binding RecentItems}" IsEnabled="{Binding CanUseItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <localControls:AdaptiveGridPanel MinItemWidth="240" ColumnSpacing="8" RowSpacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- The open button stays first: UI checks pick the first button bound to the item. -->
+                                    <StackPanel Spacing="6">
+                                        <Button Click="OpenRecentBookmark" Style="{StaticResource HomeTile}" HorizontalContentAlignment="Stretch"
+                                                AutomationProperties.Name="{Binding Name}">
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                                <FontIcon Glyph="{Binding Bookmark.IsFolder, Converter={StaticResource BookmarkGlyphConverter}}" FontSize="20"
+                                                          VerticalAlignment="Top" Margin="0,2,0,0" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <StackPanel Grid.Column="1" Spacing="2">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2"
+                                                               TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
+                                                    <TextBlock Text="{Binding DriveName}" Style="{StaticResource HomeStatLabel}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
+                                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

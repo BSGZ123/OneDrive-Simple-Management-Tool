@@ -111,6 +111,14 @@ internal static class HomeUiProbe
                 await Task.Delay(250);
                 Assert(((TextBlock)page.FindName("ActiveTransferCount")).Text == "1", "Count reaches XAML binding");
                 Assert(Grid.GetRow((FrameworkElement)page.FindName("SyncCard")) == 0, "Wide cards sit side by side");
+                Assert(((FrameworkElement)page.FindName("TotalCard")).Visibility == Visibility.Visible &&
+                    ((TextBlock)page.FindName("TotalPercent")).Text == page.Model.Drives[0].UsagePercentText &&
+                    page.Model.TotalScopeText.Length > 0, "Combined storage excludes the unavailable drive");
+                // A refresh keeps the existing cards instead of rebuilding the list.
+                var firstCard = page.Model.Drives[0];
+                await page.Model.RefreshCommand.ExecuteAsync(null);
+                Assert(ReferenceEquals(page.Model.Drives[0], firstCard) && !firstCard.IsLoading, "Refresh updates cards in place");
+                await Task.Delay(250);
                 await Capture(window, "light.png");
                 ((FrameworkElement)window.Content).RequestedTheme = ElementTheme.Dark;
                 await Task.Delay(150);

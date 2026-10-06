@@ -6,7 +6,7 @@ dotnet run --project Tests/HomeRegression/HomeRegression.csproj
 
 直接编译生产 HomeViewModel、HomeDriveViewModel、HomeDriveService、账户令牌提供器和云盘配置存储。传输/同步 ViewModel 作为事件源替身；Graph HTTP 响应在内存中模拟，配置放在独立临时目录，使用测试保护器，不访问正式账户、令牌或云盘。
 
-20 组检查覆盖：
+22 组检查覆盖：
 
 - 首次使用的三个空状态；多云盘各自完成或失败，最多三个容量请求并发；损坏配置与空列表区分，恢复后可刷新。
 - 导航取消、忽略迟到结果；慢初始化后的再次进入不重复请求；全部上传/下载状态的统计、变化、移除与清空；退出页面解除监听，再次进入重新统计。
@@ -19,3 +19,5 @@ dotnet run --project Tests/HomeRegression/HomeRegression.csproj
 2026-10-05：新增 6 项三页联动检查全部通过，总计 20 项。首页复用生产 BookmarkViewModel 的取消、错误与定位流程；该组存储和定位替身用于隔离联动行为，真实存储与 Graph 解析另由 [书签回归](../BookmarkRegression/README.md) 覆盖。
 
 实际 WinUI ViewModel 的事件、页面导航和布局另见 [首页界面验证](../HomeUi/README.md)。
+
+2026-10-06：首页美化新增 2 项，总计 22 项。刷新时未变化的云盘沿用原卡片并原地更新，配置增删和调序后列表随之调整，配置读取失败才清空；全部云盘合计只统计容量已知的云盘，单个云盘时不显示，多个大容量云盘相加不溢出。第 2 项“至多三个并发请求”在本次改动前后都会偶发失败（改动前 25 次中 3 次），原因尚未排查。

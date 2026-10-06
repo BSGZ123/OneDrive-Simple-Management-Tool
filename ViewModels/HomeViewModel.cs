@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +41,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [ObservableProperty] private int _pausedSyncs;
         [ObservableProperty] private int _syncIssues;
         [ObservableProperty] private string _syncErrorMessage = "";
+        [ObservableProperty] private bool _hasTotalUsage;
+        [ObservableProperty] private double _totalUsagePercent;
+        [ObservableProperty] private string _totalUsagePercentText = "";
+        [ObservableProperty] private string _totalUsageText = "";
+        [ObservableProperty] private string _totalScopeText = "";
         public bool HasError => ErrorMessage.Length > 0;
         public bool HasSyncError => SyncErrorMessage.Length > 0;
         public bool HasNoTransfers => TotalTransfers == 0;
@@ -96,15 +102,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _request = request;
             IsLoading = true;
             IsEmpty = false;
-            ErrorMessage = LastRefreshed = "";
-            Drives.Clear();
+            ErrorMessage = "";
+            // Cards stay on screen with their last values; they are reconciled once the configuration is read.
+            foreach (var card in Drives) card.IsLoading = true;
             var bookmarkLoad = reloadBookmarks && Bookmarks.ReloadCommand.CanExecute(null)
                 ? Bookmarks.ReloadCommand.ExecuteAsync(null) : Task.CompletedTask;
             try
             {
                 var configured = await drives.LoadDrivesAsync(request.Token).WaitAsync(request.Token);
                 if (_request != request) return;
-                foreach (var drive in configured) Drives.Add(new HomeDriveViewModel(drive));
+                Reconcile(configured);
+                UpdateTotals();
                 IsEmpty = Drives.Count == 0;
                 // Limit concurrent Graph requests; each card completes or fails independently.
                 using var slots = new SemaphoreSlim(3);
@@ -115,7 +123,12 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             catch (OperationCanceledException) when (request.IsCancellationRequested) { }
             catch (Exception exception)
             {
-                if (_request == request) ErrorMessage = Message(exception, "Home_ConfigurationFailed");
+                if (_request != request) return;
+                // Without a readable configuration the previous cards can no longer be trusted.
+                Drives.Clear();
+                UpdateTotals();
+                LastRefreshed = "";
+                ErrorMessage = Message(exception, "Home_ConfigurationFailed");
             }
             finally
             {
@@ -132,15 +145,45 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 using var timeout = CancellationTokenSource.CreateLinkedTokenSource(request.Token);
                 timeout.CancelAfter(TimeSpan.FromSeconds(30));
                 var quota = await drives.GetQuotaAsync(card.Drive, timeout.Token).WaitAsync(timeout.Token);
-                if (_request == request) card.Apply(quota);
+                if (_request == request) { card.Apply(quota); UpdateTotals(); }
             }
             catch (OperationCanceledException) when (request.IsCancellationRequested) { }
             catch (Exception exception)
             {
-                if (_request == request) card.Fail(Message(exception,
+                if (_request != request) return;
+                card.Fail(Message(exception,
                     exception is OperationCanceledException ? "Home_QuotaTimeout" : "Home_QuotaFailed"));
+                UpdateTotals();
             }
             finally { slots.Release(); }
+        }
+
+        // Reuses the card of an unchanged drive so a refresh updates values in place instead of rebuilding the list.
+        private void Reconcile(IReadOnlyList<HomeDrive> configured)
+        {
+            for (int index = 0; index < configured.Count; index++)
+            {
+                int current = index;
+                while (current < Drives.Count && Drives[current].Drive != configured[index]) current++;
+                if (current == Drives.Count) Drives.Insert(index, new HomeDriveViewModel(configured[index]));
+                else if (current != index) Drives.Move(current, index);
+            }
+            while (Drives.Count > configured.Count) Drives.RemoveAt(Drives.Count - 1);
+        }
+
+        private void UpdateTotals()
+        {
+            var known = Drives.Where(card => card.TotalBytes.HasValue && card.UsedBytes.HasValue).ToList();
+            // Doubles: several large drives can exceed the range of a 64-bit byte count.
+            double total = known.Sum(card => (double)card.TotalBytes.Value), used = known.Sum(card => (double)card.UsedBytes.Value);
+            int unknown = Drives.Count(card => !card.IsLoading && !card.HasUsage);
+            // A single drive already shows the same figures on its own card.
+            HasTotalUsage = Drives.Count > 1 && total > 0;
+            TotalUsagePercent = HasTotalUsage ? Math.Clamp(used * 100 / total, 0, 100) : 0;
+            TotalUsagePercentText = HasTotalUsage ? (TotalUsagePercent / 100).ToString("P0", CultureInfo.CurrentCulture) : "";
+            TotalUsageText = HasTotalUsage ? string.Format("Home_Capacity".GetLocalized(),
+                HomeDriveViewModel.FormatBytes(used), HomeDriveViewModel.FormatBytes(total)) : "";
+            TotalScopeText = HasTotalUsage && unknown > 0 ? string.Format("Home_TotalPartial".GetLocalized(), unknown) : "";
         }
 
         private static string Message(Exception exception, string fallback) =>

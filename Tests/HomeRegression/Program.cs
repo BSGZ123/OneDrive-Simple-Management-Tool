@@ -5,6 +5,7 @@ using OneDrive_Simple_Management_Tool.Models;
 using OneDrive_Simple_Management_Tool.Models.DTO;
 using OneDrive_Simple_Management_Tool.Services;
 using OneDrive_Simple_Management_Tool.ViewModels;
+using System.Collections.Specialized;
 using System.Net;
 using System.Text;
 using System.Xml.Linq;
@@ -223,6 +224,54 @@ await Check("Configuration corruption is surfaced without overwriting the file",
     var service = new HomeDriveService(f.Store, new Authentication());
     await Error(() => service.LoadDrivesAsync(default), "Configuration_Invalid");
     Assert(await File.ReadAllTextAsync(f.Paths.Drives) == "broken");
+});
+await Check("Refresh updates unchanged drives in place and follows configuration changes", async () =>
+{
+    using var f = new Fixture();
+    f.Service.Drives = new[] { Drive("a"), Drive("b"), Drive("c") };
+    await f.Model.ActivateAsync();
+    var (a, c) = (f.Model.Drives[0], f.Model.Drives[2]);
+    int resets = 0;
+    f.Model.Drives.CollectionChanged += (_, args) => { if (args.Action == NotifyCollectionChangedAction.Reset) resets++; };
+    var pending = new TaskCompletionSource<HomeQuota>();
+    f.Service.Quota = (_, _) => pending.Task;
+    var refresh = f.Model.RefreshCommand.ExecuteAsync(null);
+    Assert(f.Model.Drives.Count == 3 && a.IsLoading && a.UsagePercent == 10 && !f.Model.IsEmpty);
+    pending.SetResult(new HomeQuota(100, 40, 60));
+    await refresh;
+    Assert(ReferenceEquals(f.Model.Drives[0], a) && !a.IsLoading && a.UsagePercent == 40 && resets == 0);
+    f.Service.Drives = new[] { Drive("c"), Drive("d"), Drive("a") };
+    await f.Model.RefreshCommand.ExecuteAsync(null);
+    Assert(f.Model.Drives.Select(card => card.Drive.DriveId).SequenceEqual(new[] { "c", "d", "a" }));
+    Assert(ReferenceEquals(f.Model.Drives[0], c) && ReferenceEquals(f.Model.Drives[2], a) && resets == 0);
+    f.Service.LoadError = new HomeOverviewException("Configuration_Protection");
+    await f.Model.RefreshCommand.ExecuteAsync(null);
+    Assert(f.Model.HasError && f.Model.Drives.Count == 0 && !f.Model.IsEmpty && f.Model.LastRefreshed == "");
+});
+await Check("Combined storage counts only known capacities and is hidden for a single drive", async () =>
+{
+    using var f = new Fixture();
+    f.Service.Drives = new[] { Drive("a") };
+    f.Service.Quota = (drive, _) => drive.DriveId switch
+    {
+        "a" => Task.FromResult(new HomeQuota(1024, 256, 768)),
+        "b" => Task.FromResult(new HomeQuota(3072, 768, 2304)),
+        "c" => Task.FromResult(new HomeQuota(null, 512, null)),
+        _ => throw new HomeOverviewException("Home_SignInRequired")
+    };
+    await f.Model.ActivateAsync();
+    Assert(!f.Model.HasTotalUsage && f.Model.TotalUsageText == "" && f.Model.TotalScopeText == "");
+    f.Service.Drives = new[] { Drive("a"), Drive("b"), Drive("c"), Drive("d") };
+    await f.Model.RefreshCommand.ExecuteAsync(null);
+    Assert(f.Model.HasTotalUsage && f.Model.TotalUsagePercent == 25 && f.Model.TotalUsagePercentText.Contains("25"));
+    Assert(f.Model.TotalUsageText.Contains("1 KB") && f.Model.TotalUsageText.Contains("4 KB") && f.Model.TotalScopeText.Contains('2'));
+    f.Service.Drives = new[] { Drive("a"), Drive("b") };
+    f.Service.Quota = (_, _) => Task.FromResult(new HomeQuota(long.MaxValue, long.MaxValue, 0));
+    await f.Model.RefreshCommand.ExecuteAsync(null);
+    Assert(f.Model.TotalUsagePercent == 100 && f.Model.TotalUsageText.Contains("EB") && f.Model.TotalScopeText == "");
+    f.Service.LoadError = new HomeOverviewException("Configuration_Protection");
+    await f.Model.RefreshCommand.ExecuteAsync(null);
+    Assert(!f.Model.HasTotalUsage && f.Model.TotalUsageText == "");
 });
 await Check("Both locales cover all Home keys and XAML UIDs", () =>
 {
