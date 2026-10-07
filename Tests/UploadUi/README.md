@@ -56,3 +56,7 @@ Set-Content -LiteralPath bin/UploadUi/UploadProbeLanguage.txt -Value en-US -Enco
 本机构建使用已安装的 NuGet 缓存还原（`/p:RestoreSources=C:/Users/asus/.nuget/packages /p:NuGetAudit=false`），未修改仓库 NuGet 源。以上为模拟网络及本地 WinUI 验证，尚未使用真实 OneDrive 账户验证云端最终状态。
 
 2026-10-04：用户确认本轮验收通过，并授权提交、推送远端分支。
+
+## 2026-10-07 任务卡片样式
+
+任务页改为卡片样式后，本入口仍能按位置取到 Pivot 并切到“上传”，中文界面下两个预置任务（文件和文件夹）显示为卡片，移除按钮可见。取消流程本轮未操作，文件夹任务仍显示文件图标，既有截图仍是旧界面。

@@ -5,28 +5,57 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:OneDrive_Simple_Management_Tool.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:localConverters="using:OneDrive_Simple_Management_Tool.Converters"
     d:DataContext="{d:DesignInstance Type=viewmodels:TaskManagerViewModel}"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="Transparent">
 
 
 
-    <!--传输任务管理页面，两个标签页，分别为上传与下载-->
+    <!--传输任务管理页面，三个标签页，分别为下载、上传与同步上传-->
     <Grid>
         <Grid.Resources>
 
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:BoolToObjectConverter x:Key="BoolToObjectConverter" TrueValue="Collapsed" FalseValue="Visible" />
+            <converters:StringVisibilityConverter x:Key="StringVisibilityConverter" />
             <converters:FileSizeToFriendlyStringConverter x:Key="FileSizeToFriendlyStringConverter" />
+            <localConverters:FileGlyphConverter x:Key="FileGlyphConverter" />
+            <localConverters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter" />
+
+            <Style x:Key="TaskCard" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16" />
+            </Style>
+            <Style x:Key="TaskIconBadge" TargetType="Border">
+                <Setter Property="Width" Value="36" />
+                <Setter Property="Height" Value="36" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+            </Style>
+            <Style x:Key="TaskCaption" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <!-- Cards are not selectable; the container only supplies spacing. -->
+            <Style x:Key="TaskItemContainer" TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0,0,0,8" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
 
             <!--下载任务页数据模板-->
             <DataTemplate x:Key="DownloadTaskTemplate" x:DataType="viewmodels:DownloadTaskViewModel">
-                <Grid Margin="0 10 0 10">
-                    <!--Grid组件的上下文菜单，提供右键功能-->
-                    <Grid.ContextFlyout>
+                <Border Style="{StaticResource TaskCard}">
+                    <!--上下文菜单，提供右键功能-->
+                    <Border.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_Resume" Command="{Binding ResumeDownloadCommand}"/>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_Retry" Command="{Binding RetryDownloadCommand}"/>
@@ -34,125 +63,184 @@
                             <MenuFlyoutItem x:Uid="TaskManagerPage_Remove" Command="{Binding CancelTaskCommand}"/>
                             <MenuFlyoutItem x:Uid="TaskManagerPage_OpenFolder" Command="{Binding OpenFolderCommand}"/>
                         </MenuFlyout>
-                    </Grid.ContextFlyout>
+                    </Border.ContextFlyout>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="auto"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!--下载条目面板-->
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
-                        <!--下载进度条-->
-                        <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" ShowError="{Binding HasFailed}" ShowPaused="{Binding IsPaused}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
-                        
-                        <!--下载参数-->
-                        <TextBlock>
-                            <!--下载字节-->
-                            <Run Text="{Binding DownloadedBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
-                            <Run Text=" / " />
-                            <!--下载总字节-->
-                            <Run Text="{Binding TotalBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
-                            <Run Text=" " />
-                            <!--下载速度-->
-                            <Run Text="{Binding DownloadSpeed,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
-                            <Run Text="/s" />
-                        </TextBlock>
+                        <Border Style="{StaticResource TaskIconBadge}">
+                            <FontIcon Glyph="{Binding Name, Converter={StaticResource FileGlyphConverter}}" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        </Border>
 
-                        <!--任务状态与可恢复的失败原因-->
-                        <TextBlock Text="{Binding StatusText}" />
-                        <TextBlock Text="{Binding ErrorMessage}" Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}" TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Left" />
-                        <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Left" />
-                    </StackPanel>
+                        <!--下载条目面板-->
+                        <StackPanel Grid.Column="1" Spacing="6">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
+                            <!--下载进度条-->
+                            <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" ShowError="{Binding HasFailed}" ShowPaused="{Binding IsPaused}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
 
-                    <!--功能按钮，如下载 暂停 取消-->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button x:Uid="Download_PauseButton" Margin="0 0 10 0" Visibility="{Binding CanPause,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseDownloadCommand}">
-                            <FontIcon Glyph="&#xE769;" FontSize="10" />
-                        </Button>
+                            <Grid ColumnSpacing="12">
+                                <!-- The status keeps its width; in a narrow window the byte counts trim instead. -->
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="auto" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                                <!--任务状态-->
+                                <TextBlock Text="{Binding StatusText}" Style="{StaticResource TaskCaption}" TextWrapping="NoWrap" />
+                                <!--下载参数-->
+                                <TextBlock Grid.Column="1" Style="{StaticResource TaskCaption}" HorizontalAlignment="Right" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
+                                    <!--下载字节-->
+                                    <Run Text="{Binding DownloadedBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
+                                    <Run Text=" / " />
+                                    <!--下载总字节-->
+                                    <Run Text="{Binding TotalBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
+                                    <Run Text=" · " />
+                                    <!--下载速度-->
+                                    <Run Text="{Binding DownloadSpeed,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
+                                    <Run Text="/s" />
+                                </TextBlock>
+                            </Grid>
 
-                        <Button x:Uid="Download_ResumeButton" Margin="0 0 10 0" Visibility="{Binding CanResume,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding ResumeDownloadCommand}">
-                            <FontIcon Glyph="&#xE768;" FontSize="10" />
-                        </Button>
+                            <!--可恢复的失败原因-->
+                            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                       Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock Text="{Binding Notice}" Style="{StaticResource TaskCaption}"
+                                       Visibility="{Binding Notice, Converter={StaticResource StringVisibilityConverter}}" />
+                        </StackPanel>
 
-                        <Button x:Uid="Download_RetryButton" Margin="0 0 10 0" Visibility="{Binding CanRetry,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RetryDownloadCommand}">
-                            <FontIcon Glyph="&#xE72C;" FontSize="10" />
-                        </Button>
-                        <Button x:Uid="Download_RemoveButton" Command="{Binding CancelTaskCommand}">
-                            <FontIcon Glyph="&#xE711;" FontSize="10" />
-                        </Button>
-                    </StackPanel>
-                    
-                </Grid>
+                        <!--功能按钮，如下载 暂停 取消-->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                            <Button x:Uid="Download_PauseButton" Visibility="{Binding CanPause,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding PauseDownloadCommand}">
+                                <FontIcon Glyph="&#xE769;" FontSize="12" />
+                            </Button>
+
+                            <Button x:Uid="Download_ResumeButton" Visibility="{Binding CanResume,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding ResumeDownloadCommand}">
+                                <FontIcon Glyph="&#xE768;" FontSize="12" />
+                            </Button>
+
+                            <Button x:Uid="Download_RetryButton" Visibility="{Binding CanRetry,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding RetryDownloadCommand}">
+                                <FontIcon Glyph="&#xE72C;" FontSize="12" />
+                            </Button>
+                            <Button x:Uid="Download_RemoveButton" Command="{Binding CancelTaskCommand}">
+                                <FontIcon Glyph="&#xE711;" FontSize="12" />
+                            </Button>
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
             </DataTemplate>
 
             <!--上传任务页数据模板-->
             <DataTemplate x:Key="UploadTaskTemplate" x:DataType="viewmodels:UploadTaskViewModel">
-                <Grid Margin="0 10 0 10">
-                    <Grid.ContextFlyout>
+                <Border Style="{StaticResource TaskCard}">
+                    <Border.ContextFlyout>
                         <MenuFlyout>
                             <MenuFlyoutItem x:Uid="Upload_RemoveMenu" Command="{Binding CancelTaskCommand}" />
                         </MenuFlyout>
-                    </Grid.ContextFlyout>
+                    </Border.ContextFlyout>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="auto" />
-                    </Grid.ColumnDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <!--上传进度-->
-                    <StackPanel Orientation="Vertical">
-                        
-                        <TextBlock Text="{Binding Name}" FontSize="20" Margin="0 5 0 5" />
-                        <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsPreparing}" ShowError="{Binding HasFailed}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
-                        <TextBlock x:Uid="Upload_Preparing" Visibility="{Binding IsPreparing, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <TextBlock x:Uid="Upload_Cancelling" Visibility="{Binding IsCancelling, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <TextBlock x:Uid="TaskManagerPage_UploadCompleted" Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <StackPanel Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBlock x:Uid="TaskManagerPage_UploadFailed" />
-                            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" MaxWidth="600" HorizontalAlignment="Left" />
+                        <Border Style="{StaticResource TaskIconBadge}">
+                            <FontIcon Glyph="{Binding Name, Converter={StaticResource FileGlyphConverter}}" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        </Border>
+
+                        <!--上传进度-->
+                        <StackPanel Grid.Column="1" Spacing="6">
+
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
+                            <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsPreparing}" ShowError="{Binding HasFailed}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                            <TextBlock x:Uid="Upload_Preparing" Style="{StaticResource TaskCaption}" Visibility="{Binding IsPreparing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Upload_Cancelling" Style="{StaticResource TaskCaption}" Visibility="{Binding IsCancelling, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="TaskManagerPage_UploadCompleted" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                       Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <StackPanel Spacing="2" Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock x:Uid="TaskManagerPage_UploadFailed" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource TaskCaption}" />
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
 
-                    <!--上传功能按钮-->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10 0 10 0">
-                        <Button x:Uid="Upload_RemoveButton" Command="{Binding CancelTaskCommand}">
-                            <FontIcon Glyph="&#xE711;" FontSize="10" />
-                        </Button>
-                    </StackPanel>
-                    
-                </Grid>
+                        <!--上传功能按钮-->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button x:Uid="Upload_RemoveButton" Command="{Binding CancelTaskCommand}">
+                                <FontIcon Glyph="&#xE711;" FontSize="12" />
+                            </Button>
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
             </DataTemplate>
         </Grid.Resources>
 
-        <Pivot x:Uid="TaskManagerPage_Pivot_Title">
+        <!-- The Pivot stays the first child: UI checks reach it by position. -->
+        <Pivot x:Uid="TaskManagerPage_Pivot_Title" Margin="12,8,12,0">
             <PivotItem x:Uid="TaskManagerPage_Pivot_Download">
-                <ListView ItemsSource="{Binding DownloadTasks}" ItemTemplate="{StaticResource DownloadTaskTemplate}"/>
+                <Grid>
+                    <ListView ItemsSource="{Binding DownloadTasks}" ItemTemplate="{StaticResource DownloadTaskTemplate}" SelectionMode="None"
+                              ItemContainerStyle="{StaticResource TaskItemContainer}" Padding="0,8,0,24" />
+                    <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding DownloadTasks.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
+                        <FontIcon Glyph="&#xE896;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock x:Uid="TaskManagerPage_NoDownloads" Style="{StaticResource TaskCaption}" TextAlignment="Center" MaxWidth="360" />
+                    </StackPanel>
+                </Grid>
             </PivotItem>
             <PivotItem x:Uid="TaskManagerPage_Pivot_Upload">
-                <ListView ItemsSource="{Binding UploadTasks}" ItemTemplate="{StaticResource UploadTaskTemplate}" />
+                <Grid>
+                    <ListView ItemsSource="{Binding UploadTasks}" ItemTemplate="{StaticResource UploadTaskTemplate}" SelectionMode="None"
+                              ItemContainerStyle="{StaticResource TaskItemContainer}" Padding="0,8,0,24" />
+                    <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding UploadTasks.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
+                        <FontIcon Glyph="&#xE898;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock x:Uid="TaskManagerPage_NoUploads" Style="{StaticResource TaskCaption}" TextAlignment="Center" MaxWidth="360" />
+                    </StackPanel>
+                </Grid>
             </PivotItem>
             <PivotItem x:Uid="Sync_Transfers">
-                <ListView ItemsSource="{x:Bind FolderSync.Bindings}" SelectionMode="None" HorizontalContentAlignment="Stretch">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Spacing="8" Padding="12">
-                                <TextBlock Text="{Binding Name}" Style="{StaticResource SubtitleTextBlockStyle}" />
-                                <TextBlock Text="{Binding State}" />
-                                <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" />
-                                <ProgressBar Value="{Binding Percent}" />
-                                <TextBlock Text="{Binding LastSuccess}" />
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Content="{Binding ToggleLabel}" Command="{Binding ToggleCommand}" />
-                                    <Button x:Uid="Sync_CheckNow" Command="{Binding CheckNowCommand}" IsEnabled="{Binding Enabled}" />
-                                </StackPanel>
-                                <InfoBar IsOpen="{Binding HasIssues}" Message="{Binding Issues}" Severity="Warning" IsClosable="False" />
-                                <TextBlock Text="{Binding CommandError}" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                <Grid>
+                    <ListView ItemsSource="{x:Bind FolderSync.Bindings}" SelectionMode="None"
+                              ItemContainerStyle="{StaticResource TaskItemContainer}" Padding="0,8,0,24">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource TaskCard}">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="auto" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                                        <Border Style="{StaticResource TaskIconBadge}">
+                                            <FontIcon Glyph="&#xE895;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="6">
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding State}" />
+                                            <TextBlock Text="{Binding Detail}" Style="{StaticResource TaskCaption}"
+                                                       Visibility="{Binding Detail, Converter={StaticResource StringVisibilityConverter}}" />
+                                            <ProgressBar Value="{Binding Percent}" />
+                                            <TextBlock Text="{Binding LastSuccess}" Style="{StaticResource TaskCaption}"
+                                                       Visibility="{Binding LastSuccess, Converter={StaticResource StringVisibilityConverter}}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                                <Button Content="{Binding ToggleLabel}" Command="{Binding ToggleCommand}" />
+                                                <Button x:Uid="Sync_CheckNow" Command="{Binding CheckNowCommand}" IsEnabled="{Binding Enabled}" />
+                                            </StackPanel>
+                                            <InfoBar IsOpen="{Binding HasIssues}" Message="{Binding Issues}" Severity="Warning" IsClosable="False"
+                                                     Visibility="{Binding HasIssues, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <TextBlock Text="{Binding CommandError}" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                       Visibility="{Binding CommandError, Converter={StaticResource StringVisibilityConverter}}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{x:Bind FolderSync.IsEmpty, Mode=OneWay, FallbackValue=Collapsed}">
+                        <FontIcon Glyph="&#xE895;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock x:Uid="TaskManagerPage_NoSyncs" Style="{StaticResource TaskCaption}" TextAlignment="Center" MaxWidth="360" />
+                    </StackPanel>
+                </Grid>
             </PivotItem>
         </Pivot>
 
@@ -163,7 +251,7 @@
                 <SelectorBarItem x:Name="SelectorBarItemFavorites" Text="Favorites" Icon="Favorite" />
          </SelectorBar>-->
 
-        
+
 
     </Grid>
 </Page>

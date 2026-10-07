@@ -844,6 +844,9 @@
   <data name="Drive_Back.ToolTipService.ToolTip" xml:space="preserve"><value>Back to drives</value></data>
   <data name="Drive_Back.AutomationProperties.Name" xml:space="preserve"><value>Back to drives</value></data>
   <data name="Drive_ColumnType.Text" xml:space="preserve"><value>Type</value></data>
+  <data name="TaskManagerPage_NoDownloads.Text" xml:space="preserve"><value>No downloads yet. Right-click a file in the file list and choose Download.</value></data>
+  <data name="TaskManagerPage_NoUploads.Text" xml:space="preserve"><value>No uploads yet. Drop files or folders onto the file list to upload them.</value></data>
+  <data name="TaskManagerPage_NoSyncs.Text" xml:space="preserve"><value>No synced folders yet. Bind the current folder to a local folder from the file list.</value></data>
   <data name="Configuration_Invalid" xml:space="preserve"><value>Configuration is invalid. The original file is preserved. Restore a backup or rebuild explicitly. Legacy data may still be unprotected.</value></data>
   <data name="Configuration_Version" xml:space="preserve"><value>This configuration needs a compatible application version. It has not been changed.</value></data>
   <data name="Configuration_Protection" xml:space="preserve"><value>Cannot encrypt or decrypt configuration. Check the Windows user and device, then retry or restore a usable backup. Existing data is preserved.</value></data>

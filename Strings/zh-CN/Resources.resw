@@ -844,6 +844,9 @@
   <data name="Drive_Back.ToolTipService.ToolTip" xml:space="preserve"><value>返回网盘列表</value></data>
   <data name="Drive_Back.AutomationProperties.Name" xml:space="preserve"><value>返回网盘列表</value></data>
   <data name="Drive_ColumnType.Text" xml:space="preserve"><value>类型</value></data>
+  <data name="TaskManagerPage_NoDownloads.Text" xml:space="preserve"><value>暂无下载任务。在文件列表中右键文件并选择下载。</value></data>
+  <data name="TaskManagerPage_NoUploads.Text" xml:space="preserve"><value>暂无上传任务。将文件或文件夹拖入文件列表即可上传。</value></data>
+  <data name="TaskManagerPage_NoSyncs.Text" xml:space="preserve"><value>尚未绑定同步文件夹。可在文件列表中将当前目录绑定到本地文件夹。</value></data>
   <data name="Configuration_Invalid" xml:space="preserve"><value>配置无效，原文件已保留。请恢复备份或明确选择重建；旧数据可能尚未完成加密保护。</value></data>
   <data name="Configuration_Version" xml:space="preserve"><value>此配置需要兼容的应用版本，文件未被更改。</value></data>
   <data name="Configuration_Protection" xml:space="preserve"><value>配置加密或解密失败。请检查 Windows 用户和设备后重试，或恢复可用备份。原有数据已保留。</value></data>
