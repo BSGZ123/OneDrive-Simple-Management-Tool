@@ -303,9 +303,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             try
             {
                 Quota quota = await Provider.GetStorageInfo();
+                if (quota == null)
+                {
+                    HasUsage = false;
+                    StorageInfo = "Home_QuotaUnavailable".GetLocalized();
+                    return;
+                }
                 StorageInfo = Utils.ReadableFileSize(quota.Used) + " / " + Utils.ReadableFileSize(quota.Total);
+                HasUsage = quota.Total > 0 && quota.Used >= 0;
+                UsagePercent = HasUsage ? Math.Clamp(quota.Used.Value * 100d / quota.Total.Value, 0, 100) : 0;
             }
-            catch (Exception exception) { StorageInfo = FileOperationErrors.GetMessage(exception); }
+            catch (Exception exception) { HasUsage = false; StorageInfo = FileOperationErrors.GetMessage(exception); }
         }
 
         [RelayCommand]
@@ -324,6 +332,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         [ObservableProperty] private Visibility _isLoading = Visibility.Collapsed;
         [ObservableProperty] private string _storageInfo;
+        [ObservableProperty] private bool _hasUsage;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNearlyFull))]
+        private double _usagePercent;
+        public bool IsNearlyFull => UsagePercent >= 90;
         [ObservableProperty] private FileViewModel _selectedItem;
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ListVisibility))]

@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using OneDrive_Simple_Management_Tool.Helpers;
 using OneDrive_Simple_Management_Tool.Services;
 using OneDrive_Simple_Management_Tool.Views;
@@ -10,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.System;
 
 namespace OneDrive_Simple_Management_Tool.Pages
 {
@@ -20,32 +18,36 @@ namespace OneDrive_Simple_Management_Tool.Pages
         public CloudPage()
         {
             InitializeComponent();
-            DriveList.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OpenSelected), true);
             DataContext = new CloudViewModel();
-            Loaded += async (_, _) => await Model.LoadDrivesFromDisk();
+            Loaded += async (_, _) => { await Model.LoadDrivesFromDisk(); LoadCapacities(); };
+        }
+
+        // Silent only: a drive that needs sign-in reports that on its card instead of prompting.
+        private void LoadCapacities()
+        {
+            foreach (var drive in Model.Drives.Where(d => string.IsNullOrEmpty(d.StorageInfo) && !d.GetCapacityCommand.IsRunning))
+                drive.GetCapacityCommand.Execute(null);
         }
 
         private async void ShowCreateDriveDialogAsync(object sender, RoutedEventArgs e)
         {
             await new CreateDrive { XamlRoot = XamlRoot, DataContext = new CreateDriveViewModel(Model) }.ShowAsync();
+            LoadCapacities();
         }
 
         private void OpenDrive(DriveViewModel drive)
         {
             if (drive != null) (App.StartupWindow as MainWindow)?.Navigate(typeof(DrivePage), drive);
         }
-        private void NavigateToDrive(object sender, DoubleTappedRoutedEventArgs e) => OpenDrive((sender as FrameworkElement)?.DataContext as DriveViewModel);
-        private void OpenSelected(object sender, KeyRoutedEventArgs e)
-        {
-            if (e.Key == VirtualKey.Enter) { OpenDrive((sender as ListView)?.SelectedItem as DriveViewModel); e.Handled = true; }
-        }
+        // Raised for a click and for Enter or Space on the focused card.
+        private void OpenClicked(object sender, ItemClickEventArgs e) => OpenDrive(e.ClickedItem as DriveViewModel);
         private void OpenFromMenu(object sender, RoutedEventArgs e) => OpenDrive((sender as FrameworkElement)?.DataContext as DriveViewModel);
-        private async void Retry(object sender, RoutedEventArgs e) => await Model.LoadDrivesFromDisk();
+        private async void Retry(object sender, RoutedEventArgs e) { await Model.LoadDrivesFromDisk(); LoadCapacities(); }
         private async void RestoreBackup(object sender, RoutedEventArgs e) => await RecoverAsync(() => Ioc.Default.GetService<DriveConfigurationStore>().RestoreBackupAsync());
 
         private async Task RecoverAsync(Func<Task> action)
         {
-            try { await action(); await Model.LoadDrivesFromDisk(); }
+            try { await action(); await Model.LoadDrivesFromDisk(); LoadCapacities(); }
             catch (Exception exception) { Model.ErrorMessage = AccountConfigurationErrors.Message(exception); }
         }
 

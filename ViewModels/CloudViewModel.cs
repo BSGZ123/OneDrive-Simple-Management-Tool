@@ -26,7 +26,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
         public ObservableCollection<DriveViewModel> Drives { get; } = new();
         [ObservableProperty] private string _errorMessage = "";
-        [ObservableProperty] private bool _canAdd;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsEmpty))]
+        private bool _canAdd;
+        public bool IsEmpty => CanAdd && Drives.Count == 0;
         [ObservableProperty] private bool _needsRecovery;
         [ObservableProperty] private bool _hasDuplicates;
         [ObservableProperty] private DriveViewModel _selectedDrive;
@@ -63,6 +66,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 Drives.Add(drive);
             }
             _revision = snapshot.Revision;
+            OnPropertyChanged(nameof(IsEmpty));
         }
 
         public async Task AddDriveAsync(DriveViewModel drive, CancellationToken token)

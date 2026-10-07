@@ -109,6 +109,8 @@ namespace OneDrive_Simple_Management_Tool.Pages
             catch (Exception exception) { drive.ErrorMessage = Services.FolderSyncJob.GetErrorKey(exception).GetLocalized(); }
         }
 
+        private void BackToDrives(object sender, RoutedEventArgs e) => (App.StartupWindow as MainWindow)?.Navigate(typeof(CloudPage));
+
         private void ChangeLayout(object sender, RoutedEventArgs e)
         {
             if (DataContext is DriveViewModel drive && sender is MenuFlyoutItem item &&

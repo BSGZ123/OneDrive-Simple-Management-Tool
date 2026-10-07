@@ -837,6 +837,13 @@
   <data name="CreateDrive_Name.PlaceholderText" xml:space="preserve"><value>网盘名称</value></data>
   <data name="CloudPage_Open.Text" xml:space="preserve"><value>打开</value></data>
   <data name="CloudPage_SignIn.Text" xml:space="preserve"><value>重新登录</value></data>
+  <data name="CloudPage_Description.Text" xml:space="preserve"><value>选择一个网盘进入文件列表；右键可重新登录或刷新容量。</value></data>
+  <data name="CloudPage_EmptyTitle.Text" xml:space="preserve"><value>还没有绑定网盘</value></data>
+  <data name="CloudPage_Empty.Text" xml:space="preserve"><value>添加 OneDrive 账户后，即可在这里选择网盘并浏览文件。</value></data>
+  <data name="CloudPage_EmptyAdd.Content" xml:space="preserve"><value>添加网盘</value></data>
+  <data name="Drive_Back.ToolTipService.ToolTip" xml:space="preserve"><value>返回网盘列表</value></data>
+  <data name="Drive_Back.AutomationProperties.Name" xml:space="preserve"><value>返回网盘列表</value></data>
+  <data name="Drive_ColumnType.Text" xml:space="preserve"><value>类型</value></data>
   <data name="Configuration_Invalid" xml:space="preserve"><value>配置无效，原文件已保留。请恢复备份或明确选择重建；旧数据可能尚未完成加密保护。</value></data>
   <data name="Configuration_Version" xml:space="preserve"><value>此配置需要兼容的应用版本，文件未被更改。</value></data>
   <data name="Configuration_Protection" xml:space="preserve"><value>配置加密或解密失败。请检查 Windows 用户和设备后重试，或恢复可用备份。原有数据已保留。</value></data>

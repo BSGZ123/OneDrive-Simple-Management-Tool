@@ -837,6 +837,13 @@
   <data name="CreateDrive_Name.PlaceholderText" xml:space="preserve"><value>Drive name</value></data>
   <data name="CloudPage_Open.Text" xml:space="preserve"><value>Open</value></data>
   <data name="CloudPage_SignIn.Text" xml:space="preserve"><value>Sign in again</value></data>
+  <data name="CloudPage_Description.Text" xml:space="preserve"><value>Choose a drive to browse its files. Right-click a drive to sign in again or refresh its storage.</value></data>
+  <data name="CloudPage_EmptyTitle.Text" xml:space="preserve"><value>No drives yet</value></data>
+  <data name="CloudPage_Empty.Text" xml:space="preserve"><value>Add a OneDrive account to choose a drive here and browse its files.</value></data>
+  <data name="CloudPage_EmptyAdd.Content" xml:space="preserve"><value>Add drive</value></data>
+  <data name="Drive_Back.ToolTipService.ToolTip" xml:space="preserve"><value>Back to drives</value></data>
+  <data name="Drive_Back.AutomationProperties.Name" xml:space="preserve"><value>Back to drives</value></data>
+  <data name="Drive_ColumnType.Text" xml:space="preserve"><value>Type</value></data>
   <data name="Configuration_Invalid" xml:space="preserve"><value>Configuration is invalid. The original file is preserved. Restore a backup or rebuild explicitly. Legacy data may still be unprotected.</value></data>
   <data name="Configuration_Version" xml:space="preserve"><value>This configuration needs a compatible application version. It has not been changed.</value></data>
   <data name="Configuration_Protection" xml:space="preserve"><value>Cannot encrypt or decrypt configuration. Check the Windows user and device, then retry or restore a usable backup. Existing data is preserved.</value></data>

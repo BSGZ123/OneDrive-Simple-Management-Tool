@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:OneDrive_Simple_Management_Tool.Models"
     xmlns:views="using:OneDrive_Simple_Management_Tool.Views.Layout"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Background="Transparent"
     NavigationCacheMode="Enabled" KeyboardAcceleratorPlacementMode="Hidden">
     <Page.KeyboardAccelerators>
         <KeyboardAccelerator Key="Enter" Invoked="OnFileAccelerator" />
@@ -25,16 +25,21 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ProgressBar IsIndeterminate="True" Visibility="{Binding IsLoading}" />
-        <Grid Grid.Row="1" Margin="10,5" ColumnSpacing="12">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-            <BreadcrumbBar x:Name="BreadcrumbBar" ItemsSource="{Binding BreadcrumbItems}" ItemClicked="BreadcrumbBar_ItemClicked">
-                <BreadcrumbBar.ItemTemplate>
-                    <DataTemplate x:DataType="models:BreadcrumbItem">
-                        <TextBlock Text="{Binding Name}" />
-                    </DataTemplate>
-                </BreadcrumbBar.ItemTemplate>
-            </BreadcrumbBar>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+        <Grid Grid.Row="1" Margin="24,12,24,4" ColumnSpacing="12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <Button x:Uid="Drive_Back" Click="BackToDrives" VerticalAlignment="Center"><FontIcon Glyph="&#xE72B;" FontSize="16" /></Button>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                <TextBlock Text="{Binding DisplayName}" Style="{StaticResource CaptionTextBlockStyle}" TextTrimming="CharacterEllipsis"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <BreadcrumbBar x:Name="BreadcrumbBar" ItemsSource="{Binding BreadcrumbItems}" ItemClicked="BreadcrumbBar_ItemClicked">
+                    <BreadcrumbBar.ItemTemplate>
+                        <DataTemplate x:DataType="models:BreadcrumbItem">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </BreadcrumbBar.ItemTemplate>
+                </BreadcrumbBar>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                 <Button x:Uid="Sync_BindCurrent" Click="BindCurrentFolder" IsEnabled="{Binding CanCreateHere}"><SymbolIcon Symbol="Sync" /></Button>
                 <Button x:Uid="Drive_Search" Click="ShowSearchDialogAsync"><SymbolIcon Symbol="Find" /></Button>
                 <Button x:Uid="Drive_Refresh" Command="{Binding RefreshCommand}"><SymbolIcon Symbol="Refresh" /></Button>
@@ -50,15 +55,19 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="2" Margin="10,0">
-            <Grid ColumnSpacing="8" Visibility="{Binding SearchVisibility}">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding SearchDescription}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                <Button Grid.Column="1" x:Uid="Drive_ClearSearch" Command="{Binding ClearSearchCommand}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid ColumnSpacing="8" Margin="0,4">
+        <StackPanel Grid.Row="2" Margin="24,0">
+            <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="12,6" Margin="0,0,0,4" Visibility="{Binding SearchVisibility}">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE721;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock Grid.Column="1" Text="{Binding SearchDescription}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <Button Grid.Column="2" x:Uid="Drive_ClearSearch" Command="{Binding ClearSearchCommand}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Grid ColumnSpacing="8" Margin="0,4" MinHeight="32">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Button Grid.Column="1" x:Uid="Drive_CancelLoading" Command="{Binding CancelLoadingCommand}" Visibility="{Binding IsLoading}" VerticalAlignment="Center" />
                 <Button Grid.Column="2" x:Uid="Drive_RetryLoading" Command="{Binding RetryLoadingCommand}" Visibility="{Binding RetryVisibility}" VerticalAlignment="Center" />
             </Grid>
@@ -69,7 +78,8 @@
             <InfoBar x:Name="UploadErrorInfoBar" Severity="Error" IsOpen="False" IsClosable="True" />
             <InfoBar Message="{Binding BookmarkMessage}" IsOpen="{Binding HasBookmarkMessage}" Severity="Informational" IsClosable="False" />
         </StackPanel>
-        <Grid Grid.Row="3" x:Name="CloudControl" Background="Transparent" AllowDrop="True"
+        <!-- 8 + the 16 item padding lines rows up with the 24 page gutter. -->
+        <Grid Grid.Row="3" x:Name="CloudControl" Background="Transparent" AllowDrop="True" Margin="8,0"
               DragOver="CopyIcon_DragOver" Drop="ToUpload_Drop">
             <Grid.ContextFlyout>
                 <MenuFlyout>

@@ -7,22 +7,25 @@
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters">
     <UserControl.Resources>
         <converter:FileSizeConverter x:Key="FileSizeConverter" />
+        <converter:FileGlyphConverter x:Key="FileGlyphConverter" />
         <converter:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" />
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </UserControl.Resources>
-    <Grid Background="Transparent" MinHeight="36" ColumnSpacing="12">
+    <!-- Column widths match the header row in ColumnCloudView. In a narrow window the trailing columns clip before the name does. -->
+    <Grid Background="Transparent" MinHeight="40" ColumnSpacing="12">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="2*" MinWidth="160" />
             <ColumnDefinition Width="100" />
             <ColumnDefinition Width="80" />
             <ColumnDefinition Width="160" />
         </Grid.ColumnDefinitions>
-        <SymbolIcon Symbol="Folder" Visibility="{Binding IsFolder, Converter={StaticResource BoolToVisibilityConverter}}" />
-        <SymbolIcon Symbol="OpenFile" Visibility="{Binding IsFile, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <FontIcon Glyph="&#xE8D5;" FontSize="18" Foreground="#F2B01E" Visibility="{Binding IsFolder, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <FontIcon Glyph="{Binding Name, Converter={StaticResource FileGlyphConverter}}" FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                  Visibility="{Binding IsFile, Converter={StaticResource BoolToVisibilityConverter}}" />
         <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding Name}" />
-        <TextBlock Grid.Column="2" Text="{Binding Size, Converter={StaticResource FileSizeConverter}}" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="3" Text="{Binding ItemType}" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="4" Text="{Binding Updated, Converter={StaticResource DateTimeOffsetToStringConverter}}" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="2" Text="{Binding Size, Converter={StaticResource FileSizeConverter}}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <TextBlock Grid.Column="3" Text="{Binding ItemType}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <TextBlock Grid.Column="4" Text="{Binding Updated, Converter={StaticResource DateTimeOffsetToStringConverter}}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
     </Grid>
 </UserControl>

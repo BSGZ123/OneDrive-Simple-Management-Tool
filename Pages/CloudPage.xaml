@@ -5,18 +5,22 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:OneDrive_Simple_Management_Tool.ViewModels"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:localControls="using:OneDrive_Simple_Management_Tool.Controls"
     d:DataContext="{x:Bind viewmodels:CloudViewModel}"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Background="Transparent"
     NavigationCacheMode="Enabled">
 
-    <!--这里是网盘列表模板（每个已登录的网盘将以行记录展示），右键菜单获取当前网盘容量情况-->
+    <!--这里是网盘卡片模板（每个已登录的网盘一张卡片），单击进入，右键菜单可重新登录或刷新容量-->
     <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:StringVisibilityConverter x:Key="StringVisibilityConverter" />
         <DataTemplate x:Key="DriveItemTemplate" x:DataType="viewmodels:DriveViewModel">
-            <Grid DoubleTapped="NavigateToDrive">
-                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+            <!-- The root Grid owns the context menu: UI checks look it up by DataContext. -->
+            <Grid Background="Transparent">
                 <Grid.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem x:Uid="CloudPage_Open" Click="OpenFromMenu" />
@@ -25,48 +29,114 @@
                         <!--<MenuFlyoutItem x:Uid="CloudPage_Flyout_RemoveDrive" Command="{Binding Cloud.RemoveDriveCommand}" CommandParameter="{Binding}" />-->
                     </MenuFlyout>
                 </Grid.ContextFlyout>
-
-                <TextBlock Text="{Binding DisplayName}" />
-                <TextBlock Text="{Binding StorageInfo}" HorizontalAlignment="Right" />
-                <InfoBar Grid.Row="1" IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
+                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Top" Background="{ThemeResource AccentFillColorDefaultBrush}">
+                                <FontIcon Glyph="&#xE753;" FontSize="18" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                            </Border>
+                            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap"
+                                       MaxLines="2" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding DisplayName}" />
+                            <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </Grid>
+                        <ProgressBar IsIndeterminate="True" Visibility="{Binding GetCapacityCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding StorageInfo}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding StorageInfo, Converter={StaticResource StringVisibilityConverter}}" />
+                        <!-- ShowPaused only supplies the caution color for a nearly full drive. -->
+                        <ProgressBar Value="{Binding UsagePercent}" Maximum="100" MinHeight="6" CornerRadius="3" ShowPaused="{Binding IsNearlyFull}"
+                                     Visibility="{Binding HasUsage, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ProgressBar.Resources>
+                                <x:Double x:Key="ProgressBarTrackHeight">6</x:Double>
+                                <CornerRadius x:Key="ProgressBarTrackCornerRadius">3</CornerRadius>
+                            </ProgressBar.Resources>
+                        </ProgressBar>
+                        <!-- Collapsed as well as closed, so a healthy card has no trailing gap. -->
+                        <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False"
+                                 Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </DataTemplate>
     </Page.Resources>
 
 
-    <Grid Margin="10">
+    <Grid Padding="24,20,24,0" RowSpacing="16" MaxWidth="1120">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Uid="CloudPage_Title"/>
-        <Button
-            Grid.Row="1"
-            x:Uid="CloudPage_CreateDrive"
-            Margin="0 10 0 10"
-            IsEnabled="{Binding CanAdd}"
-            Click="ShowCreateDriveDialogAsync"/>
-
-        <StackPanel Grid.Row="2" Spacing="8" Margin="0,0,0,12">
-            <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button x:Uid="Configuration_RetryButton" Click="Retry" />
-                <Button x:Uid="Configuration_RestoreButton" Click="RestoreBackup" IsEnabled="{Binding NeedsRecovery}" />
-                <Button x:Uid="Configuration_RebuildButton" Click="Rebuild" IsEnabled="{Binding NeedsRecovery}" />
-                <Button x:Uid="Configuration_RepairButton" Click="RepairDuplicates" IsEnabled="{Binding HasDuplicates}" />
+        <!-- A StackPanel so that a hidden notice or empty state leaves no gap. -->
+        <StackPanel Spacing="16">
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel Spacing="4">
+                <TextBlock x:Uid="CloudPage_Title" Style="{StaticResource TitleTextBlockStyle}" />
+                <TextBlock x:Uid="CloudPage_Description" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
+            <Button
+                Grid.Column="1"
+                x:Uid="CloudPage_CreateDrive"
+                VerticalAlignment="Center"
+                Style="{StaticResource AccentButtonStyle}"
+                IsEnabled="{Binding CanAdd}"
+                Click="ShowCreateDriveDialogAsync"/>
+        </Grid>
+
+        <!-- Recovery actions appear only with the configuration problem they resolve. -->
+        <InfoBar IsOpen="True" IsClosable="False" Severity="Warning" Message="{Binding ErrorMessage}"
+                 Visibility="{Binding ErrorMessage, Converter={StaticResource StringVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+                <Button x:Uid="Configuration_RetryButton" Click="Retry" />
+                <Button x:Uid="Configuration_RestoreButton" Click="RestoreBackup" Visibility="{Binding NeedsRecovery, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button x:Uid="Configuration_RebuildButton" Click="Rebuild" Visibility="{Binding NeedsRecovery, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button x:Uid="Configuration_RepairButton" Click="RepairDuplicates" Visibility="{Binding HasDuplicates, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </StackPanel>
+        </InfoBar>
+
+        <Border Padding="20" CornerRadius="8" BorderThickness="1"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <FontIcon Glyph="&#xE753;" FontSize="40" VerticalAlignment="Top" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <StackPanel Grid.Column="1" Spacing="8">
+                    <TextBlock x:Uid="CloudPage_EmptyTitle" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                    <TextBlock x:Uid="CloudPage_Empty" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button x:Uid="CloudPage_EmptyAdd" Click="ShowCreateDriveDialogAsync" Margin="0,4,0,0" Style="{StaticResource AccentButtonStyle}" />
+                </StackPanel>
+            </Grid>
+        </Border>
         </StackPanel>
 
-        <!--这里网盘列表显示，套用DriveItemTemplate-->
+        <!--这里网盘卡片显示，套用DriveItemTemplate-->
         <ListView
             x:Name="DriveList"
-            HorizontalContentAlignment="Stretch"
-            Grid.Row="3"
+            Grid.Row="1"
+            Padding="0,0,0,24"
+            IsItemClickEnabled="True"
+            ItemClick="OpenClicked"
             SelectedItem="{Binding SelectedDrive, Mode=TwoWay}"
             ItemTemplate="{StaticResource DriveItemTemplate}"
-            ItemsSource="{Binding Drives}"/>
+            ItemsSource="{Binding Drives}">
+            <ListView.Resources>
+                <CornerRadius x:Key="ListViewItemCornerRadius">8</CornerRadius>
+            </ListView.Resources>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <localControls:AdaptiveGridPanel MinItemWidth="320" ColumnSpacing="12" RowSpacing="12" />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                    <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
     </Grid>
 </Page>
