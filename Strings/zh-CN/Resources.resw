@@ -879,8 +879,9 @@
   <data name="Startup_Services" xml:space="preserve"><value>应用服务初始化失败，请重试或退出。</value></data>
   <data name="Startup_Configurations" xml:space="preserve"><value>用户配置初始化失败，请重试或退出。</value></data>
   <data name="Startup_CacheCleanup" xml:space="preserve"><value>登录数据已迁移，但旧加密缓存未能移除。请关闭旧版本并重启以重试清理。</value></data>
-  <data name="Diagnostics_Title.Text" xml:space="preserve"><value>安全诊断</value></data>
-  <data name="Diagnostics_Description.Text" xml:space="preserve"><value>仅记录经过过滤的事件。生产诊断最长 30 分钟，退出即结束；Debug 诊断持续至手动结束或退出。文件仅保存在本机。</value></data>
+  <data name="SettingPage_DataTitle.Text" xml:space="preserve"><value>存储与诊断</value></data>
+  <data name="Settings_Diagnostics.Header" xml:space="preserve"><value>安全诊断</value></data>
+  <data name="Settings_Diagnostics.Description" xml:space="preserve"><value>仅记录经过过滤的事件。生产诊断最长 30 分钟，退出即结束；Debug 诊断持续至手动结束或退出。文件仅保存在本机。</value></data>
   <data name="Diagnostics_Start.Content" xml:space="preserve"><value>开始文件诊断</value></data>
   <data name="Diagnostics_Stop.Content" xml:space="preserve"><value>结束诊断</value></data>
   <data name="Diagnostics_Copy.Content" xml:space="preserve"><value>复制安全摘要</value></data>
@@ -1239,8 +1240,8 @@
   <data name="Reader_SourceChanged" xml:space="preserve"><value>下载期间书籍发生变化，请重试以获取最新版本。</value></data>
   <data name="Reader_CacheStorage" xml:space="preserve"><value>无法保存或读取书籍缓存，请检查可用空间，或在设置中清理阅读缓存。</value></data>
   <data name="Reader_CacheCorrupt" xml:space="preserve"><value>阅读缓存索引损坏。请在设置中清理阅读缓存后重试；阅读进度会保留。</value></data>
-  <data name="Reader_CacheTitle.Text" xml:space="preserve"><value>阅读缓存</value></data>
-  <data name="Reader_CacheDescription.Text" xml:space="preserve"><value>书籍缓存最多 500 MB，正文以未加密文件保存在本机。每次打开需联网确认权限和版本。清理缓存会保留阅读进度。</value></data>
+  <data name="Settings_ReaderCache.Header" xml:space="preserve"><value>阅读缓存</value></data>
+  <data name="Settings_ReaderCache.Description" xml:space="preserve"><value>书籍缓存最多 500 MB，正文以未加密文件保存在本机。每次打开需联网确认权限和版本。清理缓存会保留阅读进度。</value></data>
   <data name="Reader_ClearCache.Content" xml:space="preserve"><value>清理阅读缓存</value></data>
   <data name="Reader_CacheCleared" xml:space="preserve"><value>阅读缓存已清理。</value></data>
   <data name="Reader_CacheRetained" xml:space="preserve"><value>已清理可删除的缓存；正在使用的书籍将在关闭后允许清理。</value></data>

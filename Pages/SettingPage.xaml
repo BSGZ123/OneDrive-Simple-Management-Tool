@@ -12,7 +12,7 @@
     </Page.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
         <StackPanel Padding="24,20,24,32" Spacing="12" MaxWidth="960" HorizontalAlignment="Stretch">
-            <TextBlock x:Uid="SettingPage_Title" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock x:Uid="SettingPage_Title" Style="{StaticResource TitleTextBlockStyle}" />
             <TextBlock x:Uid="SettingPage_AppearanceTitle" FontWeight="SemiBold" Margin="0,8,0,0" />
             <controls:SettingsCard x:Name="ThemeCard" x:Uid="SettingPage_AppTheme">
                 <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE790;" /></controls:SettingsCard.HeaderIcon>
@@ -37,24 +37,30 @@
                        Visibility="{Binding HasMaterialNotice, Converter={StaticResource BoolToVisibilityConverter}}" />
             <TextBlock Text="{Binding SaveStatus}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Visibility="{Binding HasSaveStatus, Converter={StaticResource BoolToVisibilityConverter}}" />
-            <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}">
+            <!-- Collapsed as well as closed, so the groups keep even spacing. -->
+            <InfoBar IsOpen="{Binding HasError}" Severity="Warning" IsClosable="False" Message="{Binding ErrorMessage}"
+                     Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}">
                 <InfoBar.ActionButton>
                     <Button x:Uid="Settings_RetrySave" Command="{Binding RetrySaveCommand}" />
                 </InfoBar.ActionButton>
             </InfoBar>
 
-            <TextBlock x:Uid="Reader_CacheTitle" FontWeight="SemiBold" Margin="0,12,0,0" />
-            <TextBlock x:Uid="Reader_CacheDescription" TextWrapping="Wrap" />
-            <Button x:Name="ClearReaderCacheButton" x:Uid="Reader_ClearCache" Click="ClearReaderCache" />
-            <TextBlock x:Name="ReaderCacheStatus" TextWrapping="Wrap" Visibility="Collapsed" />
-            <TextBlock x:Uid="Diagnostics_Title" FontWeight="SemiBold" Margin="0,12,0,0" />
-            <TextBlock x:Uid="Diagnostics_Description" TextWrapping="Wrap" />
-            <localControls:WrapPanel>
-                <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" Margin="0,0,8,8" />
-                <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" Margin="0,0,8,8" />
-                <Button x:Uid="Diagnostics_Copy" Click="CopyDiagnostics" Margin="0,0,0,8" />
-            </localControls:WrapPanel>
-            <TextBlock x:Name="DiagnosticsStatus" TextWrapping="Wrap" Visibility="Collapsed" />
+            <TextBlock x:Uid="SettingPage_DataTitle" FontWeight="SemiBold" Margin="0,12,0,0" />
+            <controls:SettingsCard x:Uid="Settings_ReaderCache">
+                <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE82D;" /></controls:SettingsCard.HeaderIcon>
+                <Button x:Name="ClearReaderCacheButton" x:Uid="Reader_ClearCache" Click="ClearReaderCache" />
+            </controls:SettingsCard>
+            <TextBlock x:Name="ReaderCacheStatus" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="Collapsed" />
+            <!-- Vertical content keeps the three text buttons visible and wrapping at any width. -->
+            <controls:SettingsCard x:Uid="Settings_Diagnostics" ContentAlignment="Vertical">
+                <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE9D9;" /></controls:SettingsCard.HeaderIcon>
+                <localControls:WrapPanel>
+                    <Button x:Uid="Diagnostics_Start" Click="StartDiagnostics" Margin="0,0,8,8" />
+                    <Button x:Uid="Diagnostics_Stop" Click="StopDiagnostics" Margin="0,0,8,8" />
+                    <Button x:Uid="Diagnostics_Copy" Click="CopyDiagnostics" Margin="0,0,0,8" />
+                </localControls:WrapPanel>
+            </controls:SettingsCard>
+            <TextBlock x:Name="DiagnosticsStatus" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="Collapsed" />
 
             <TextBlock x:Uid="SettingPage_AboutTitle" FontWeight="SemiBold" Margin="0,12,0,0" />
             <controls:SettingsExpander x:Uid="Settings_About">

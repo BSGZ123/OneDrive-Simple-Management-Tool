@@ -879,8 +879,9 @@
   <data name="Startup_Services" xml:space="preserve"><value>Application services could not initialize. Retry or exit.</value></data>
   <data name="Startup_Configurations" xml:space="preserve"><value>User configuration could not initialize. Retry or exit.</value></data>
   <data name="Startup_CacheCleanup" xml:space="preserve"><value>Sign-in data was migrated, but the old encrypted cache could not be removed. Close older versions and restart to retry cleanup.</value></data>
-  <data name="Diagnostics_Title.Text" xml:space="preserve"><value>Safe diagnostics</value></data>
-  <data name="Diagnostics_Description.Text" xml:space="preserve"><value>Records only filtered events. Production sessions last up to 30 minutes and stop on exit. Debug sessions last until stopped or exit. Files stay on this device.</value></data>
+  <data name="SettingPage_DataTitle.Text" xml:space="preserve"><value>Storage and diagnostics</value></data>
+  <data name="Settings_Diagnostics.Header" xml:space="preserve"><value>Safe diagnostics</value></data>
+  <data name="Settings_Diagnostics.Description" xml:space="preserve"><value>Records only filtered events. Production sessions last up to 30 minutes and stop on exit. Debug sessions last until stopped or exit. Files stay on this device.</value></data>
   <data name="Diagnostics_Start.Content" xml:space="preserve"><value>Start file diagnostics</value></data>
   <data name="Diagnostics_Stop.Content" xml:space="preserve"><value>Stop diagnostics</value></data>
   <data name="Diagnostics_Copy.Content" xml:space="preserve"><value>Copy safe summary</value></data>
@@ -1239,8 +1240,8 @@
   <data name="Reader_SourceChanged" xml:space="preserve"><value>The book changed during download. Retry to get the latest version.</value></data>
   <data name="Reader_CacheStorage" xml:space="preserve"><value>Cannot read or save the book cache. Check free space or clear the reading cache in Settings.</value></data>
   <data name="Reader_CacheCorrupt" xml:space="preserve"><value>The reading cache index is damaged. Clear the reading cache in Settings and retry. Your reading progress is kept.</value></data>
-  <data name="Reader_CacheTitle.Text" xml:space="preserve"><value>Reading cache</value></data>
-  <data name="Reader_CacheDescription.Text" xml:space="preserve"><value>Up to 500 MB of books are cached locally as unencrypted files. Opening a book requires an online access and version check. Clearing the cache keeps reading progress.</value></data>
+  <data name="Settings_ReaderCache.Header" xml:space="preserve"><value>Reading cache</value></data>
+  <data name="Settings_ReaderCache.Description" xml:space="preserve"><value>Up to 500 MB of books are cached locally as unencrypted files. Opening a book requires an online access and version check. Clearing the cache keeps reading progress.</value></data>
   <data name="Reader_ClearCache.Content" xml:space="preserve"><value>Clear reading cache</value></data>
   <data name="Reader_CacheCleared" xml:space="preserve"><value>Reading cache cleared.</value></data>
   <data name="Reader_CacheRetained" xml:space="preserve"><value>Unused cache cleared. Books in use can be cleared after they close.</value></data>
