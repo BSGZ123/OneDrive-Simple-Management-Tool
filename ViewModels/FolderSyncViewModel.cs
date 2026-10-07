@@ -64,6 +64,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [ObservableProperty] private string _toggleLabel;
         [ObservableProperty] private double _percent;
         [ObservableProperty] private bool _isActive;
+        // With IsActive, exactly one of these is true; the page colors the state by it.
+        [ObservableProperty] private bool _needsAttention;
+        [ObservableProperty] private bool _isPaused;
+        [ObservableProperty] private bool _isIdle;
         [ObservableProperty] private bool _enabled;
         [ObservableProperty] private bool _hasIssues;
         [ObservableProperty] private string _commandError;
@@ -95,6 +99,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             Enabled = Job.Binding.Enabled;
             ToggleLabel = (Enabled ? "Sync_Pause" : "Sync_Resume").GetLocalized();
             IsActive = progress.StateKey is "Sync_Scanning" or "Sync_Uploading";
+            NeedsAttention = progress.StateKey == "Sync_Attention";
+            IsPaused = progress.StateKey == "Sync_Paused";
+            IsIdle = !IsActive && !NeedsAttention && !IsPaused;
             Percent = progress.Total == 0 ? (progress.StateKey == "Sync_Monitoring" ? 100 : 0) :
                 Math.Clamp((progress.Completed + progress.Percent / 100d) * 100 / progress.Total, 0, 100);
         }

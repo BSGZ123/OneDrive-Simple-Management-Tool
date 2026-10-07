@@ -62,7 +62,7 @@ namespace OneDrive_Simple_Management_Tool.Pages
 
         private async void RemoveBinding(object sender, RoutedEventArgs args)
         {
-            if (_dialogOpen || (sender as Button)?.Tag is not FolderSyncItemViewModel item) return;
+            if (_dialogOpen || (sender as FrameworkElement)?.Tag is not FolderSyncItemViewModel item) return;
             _dialogOpen = true;
             try
             {

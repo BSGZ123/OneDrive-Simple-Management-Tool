@@ -768,6 +768,11 @@
   <data name="Sync_Description.Text" xml:space="preserve"><value>New and modified local files upload to OneDrive. Local deletions leave cloud files intact.</value></data>
   <data name="Sync_Lifetime.Text" xml:space="preserve"><value>Monitoring runs while the app is open and catches up when reopened. Renames and moves upload the new path and keep the old cloud copy.</value></data>
   <data name="Sync_Empty.Message" xml:space="preserve"><value>No sync bindings yet. Choose New sync to select local and cloud folders with identical names.</value></data>
+  <data name="Sync_EmptyText.Text" xml:space="preserve"><value>No sync bindings yet. Create one, then select local and cloud folders with identical names.</value></data>
+  <data name="Sync_EmptyNew.Content" xml:space="preserve"><value>New sync</value></data>
+  <data name="Sync_More.ToolTipService.ToolTip" xml:space="preserve"><value>More actions</value></data>
+  <data name="Sync_More.AutomationProperties.Name" xml:space="preserve"><value>More actions</value></data>
+  <data name="Sync_RemoveMenu.Text" xml:space="preserve"><value>Remove binding</value></data>
   <data name="Sync_CheckNow.Content" xml:space="preserve"><value>Check now / Retry</value></data>
   <data name="Sync_Remove.Content" xml:space="preserve"><value>Unlink</value></data>
   <data name="Sync_IssueBar.Title" xml:space="preserve"><value>Some items need attention</value></data>

@@ -768,6 +768,11 @@
   <data name="Sync_Description.Text" xml:space="preserve"><value>本地新增和修改自动上传至 OneDrive，本地删除不影响云端文件。</value></data>
   <data name="Sync_Lifetime.Text" xml:space="preserve"><value>应用运行时持续监测，重新打开后检查遗漏的变化。重命名或移动会上传新路径并保留云端旧副本。</value></data>
   <data name="Sync_Empty.Message" xml:space="preserve"><value>还没有同步绑定。点击“新建同步”，选择同名的本地和云端文件夹。</value></data>
+  <data name="Sync_EmptyText.Text" xml:space="preserve"><value>还没有同步绑定。新建同步后，选择同名的本地和云端文件夹。</value></data>
+  <data name="Sync_EmptyNew.Content" xml:space="preserve"><value>新建同步</value></data>
+  <data name="Sync_More.ToolTipService.ToolTip" xml:space="preserve"><value>更多操作</value></data>
+  <data name="Sync_More.AutomationProperties.Name" xml:space="preserve"><value>更多操作</value></data>
+  <data name="Sync_RemoveMenu.Text" xml:space="preserve"><value>解除绑定</value></data>
   <data name="Sync_CheckNow.Content" xml:space="preserve"><value>立即检查 / 重试</value></data>
   <data name="Sync_Remove.Content" xml:space="preserve"><value>解除绑定</value></data>
   <data name="Sync_IssueBar.Title" xml:space="preserve"><value>部分项目需要处理</value></data>

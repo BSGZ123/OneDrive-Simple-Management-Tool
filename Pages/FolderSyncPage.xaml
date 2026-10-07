@@ -3,55 +3,133 @@
     x:Class="OneDrive_Simple_Management_Tool.Pages.FolderSyncPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
     NavigationCacheMode="Enabled"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <Grid Margin="24" RowSpacing="12">
+    Background="Transparent">
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:StringVisibilityConverter x:Key="StringVisibilityConverter" />
+        <Style x:Key="SyncCaption" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="SyncStatePill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Page.Resources>
+    <Grid Padding="24,20,24,0" RowSpacing="16" MaxWidth="1120">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" />
+            <RowDefinition Height="Auto" /><RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid>
-            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-            <TextBlock x:Uid="Sync_Title" Style="{StaticResource TitleTextBlockStyle}" />
-            <Button Grid.Column="1" x:Uid="Sync_New" HorizontalAlignment="Right" Click="CreateBinding" />
-        </Grid>
-        <StackPanel Grid.Row="1" Spacing="6">
-            <TextBlock x:Uid="Sync_Description" TextWrapping="Wrap" />
-            <TextBlock x:Uid="Sync_Lifetime" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        <!-- A StackPanel so that a closed error bar leaves no gap. -->
+        <StackPanel Spacing="12">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel Spacing="4">
+                    <TextBlock x:Uid="Sync_Title" Style="{StaticResource TitleTextBlockStyle}" />
+                    <TextBlock x:Uid="Sync_Description" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock x:Uid="Sync_Lifetime" Style="{StaticResource SyncCaption}" />
+                </StackPanel>
+                <Button Grid.Column="1" x:Uid="Sync_New" VerticalAlignment="Top" Margin="0,4,0,0" Style="{StaticResource AccentButtonStyle}" Click="CreateBinding" />
+            </Grid>
+            <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False"
+                     Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+                    <Button x:Uid="Sync_RetryConfiguration" Click="RetryConfiguration" />
+                    <Button x:Uid="Sync_RestoreConfiguration" Click="RestoreConfiguration" />
+                </StackPanel>
+            </InfoBar>
         </StackPanel>
-        <InfoBar Grid.Row="2" IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button x:Uid="Sync_RetryConfiguration" Click="RetryConfiguration" />
-                <Button x:Uid="Sync_RestoreConfiguration" Click="RestoreConfiguration" />
+        <Grid Grid.Row="1">
+            <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibilityConverter}}">
+                <FontIcon Glyph="&#xE895;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                <TextBlock x:Uid="Sync_EmptyText" Style="{StaticResource SyncCaption}" TextAlignment="Center" MaxWidth="360" />
+                <Button x:Uid="Sync_EmptyNew" HorizontalAlignment="Center" Click="CreateBinding" />
             </StackPanel>
-        </InfoBar>
-        <Grid Grid.Row="3">
-            <InfoBar IsOpen="{Binding IsEmpty}" x:Uid="Sync_Empty" Severity="Informational" IsClosable="False" VerticalAlignment="Top" />
-            <ListView ItemsSource="{Binding Bindings}" SelectionMode="None" HorizontalContentAlignment="Stretch">
+            <ListView ItemsSource="{Binding Bindings}" SelectionMode="None" Padding="0,0,0,24">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0,0,0,12" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Padding="16" Margin="0,0,0,12" BorderThickness="1" CornerRadius="8"
+                        <Border Padding="16" BorderThickness="1" CornerRadius="8"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <StackPanel Spacing="8">
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}" Style="{StaticResource SubtitleTextBlockStyle}" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" />
-                                    <TextBlock Grid.Column="1" Text="{Binding State}" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                </Grid>
-                                <TextBlock Text="{Binding LocalPath}" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
-                                <TextBlock Text="{Binding RemotePath}" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
-                                <ProgressBar Value="{Binding Percent}" />
-                                <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" />
-                                <TextBlock Text="{Binding LastSuccess}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Content="{Binding ToggleLabel}" Command="{Binding ToggleCommand}" />
-                                    <Button x:Uid="Sync_CheckNow" Command="{Binding CheckNowCommand}" IsEnabled="{Binding Enabled}" />
-                                    <Button x:Uid="Sync_Remove" Click="RemoveBinding" Tag="{Binding}" />
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Top" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                    <FontIcon Glyph="&#xE895;" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="8">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <!-- Unbinding sits in the overflow menu, apart from the everyday actions. -->
+                                        <Button Grid.Column="2" x:Uid="Sync_More" Padding="6" VerticalAlignment="Center">
+                                            <FontIcon Glyph="&#xE712;" FontSize="14" />
+                                            <Button.Flyout>
+                                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                    <MenuFlyoutItem x:Uid="Sync_RemoveMenu" Click="RemoveBinding" Tag="{Binding}" />
+                                                </MenuFlyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" ToolTipService.ToolTip="{Binding Name}" />
+                                        <!-- Exactly one pill is visible; each carries the same state text in its own colors. -->
+                                        <Grid Grid.Column="1">
+                                            <Border Style="{StaticResource SyncStatePill}" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                                    Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding State}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            </Border>
+                                            <Border Style="{StaticResource SyncStatePill}" Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding State}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                            </Border>
+                                            <Border Style="{StaticResource SyncStatePill}" Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                    Visibility="{Binding NeedsAttention, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding State}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                                            </Border>
+                                            <Border Style="{StaticResource SyncStatePill}" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                    Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding State}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+                                    <StackPanel Spacing="4">
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                            <FontIcon Glyph="&#xE7F8;" FontSize="14" VerticalAlignment="Top" Margin="0,1,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding LocalPath}" Style="{StaticResource SyncCaption}" IsTextSelectionEnabled="True" />
+                                        </Grid>
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                            <FontIcon Glyph="&#xE753;" FontSize="14" VerticalAlignment="Top" Margin="0,1,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding RemotePath}" Style="{StaticResource SyncCaption}" IsTextSelectionEnabled="True" />
+                                        </Grid>
+                                    </StackPanel>
+                                    <ProgressBar Value="{Binding Percent}" ShowPaused="{Binding IsPaused}" />
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Detail}" Style="{StaticResource SyncCaption}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding LastSuccess}" Style="{StaticResource SyncCaption}" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                        <Button Content="{Binding ToggleLabel}" Command="{Binding ToggleCommand}" />
+                                        <Button x:Uid="Sync_CheckNow" Command="{Binding CheckNowCommand}" IsEnabled="{Binding Enabled}" />
+                                    </StackPanel>
+                                    <InfoBar IsOpen="{Binding HasIssues}" x:Uid="Sync_IssueBar" Severity="Warning" IsClosable="False"
+                                             Visibility="{Binding HasIssues, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <ScrollViewer MaxHeight="200"><TextBlock Text="{Binding Issues}" TextWrapping="Wrap" IsTextSelectionEnabled="True" /></ScrollViewer>
+                                    </InfoBar>
+                                    <TextBlock Text="{Binding CommandError}" Style="{StaticResource SyncCaption}" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                               Visibility="{Binding CommandError, Converter={StaticResource StringVisibilityConverter}}" />
                                 </StackPanel>
-                                <InfoBar IsOpen="{Binding HasIssues}" x:Uid="Sync_IssueBar" Severity="Warning" IsClosable="False">
-                                    <ScrollViewer MaxHeight="200"><TextBlock Text="{Binding Issues}" TextWrapping="Wrap" IsTextSelectionEnabled="True" /></ScrollViewer>
-                                </InfoBar>
-                                <TextBlock Text="{Binding CommandError}" TextWrapping="Wrap" />
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
