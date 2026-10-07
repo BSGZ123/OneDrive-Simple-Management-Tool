@@ -4,9 +4,18 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:localConverters="using:OneDrive_Simple_Management_Tool.Converters"
     xmlns:localControls="using:OneDrive_Simple_Management_Tool.Controls"
     Background="Transparent">
-    <Page.Resources><converters:BoolToVisibilityConverter x:Key="BoolToVisibility" /></Page.Resources>
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <converters:BoolToObjectConverter x:Key="InverseBoolToVisibility" TrueValue="Collapsed" FalseValue="Visible" />
+        <localConverters:FileGlyphConverter x:Key="FileGlyphConverter" />
+        <Style x:Key="BookmarkCaption" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </Page.Resources>
     <Page.KeyboardAccelerators>
         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="FocusSearch" />
         <KeyboardAccelerator Key="F5" Invoked="RefreshBookmarks" />
@@ -16,8 +25,8 @@
                   SelectionMode="Single" KeyDown="OnListKeyDown">
             <ListView.Header>
                 <StackPanel Spacing="12" Padding="0,0,0,16">
-                    <StackPanel Spacing="6">
-                        <TextBlock x:Uid="Bookmarks_Title" FontSize="28" FontWeight="SemiBold" />
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Uid="Bookmarks_Title" Style="{StaticResource TitleTextBlockStyle}" />
                         <TextBlock x:Uid="Bookmarks_Description" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
                     <Grid ColumnSpacing="12">
@@ -25,19 +34,30 @@
                         <TextBox x:Name="BookmarkSearch" x:Uid="Bookmarks_Search" Text="{Binding Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <Button x:Uid="Bookmarks_Reload" Grid.Column="1" Command="{Binding ReloadCommand}" VerticalAlignment="Bottom" />
                     </Grid>
-                    <TextBlock Text="{Binding CountText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="{Binding CountText}" Style="{StaticResource BookmarkCaption}" />
                     <ProgressBar IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
-                    <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
-                    <StackPanel Spacing="8" Visibility="{Binding NeedsRecovery, Converter={StaticResource BoolToVisibility}}">
-                        <Button x:Uid="Bookmarks_Restore" Command="{Binding RestoreBackupCommand}" />
-                        <Button x:Uid="Bookmarks_Rebuild" Click="Rebuild" IsEnabled="{Binding CanRecoverBookmarks}" />
-                    </StackPanel>
-                    <StackPanel Spacing="12" Padding="20" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock x:Uid="Bookmarks_EmptyTitle" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock x:Uid="Bookmarks_Empty" TextWrapping="Wrap" />
-                        <Button x:Uid="Bookmarks_Files" Click="OpenFiles" />
-                    </StackPanel>
-                    <TextBlock x:Uid="Bookmarks_NoMatches" TextWrapping="Wrap" Margin="20" Visibility="{Binding HasNoMatches, Converter={StaticResource BoolToVisibility}}" />
+                    <!-- Collapsed as well as closed, so the header keeps even spacing. -->
+                    <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False"
+                             Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
+                    <localControls:WrapPanel Visibility="{Binding NeedsRecovery, Converter={StaticResource BoolToVisibility}}">
+                        <Button x:Uid="Bookmarks_Restore" Command="{Binding RestoreBackupCommand}" Margin="0,0,8,4" />
+                        <Button x:Uid="Bookmarks_Rebuild" Click="Rebuild" IsEnabled="{Binding CanRecoverBookmarks}" Margin="0,0,0,4" />
+                    </localControls:WrapPanel>
+                    <Border Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE8A4;" FontSize="40" VerticalAlignment="Top" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <StackPanel Grid.Column="1" Spacing="8">
+                                <TextBlock x:Uid="Bookmarks_EmptyTitle" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                                <TextBlock x:Uid="Bookmarks_Empty" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <Button x:Uid="Bookmarks_Files" Click="OpenFiles" Margin="0,4,0,0" Style="{StaticResource AccentButtonStyle}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <TextBlock x:Uid="Bookmarks_NoMatches" TextWrapping="Wrap" Margin="0,8" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Visibility="{Binding HasNoMatches, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>
             </ListView.Header>
             <ListView.ItemContainerStyle>
@@ -49,20 +69,37 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="18" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding DriveName}" TextWrapping="Wrap" />
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="{Binding Kind}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                <TextBlock Text="{Binding AddedText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Border Padding="16" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36" CornerRadius="8" VerticalAlignment="Top" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                <Grid>
+                                    <FontIcon Glyph="&#xE8D5;" FontSize="18" Foreground="#F2B01E" Visibility="{Binding Bookmark.IsFolder, Converter={StaticResource BoolToVisibility}}" />
+                                    <FontIcon Glyph="{Binding Name, Converter={StaticResource FileGlyphConverter}}" FontSize="18" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                              Visibility="{Binding Bookmark.IsFolder, Converter={StaticResource InverseBoolToVisibility}}" />
+                                </Grid>
+                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="Wrap" />
+                                <StackPanel Spacing="2">
+                                    <Grid ColumnSpacing="6">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <FontIcon Glyph="&#xE753;" FontSize="12" VerticalAlignment="Top" Margin="0,2,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding DriveName}" Style="{StaticResource BookmarkCaption}" />
+                                    </Grid>
+                                    <TextBlock Style="{StaticResource BookmarkCaption}">
+                                        <Run Text="{Binding Kind}" /><Run Text="  ·  " /><Run Text="{Binding AddedText}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <!-- Plain text buttons in a wrapping row: UI checks find them by label and require the full label when narrow. -->
+                                <localControls:WrapPanel Margin="0,4,0,0">
+                                    <Button x:Uid="Bookmarks_Open" Click="OpenBookmark" Margin="0,0,8,4" IsEnabled="{Binding Owner.CanUseItems}" />
+                                    <Button x:Uid="Bookmarks_RemoveButton" Click="RemoveBookmark" Margin="0,0,0,4" IsEnabled="{Binding Owner.CanUseItems}" />
+                                </localControls:WrapPanel>
+                                <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False"
+                                         Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
                             </StackPanel>
-                            <localControls:WrapPanel Margin="0,4,0,0">
-                                <Button x:Uid="Bookmarks_Open" Click="OpenBookmark" Margin="0,0,8,4" IsEnabled="{Binding Owner.CanUseItems}" />
-                                <Button x:Uid="Bookmarks_RemoveButton" Click="RemoveBookmark" Margin="0,0,0,4" IsEnabled="{Binding Owner.CanUseItems}" />
-                            </localControls:WrapPanel>
-                            <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Warning" IsClosable="False" />
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
