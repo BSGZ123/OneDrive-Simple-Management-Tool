@@ -23,10 +23,13 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         private DownloadTaskState _lastReportedState;
 
         public DownloadTaskViewModel(DriveViewModel drive, string itemId, StorageFile file)
-            : this(file.Name, new DownloadSession(file.Path, token => drive.Provider.GetDownloadSourceAsync(itemId, token))) { }
+            : this(file.Name, new DownloadSession(file.Path, token => drive.Provider.GetDownloadSourceAsync(itemId, token)),
+                accountId: drive.Provider.HomeAccountId, driveId: drive.Provider.DriveId) { }
 
-        public DownloadTaskViewModel(string name, IDownloadSession session, TaskManagerViewModel manager = null)
+        public DownloadTaskViewModel(string name, IDownloadSession session, TaskManagerViewModel manager = null, string accountId = null, string driveId = null)
         {
+            AccountId = accountId;
+            DriveId = driveId;
             Name = name;
             _manager = manager ?? Ioc.Default.GetRequiredService<TaskManagerViewModel>();
             _session = session;
@@ -34,6 +37,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
         public string Name { get; }
+        public string AccountId { get; }
+        public string DriveId { get; }
         public string DestinationPath => _session.DestinationPath;
         // Read the session directly: a queued UI snapshot can lag behind a finalization or pause.
         public bool NeedsExitProtection => _session.Snapshot.State is not (DownloadTaskState.Completed or DownloadTaskState.Cancelled);

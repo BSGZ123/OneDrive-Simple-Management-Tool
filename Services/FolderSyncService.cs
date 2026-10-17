@@ -12,6 +12,7 @@ namespace OneDrive_Simple_Management_Tool.Services
     {
         private readonly FolderSyncStore _store;
         private readonly Func<FolderSyncBinding, IFolderSyncTarget> _targetFactory;
+        private readonly AccountAccessState _access;
         private readonly List<FolderSyncJob> _jobs = new();
         private readonly SemaphoreSlim _changes = new(1, 1);
         private Task _initialization;
@@ -22,10 +23,11 @@ namespace OneDrive_Simple_Management_Tool.Services
         public FolderSyncService() : this(new FolderSyncStore(new ApplicationDataPaths().FolderSync),
             OneDrive.CreateFolderSyncTarget) { }
 
-        public FolderSyncService(FolderSyncStore store, Func<FolderSyncBinding, IFolderSyncTarget> factory)
+        public FolderSyncService(FolderSyncStore store, Func<FolderSyncBinding, IFolderSyncTarget> factory, AccountAccessState access = null)
         {
             _store = store;
             _targetFactory = factory;
+            _access = access;
         }
 
         public Task InitializeAsync() => _initialization ??= LoadAsync();
@@ -84,7 +86,7 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         private void AddJob(FolderSyncBinding binding)
         {
-            var job = new FolderSyncJob(binding, _store, _targetFactory);
+            var job = new FolderSyncJob(binding, _store, _targetFactory, _access);
             _jobs.Add(job);
             job.Start();
         }
@@ -95,6 +97,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             await _changes.WaitAsync();
             try
             {
+                _access?.Check(binding.AccountId, binding.DriveId);
                 binding.LocalPath = FolderSyncRules.NormalizeRoot(binding.LocalPath);
                 FolderSyncRules.ValidateName(binding.FolderName);
                 FolderSyncRules.CheckLocalRoot(binding);
@@ -126,10 +129,23 @@ namespace OneDrive_Simple_Management_Tool.Services
         {
             foreach (var job in _jobs) job.RequestStop();
         }
+
+        public async Task UpdateAccountAsync(string account, string drive, bool remove)
+        {
+            await InitializeAsync();
+            // Do not report a complete cleanup when an unreadable binding could still exist.
+            if (ErrorKey == "Sync_ConfigError") throw new FolderSyncException("Sync_ConfigError");
+            foreach (var job in Jobs.Where(j => j.Binding.AccountId == account && (drive == null || j.Binding.DriveId == drive)))
+            {
+                if (remove) await RemoveAsync(job);
+                else await job.SetEnabledAsync(false);
+            }
+        }
     }
 
     public sealed class FolderSyncJob
     {
+        private readonly AccountAccessState _access;
         private readonly FolderSyncStore _store;
         private readonly Func<FolderSyncBinding, IFolderSyncTarget> _targetFactory;
         private readonly CancellationTokenSource _lifetime = new();
@@ -145,11 +161,12 @@ namespace OneDrive_Simple_Management_Tool.Services
         public IReadOnlyList<FolderSyncIssue> Issues { get; private set; } = Array.Empty<FolderSyncIssue>();
         public event Action Updated;
 
-        public FolderSyncJob(FolderSyncBinding binding, FolderSyncStore store, Func<FolderSyncBinding, IFolderSyncTarget> factory)
+        public FolderSyncJob(FolderSyncBinding binding, FolderSyncStore store, Func<FolderSyncBinding, IFolderSyncTarget> factory, AccountAccessState access = null)
         {
             Binding = binding;
             _store = store;
             _targetFactory = factory;
+            _access = access;
         }
 
         public void Start() => _worker ??= Task.Run(LoopAsync);
@@ -166,6 +183,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             await _gate.WaitAsync();
             try
             {
+                if (enabled) _access?.Check(Binding.AccountId, Binding.DriveId);
                 bool previous = Binding.Enabled;
                 Binding.Enabled = enabled;
                 try { await _store.SaveAsync(Binding, CancellationToken.None); }
@@ -220,6 +238,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                             try
                             {
                                 attempt.Token.ThrowIfCancellationRequested();
+                                _access?.Check(Binding.AccountId, Binding.DriveId);
                                 FolderSyncRules.CheckLocalRoot(Binding);
                                 EnsureWatcher(); // Install before scanning, so changes during first upload are retained.
                                 using var target = _targetFactory(Binding);
@@ -269,6 +288,7 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public static string GetErrorKey(Exception exception) => exception switch
         {
+            AccountAccessException => "Sync_LoginNeeded",
             Microsoft.Kiota.Abstractions.ApiException api => api.ResponseStatusCode switch
             {
                 401 => "Sync_LoginNeeded", 403 => "Sync_AccessDenied", 404 => "Sync_RemoteMissing",

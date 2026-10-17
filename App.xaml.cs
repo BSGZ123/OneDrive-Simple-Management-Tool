@@ -91,20 +91,24 @@ namespace OneDrive_Simple_Management_Tool
                             if (Services == null)
                             {
                                 Services = new ServiceCollection().AddSingleton(_paths).AddSingleton(_cache).AddSingleton(_publicClient)
+                                    .AddSingleton<AccountAccessState>()
                                     .AddSingleton<IAccountAuthenticationService, MsalAccountAuthenticationService>()
+                                    .AddSingleton<IAccountLifecycleEffects, AccountLifecycleEffects>().AddSingleton<AccountLifecycleService>()
                                     .AddSingleton<DriveConfigurationStore>().AddSingleton<TaskManagerViewModel>()
                                     .AddSingleton<IAppearanceSettingsStore, AppearanceSettingsStore>().AddSingleton<SettingViewModel>()
                                     .AddSingleton<IHomeDriveService, HomeDriveService>().AddTransient<HomeViewModel>()
                                     .AddSingleton<IBookmarkStore, BookmarkStore>().AddSingleton<IBookmarkResolver, BookmarkResolver>()
                                     .AddSingleton<ReaderWorkspace>()
                                     .AddTransient<BookmarkViewModel>()
-                                    .AddSingleton(new FolderSyncService(new FolderSyncStore(_paths.FolderSync), OneDrive.CreateFolderSyncTarget))
+                                    .AddSingleton(sp => new FolderSyncService(new FolderSyncStore(_paths.FolderSync), OneDrive.CreateFolderSyncTarget,
+                                        sp.GetRequiredService<AccountAccessState>()))
                                     .AddSingleton<FolderSyncViewModel>().BuildServiceProvider();
                                 Ioc.Default.ConfigureServices(Services);
                             }
                             break;
                         case StartupPhase.Configurations:
                             _configurationNeedsAttention = false;
+                            await Services.GetRequiredService<AccountAccessState>().InitializeAsync();
                             try
                             {
                                 var store = Services.GetRequiredService<DriveConfigurationStore>();
@@ -117,6 +121,8 @@ namespace OneDrive_Simple_Management_Tool
                                 SafeDiagnostics.Current.Record(DiagnosticEvent.ConfigurationFailure);
                             }
                             await Services.GetRequiredService<FolderSyncService>().InitializeAsync();
+                            try { await Services.GetRequiredService<AccountLifecycleService>().RetryPendingAsync(); }
+                            catch { _configurationNeedsAttention = true; }
                             await Services.GetRequiredService<SettingViewModel>().InitializeAsync();
                             break;
                     }

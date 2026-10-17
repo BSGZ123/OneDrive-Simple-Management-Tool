@@ -50,6 +50,20 @@ internal static class AccountViewModelChecks
             catch (AccountAuthenticationException e) when (e.Failure == AuthenticationFailure.AccountMismatch) { }
             Check(provider.DriveId == "bound-drive" && provider.HomeAccountId == "A" && !provider.IsAuthenticated, "binding mutated");
         }),
+        ("Account invalidation clears cached rows and selection for only the affected drive", async () =>
+        {
+            using var f = new Fixture();
+            var access = new AccountAccessState(f.Paths); await access.InitializeAsync();
+            var auth = new AccessAuthentication(access);
+            var a = new DriveViewModel(new OneDrive("same-drive", "A", auth) { IsAuthenticated = true });
+            var b = new DriveViewModel(new OneDrive("same-drive", "B", auth) { IsAuthenticated = true });
+            var item = new FileViewModel(a, new Microsoft.Graph.Models.DriveItem { Id = "private-item", Name = "private.txt", File = new() });
+            a.Files.Add(item); a.SetSelection(new[] { item });
+            a.StorageInfo = "private quota"; b.StorageInfo = "other quota";
+            await access.BeginAsync(new("A"), false);
+            Check(a.IsSignedOut && !a.Provider.IsAuthenticated && a.StorageInfo == null && a.Files.Count == 0 && a.SelectedCount == 0 && !a.CanCreateHere, "A still exposes its cached state");
+            Check(!b.IsSignedOut && b.Provider.IsAuthenticated && b.StorageInfo == "other quota", "B was invalidated");
+        }),
         ("Configuration damage blocks adding without clearing an already displayed list", async () =>
         {
             using var f = new Fixture(); await f.Store.AddAsync(Record("A"), 0); await f.Cloud.LoadDrivesFromDisk();
@@ -64,6 +78,12 @@ internal static class AccountViewModelChecks
     private sealed class FakeAuthentication : IAccountAuthenticationService
     {
         public Task<AccountToken> AcquireInteractiveAsync(string id, CancellationToken token) => Task.FromResult(new AccountToken("B", "fake-token"));
+        public Task<AccountToken> AcquireSilentAsync(string id, CancellationToken token) => throw new NotSupportedException();
+    }
+    private sealed class AccessAuthentication(AccountAccessState access) : IAccountAuthenticationService
+    {
+        public AccountAccessState Access => access;
+        public Task<AccountToken> AcquireInteractiveAsync(string id, CancellationToken token) => throw new NotSupportedException();
         public Task<AccountToken> AcquireSilentAsync(string id, CancellationToken token) => throw new NotSupportedException();
     }
     private sealed class Resolver : IAccountDriveResolver

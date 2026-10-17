@@ -16,6 +16,21 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public ObservableCollection<UploadTaskViewModel> UploadTasks { get; } = new();
         private Task<bool> _closeTask = Task.FromResult(false);
         public bool IsShuttingDown { get; private set; }
+        private readonly List<(string Account, string Drive)> _blocked = new();
+        public bool CanUseAccount(string account, string drive) => !_blocked.Any(x => x.Account == account && (x.Drive == null || x.Drive == drive));
+
+        public async Task StopAccountAsync(string account, string drive = null)
+        {
+            _blocked.Add((account, drive));
+            try
+            {
+                await Task.WhenAll(UploadTasks.Where(x => x.Drive.Provider.HomeAccountId == account &&
+                        (drive == null || x.Drive.Provider.DriveId == drive)).ToArray().Select(x => x.CancelTaskAsync())
+                    .Concat(DownloadTasks.Where(x => x.AccountId == account && (drive == null || x.DriveId == drive))
+                        .ToArray().Select(x => x.StopForExitAsync())));
+            }
+            finally { _blocked.Remove((account, drive)); }
+        }
 
         // All admission and lifecycle calls are on the UI thread. Freeze admission even while asking.
         public Task<bool> RequestCloseAsync(Func<int, int, Task<bool>> confirm, Func<Task> finish)
@@ -49,6 +64,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public async Task AddDownloadTask(DriveViewModel drive, string itemId, StorageFile file)
         {
             if (IsShuttingDown) return;
+            if (!CanUseAccount(drive.Provider.HomeAccountId, drive.Provider.DriveId)) return;
+            drive.Provider.CheckAccess();
             DownloadTaskViewModel downloadTask = new(drive, itemId, file);
             DownloadTasks.Add(downloadTask);
             await downloadTask.StartDownload();
@@ -58,8 +75,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             string name, IReadOnlyDictionary<string, string> names = null)
         {
             if (IsShuttingDown) return null;
+            if (!CanUseAccount(source.AccountId, source.DriveId)) return null;
+            source.CheckAccess();
             var session = new DownloadBatchSession(source, ids, destination, names: names);
-            var task = new DownloadTaskViewModel(name, session, this);
+            var task = new DownloadTaskViewModel(name, session, this, source.AccountId, source.DriveId);
             DownloadTasks.Add(task);
             return task;
         }
@@ -91,6 +110,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public async Task AddUploadTask(DriveViewModel drive, string itemId,IStorageItem item, UploadConflictResolver conflicts = null)
         {
             if (IsShuttingDown) return;
+            if (!CanUseAccount(drive.Provider.HomeAccountId, drive.Provider.DriveId)) return;
+            drive.Provider.CheckAccess();
             UploadTaskViewModel uploadTasks = new(drive, itemId, item, conflicts);
             UploadTasks.Add(uploadTasks);
             await uploadTasks.StartUpload();

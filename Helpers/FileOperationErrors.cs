@@ -10,6 +10,7 @@ namespace OneDrive_Simple_Management_Tool.Helpers
     {
         public static string GetMessage(Exception exception) => (exception switch
         {
+            Services.AccountAccessException => "Account_RequiresSignIn",
             Services.AccountAuthenticationException auth => "Account_" + auth.Failure,
             ApiException api when api.ResponseStatusCode == 401 => "FileOperation_AuthenticationFailed",
             ApiException api when api.ResponseStatusCode == 403 => "FileOperation_AccessDenied",

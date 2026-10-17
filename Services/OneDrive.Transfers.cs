@@ -10,6 +10,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             string drive = DriveId, account = HomeAccountId;
             return new GraphFileTransferService(graphClient, drive, checkIdentity: () =>
             {
+                CheckAccess();
                 if (!IsAuthenticated || DriveId != drive || HomeAccountId != account)
                     throw new FileTransferException("FileOperation_AuthenticationFailed");
             });

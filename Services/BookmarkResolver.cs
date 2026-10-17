@@ -50,6 +50,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             {
                 throw new BookmarkException(exception switch
                 {
+                    AccountAccessException => "Bookmarks_SignInRequired",
                     ConfigurationException => "Bookmarks_AccountConfiguration",
                     AccountAuthenticationException { Failure: AuthenticationFailure.RequiresSignIn } => "Bookmarks_SignInRequired",
                     AccountAuthenticationException { Failure: AuthenticationFailure.Network } => "Bookmarks_Network",

@@ -259,6 +259,31 @@ internal static class BatchDownloadChecks
             await running;
             Check(finished && !task.NeedsExitProtection && !Directory.GetFiles(f.DirectoryPath, ".cloudflow-*").Any(), "Shutdown returned before cleanup.");
         });
+        await Test("account removal drains only matching transfers and preserves completed local files", async (f, source) =>
+        {
+            source.AccountId = "A"; source.DriveId = "one";
+            source.File("large", "large.bin");
+            services.Manager = new TaskManagerViewModel();
+            var manager = services.Manager;
+            string existing = Path.Combine(f.DirectoryPath, "keep.txt");
+            await File.WriteAllTextAsync(existing, "keep");
+            var otherSource = new TreeSource(f) { AccountId = "B", DriveId = "one" };
+            otherSource.File("other", "other.bin");
+            var siblingSource = new TreeSource(f) { AccountId = "A", DriveId = "two" };
+            siblingSource.File("sibling", "sibling.bin");
+            var active = manager.QueueDownloadBatch(source, ["large"], f.DirectoryPath, "active");
+            var other = manager.QueueDownloadBatch(otherSource, ["other"], f.DirectoryPath, "other");
+            var sibling = manager.QueueDownloadBatch(siblingSource, ["sibling"], f.DirectoryPath, "sibling");
+            Task running = active.StartDownload();
+            await Until(() => { DispatcherQueue.Drain(); return active.DownloadedBytes >= 32768; });
+            await manager.StopAccountAsync("A", "one"); await running;
+            Check(!manager.DownloadTasks.Contains(active) && manager.DownloadTasks.Contains(other) && manager.DownloadTasks.Contains(sibling), "Wrong transfers stopped");
+            Check(other.State == DownloadTaskState.Pending && sibling.State == DownloadTaskState.Pending, "Unaffected transfer state changed");
+            Check(File.ReadAllText(existing) == "keep" && !Directory.GetFiles(f.DirectoryPath, ".cloudflow-*").Any(), "Local file lost or active writer remains");
+            await manager.StopAccountAsync("A");
+            Check(!manager.DownloadTasks.Contains(sibling) && manager.DownloadTasks.Contains(other), "Account scope crossed to B");
+            await other.StopForExitAsync();
+        });
         await Test("batch localization and explicit cancel retain a cancelled card", async (f, source) =>
         {
             source.File("file", "file.bin", size: 0);
@@ -301,6 +326,8 @@ internal static class BatchDownloadChecks
 
     private sealed class TreeSource(Fixture fixture) : IDownloadTreeSource
     {
+        public string AccountId { get; set; }
+        public string DriveId { get; set; }
         public Dictionary<string, DownloadTreeItem> Items { get; } = new()
         {
             ["root"] = new("root", "Root", true, 0, IsRoot: true)

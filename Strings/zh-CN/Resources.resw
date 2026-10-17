@@ -842,7 +842,7 @@
   <data name="CreateDrive_Name.PlaceholderText" xml:space="preserve"><value>网盘名称</value></data>
   <data name="CloudPage_Open.Text" xml:space="preserve"><value>打开</value></data>
   <data name="CloudPage_SignIn.Text" xml:space="preserve"><value>重新登录</value></data>
-  <data name="CloudPage_Description.Text" xml:space="preserve"><value>选择一个网盘进入文件列表；右键可重新登录或刷新容量。</value></data>
+  <data name="CloudPage_Description.Text" xml:space="preserve"><value>选择网盘浏览文件；右键可重新登录、刷新容量、退出账户或移除网盘。</value></data>
   <data name="CloudPage_EmptyTitle.Text" xml:space="preserve"><value>还没有绑定网盘</value></data>
   <data name="CloudPage_Empty.Text" xml:space="preserve"><value>添加 OneDrive 账户后，即可在这里选择网盘并浏览文件。</value></data>
   <data name="CloudPage_EmptyAdd.Content" xml:space="preserve"><value>添加网盘</value></data>
@@ -1415,4 +1415,28 @@
   <data name="Transfer_StopTracking.Content" xml:space="preserve">
     <value>结束跟踪（云端复制可能继续）</value>
   </data>
+  <data name="AccountLifecycle_SignOutMenu.Text" xml:space="preserve"><value>退出此账户</value></data>
+  <data name="AccountLifecycle_RetryButton.Content" xml:space="preserve"><value>重试未完成的退出或移除</value></data>
+  <data name="AccountLifecycle_RemoveTitle" xml:space="preserve"><value>移除网盘</value></data>
+  <data name="AccountLifecycle_SignOutTitle" xml:space="preserve"><value>退出此应用中的账户</value></data>
+  <data name="AccountLifecycle_RemoveButton" xml:space="preserve"><value>移除网盘</value></data>
+  <data name="AccountLifecycle_SignOutButton" xml:space="preserve"><value>退出账户</value></data>
+  <data name="AccountLifecycle_RemoveExplanation" xml:space="preserve"><value>将移除“{0}”，停止并解除 {2} 个同步绑定，清理此网盘的应用内容缓存。{3} 个书签默认保留并标记为不可用；重新添加相同网盘后可继续使用。同一账户仍有其他网盘时保留登录凭据；移除最后一个网盘时清除凭据。</value></data>
+  <data name="AccountLifecycle_SignOutExplanation" xml:space="preserve"><value>将退出“{0}”所属账户在本应用中的全部 {1} 个网盘，暂停 {2} 个同步任务，保留网盘配置、同步绑定和 {3} 个书签。清除此账户的登录凭据和应用内容缓存；重新登录后需手动恢复同步。此操作仅退出本应用，不退出浏览器或其他应用。</value></data>
+  <data name="AccountLifecycle_FileNotice" xml:space="preserve"><value>不会删除云端文件、本地同步文件或已下载文件。保留阅读进度；停止相关传输并清理应用创建的临时文件。已提交到云端的操作无法撤回。其他账户不受影响。</value></data>
+  <data name="AccountLifecycle_DeleteBookmarks" xml:space="preserve"><value>同时删除此网盘的书签</value></data>
+  <data name="AccountLifecycle_SignedOut" xml:space="preserve"><value>已退出。重新登录后可继续访问；同步需手动恢复。</value></data>
+  <data name="AccountLifecycle_CleanupStatus" xml:space="preserve"><value>访问已停用，清理尚未完成。请重试未完成的退出或移除。</value></data>
+  <data name="AccountLifecycle_RemovedStatus" xml:space="preserve"><value>此网盘已移除。请从网盘列表重新添加。</value></data>
+  <data name="AccountLifecycle_Pending" xml:space="preserve"><value>此范围的访问已停用，部分清理尚未完成。请点击“重试未完成的退出或移除”；重启后也会继续尝试。</value></data>
+  <data name="AccountLifecycle_Removed" xml:space="preserve"><value>已移除网盘，解除关联同步并清理应用缓存。云端文件和本地文件已保留。</value></data>
+  <data name="AccountLifecycle_SignedOutDone" xml:space="preserve"><value>已退出此账户，暂停关联同步并清理凭据及应用缓存。配置、书签和文件已保留；重新登录后可手动恢复同步。</value></data>
+  <data name="AccountLifecycle_RetryDone" xml:space="preserve"><value>未完成的清理已处理。</value></data>
+  <data name="AccountLifecycle_FailedStop" xml:space="preserve"><value>相关任务尚未完全停止。</value></data>
+  <data name="AccountLifecycle_FailedSync" xml:space="preserve"><value>同步配置处理失败。</value></data>
+  <data name="AccountLifecycle_FailedBookmarks" xml:space="preserve"><value>书签清理未完成。</value></data>
+  <data name="AccountLifecycle_FailedCache" xml:space="preserve"><value>应用缓存清理未完成，文件可能被占用或缓存索引无法读取。</value></data>
+  <data name="AccountLifecycle_FailedCredentials" xml:space="preserve"><value>账户登录凭据清理失败。</value></data>
+  <data name="AccountLifecycle_FailedConfiguration" xml:space="preserve"><value>账户操作记录或网盘配置保存失败。</value></data>
+  <data name="AccountLifecycle_UnknownCount" xml:space="preserve"><value>数量未知的</value></data>
 </root>

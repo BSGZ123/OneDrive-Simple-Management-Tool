@@ -42,6 +42,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 {
     public sealed class SourceProvider
     {
+        public string HomeAccountId { get; set; }
+        public string DriveId { get; set; }
+        public void CheckAccess() { }
         public Func<CancellationToken, Task<DownloadSource>> Resolve { get; set; }
         public Task<DownloadSource> GetDownloadSourceAsync(string id, CancellationToken token) => Resolve(token);
     }
@@ -52,7 +55,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
     // Upload behavior has its own regression project; only download paths run here.
     public sealed class UploadTaskViewModel
     {
-        public UploadTaskViewModel(DriveViewModel drive, string id, Windows.Storage.IStorageItem item, UploadConflictResolver conflicts = null) { }
+        public UploadTaskViewModel(DriveViewModel drive, string id, Windows.Storage.IStorageItem item, UploadConflictResolver conflicts = null) { Drive = drive; }
+        public DriveViewModel Drive { get; }
         public bool NeedsExitProtection { get; set; }
         public bool WasCancelled { get; private set; }
         public Func<Task> OnCancel { get; set; } = () => Task.CompletedTask;

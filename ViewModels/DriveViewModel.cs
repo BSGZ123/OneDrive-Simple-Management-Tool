@@ -46,6 +46,54 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             Provider = provider;
             DisplayName = string.IsNullOrWhiteSpace(displayName) ? "Account_DefaultName".GetLocalized() : displayName;
             BreadcrumbItems.Add(RootBreadcrumb());
+            WatchAccess(this);
+        }
+
+        private static void WatchAccess(DriveViewModel model)
+        {
+            var access = model.Provider.Access;
+            if (access == null) return;
+            var weak = new WeakReference<DriveViewModel>(model);
+            var context = SynchronizationContext.Current;
+            void Changed(AccountScope scope)
+            {
+                void Apply()
+                {
+                    if (!weak.TryGetTarget(out var target)) { access.Changed -= Changed; return; }
+                    if (scope.Contains(target.Provider.HomeAccountId, target.Provider.DriveId)) target.UpdateAccess();
+                }
+                if (context != null && SynchronizationContext.Current != context) context.Post(_ => Apply(), null);
+                else Apply();
+            }
+            access.Changed += Changed;
+            model.UpdateAccess();
+        }
+
+        public bool IsSignedOut => Provider.Access?.IsBlocked(Provider.HomeAccountId, Provider.DriveId) == true;
+        public string AccountStatus => !IsSignedOut ? "" : (Provider.Access.Pending.Any(x => x.Scope.Contains(Provider.HomeAccountId, Provider.DriveId))
+            ? "AccountLifecycle_CleanupStatus" : Provider.Access.IsRemoved(Provider.HomeAccountId, Provider.DriveId)
+                ? "AccountLifecycle_RemovedStatus" : "AccountLifecycle_SignedOut").GetLocalized();
+        private long _statusVersion;
+        private void UpdateAccess()
+        {
+            ++_statusVersion;
+            if (IsSignedOut)
+            {
+                Provider.IsAuthenticated = false;
+                CancelLoading();
+                _view = _attempt = null;
+                SetVisibleFiles(Array.Empty<FileViewModel>());
+                ClearSelection();
+                BreadcrumbItems.Clear();
+                BreadcrumbItems.Add(RootBreadcrumb());
+                StorageInfo = null;
+                HasUsage = false;
+                ErrorMessage = "";
+            }
+            else ErrorMessage = "";
+            OnPropertyChanged(nameof(IsSignedOut));
+            OnPropertyChanged(nameof(AccountStatus));
+            NotifyListing();
         }
 
         private static BreadcrumbItem RootBreadcrumb() => new() { Name = "RootFileName".GetLocalized(), ItemId = "Root" };
@@ -235,9 +283,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public IReadOnlyList<FileViewModel> SelectedItems { get; private set; } = Array.Empty<FileViewModel>();
         public int SelectedCount => SelectedItems.Count;
         public string SelectionText => string.Format("Drive_SelectedCount".GetLocalized(), SelectedCount);
-        public bool CanDeleteSelection => SelectedCount > 0 && IsLoading != Visibility.Visible;
-        public bool CanDownloadSelection => SelectedCount > 0 && IsLoading != Visibility.Visible;
-        public bool CanTransferSelection => SelectedCount > 0 && IsLoading != Visibility.Visible;
+        public bool CanDeleteSelection => !IsSignedOut && SelectedCount > 0 && IsLoading != Visibility.Visible;
+        public bool CanDownloadSelection => !IsSignedOut && SelectedCount > 0 && IsLoading != Visibility.Visible;
+        public bool CanTransferSelection => !IsSignedOut && SelectedCount > 0 && IsLoading != Visibility.Visible;
         public bool IsUpdatingSelection => _updatingSelection;
 
         public void SetSelection(IEnumerable<FileViewModel> items, FileViewModel focused = null)
@@ -407,9 +455,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [RelayCommand]
         private async Task GetCapacity()
         {
+            long version = _statusVersion;
             try
             {
                 Quota quota = await Provider.GetStorageInfo();
+                if (version != _statusVersion) return;
                 if (quota == null)
                 {
                     HasUsage = false;
@@ -420,13 +470,13 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 HasUsage = quota.Total > 0 && quota.Used >= 0;
                 UsagePercent = HasUsage ? Math.Clamp(quota.Used.Value * 100d / quota.Total.Value, 0, 100) : 0;
             }
-            catch (Exception exception) { HasUsage = false; StorageInfo = FileOperationErrors.GetMessage(exception); }
+            catch (Exception exception) { if (version == _statusVersion) { HasUsage = false; StorageInfo = FileOperationErrors.GetMessage(exception); } }
         }
 
         [RelayCommand]
         private async Task SignIn()
         {
-            try { await Provider.SignInAsync(); await TryRefresh(); }
+            try { await Provider.SignInAsync(); await TryRefresh(); await GetCapacity(); }
             catch (Exception exception) { ErrorMessage = AccountConfigurationErrors.Message(exception); }
         }
 
@@ -473,7 +523,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public int LoadedCount => _view?.Items.Count ?? 0;
         public bool CanRetry => IsLoading != Visibility.Visible && _attempt != null && !_attempt.Complete;
         public Visibility RetryVisibility => CanRetry ? Visibility.Visible : Visibility.Collapsed;
-        public bool CanCreateHere => !IsDriveSearch && IsLoading != Visibility.Visible;
+        public bool CanCreateHere => !IsSignedOut && !IsDriveSearch && IsLoading != Visibility.Visible;
         public string SearchDescription => IsSearchActive ? string.Format(
             (IsDriveSearch ? "Drive_SearchScope" : "Drive_FilterScope").GetLocalized(), Keyword) : string.Empty;
         public string StatusText

@@ -6,6 +6,9 @@ namespace OneDrive_Simple_Management_Tool.Services
 {
     public interface IDownloadTreeSource
     {
+        string AccountId => null;
+        string DriveId => null;
+        void CheckAccess() { }
         Task<DownloadTreeItem> GetDownloadItemAsync(string itemId, CancellationToken token);
         Task<DownloadTreePage> GetDownloadChildrenAsync(string parentId, string nextLink, CancellationToken token);
         Task<DownloadSource> GetDownloadSourceAsync(string itemId, CancellationToken cancellationToken);

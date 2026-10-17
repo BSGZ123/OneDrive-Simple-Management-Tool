@@ -356,7 +356,9 @@ internal static class PreviewUiProbe
     private sealed class TestServices : IServiceProvider
     {
         private readonly TaskManagerViewModel _manager = new();
-        public object GetService(Type type) => type == typeof(TaskManagerViewModel) ? _manager : null;
+        private readonly ApplicationDataPaths _paths = new(Path.Combine(AppContext.BaseDirectory, "probe-data"));
+        public object GetService(Type type) => type == typeof(TaskManagerViewModel) ? _manager :
+            type == typeof(ApplicationDataPaths) ? _paths : null;
     }
 
     private sealed class DownloadHandler(LoopbackServer server) : HttpMessageHandler

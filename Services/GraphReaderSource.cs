@@ -36,6 +36,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 }
                 catch (ApiException error) { throw new ReaderException(error.ResponseStatusCode switch { 401 or 403 => "AccessDenied", 404 => "NotFound", _ => "Network" }); }
                 catch (AccountAuthenticationException error) { throw new ReaderException(error.Failure == AuthenticationFailure.Network ? "Network" : "AccessDenied"); }
+                catch (AccountAccessException) { throw new ReaderException("AccessDenied"); }
                 catch (MsalException) { throw new ReaderException("AccessDenied"); }
                 catch (HttpRequestException) { throw new ReaderException("Network"); }
             }

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><LangVersion>12</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/AccountAccessState.cs" Link="Production/AccountAccessState.cs" />
+    <Compile Include="../../Services/AccountLifecycleService.cs" Link="Production/AccountLifecycleService.cs" />
+    <Compile Include="../../Services/AccountAuthenticationService.cs" Link="Production/AccountAuthenticationService.cs" />
+    <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/DriveConfigurationStore.cs" Link="Production/DriveConfigurationStore.cs" />
+    <Compile Include="../../Services/BookmarkStore.cs" Link="Production/BookmarkStore.cs" />
+    <Compile Include="../../Services/FolderSyncStore.cs" Link="Production/FolderSyncStore.cs" />
+    <Compile Include="../../Services/FolderSyncService.cs" Link="Production/FolderSyncService.cs" />
+    <Compile Include="../../Services/FolderSyncEngine.cs" Link="Production/FolderSyncEngine.cs" />
+    <Compile Include="../../Services/OneDrive.FolderSync.cs" Link="Production/OneDrive.FolderSync.cs" />
+    <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
+    <Compile Include="../../Services/ReaderCacheService.cs" Link="Production/ReaderCacheService.cs" />
+    <Compile Include="../../Services/ReaderLocalBook.cs" Link="Production/ReaderLocalBook.cs" />
+    <Compile Include="../../Services/ReaderProtocol.cs" Link="Production/ReaderProtocol.cs" />
+    <Compile Include="../../Services/ReaderStore.cs" Link="Production/ReaderStore.cs" />
+    <Compile Include="../../Services/DownloadSession.cs" Link="Production/DownloadSession.cs" />
+    <Compile Include="../../Services/DownloadResponseHandler.cs" Link="Production/DownloadResponseHandler.cs" />
+    <Compile Include="../../Services/IDownloadSession.cs" Link="Production/IDownloadSession.cs" />
+    <Compile Include="../../Models/DTO/DriveDTO.cs" Link="Production/DriveDTO.cs" />
+    <Compile Include="../../Models/Bookmark.cs" Link="Production/Bookmark.cs" />
+    <Compile Include="../../Models/FolderSyncState.cs" Link="Production/FolderSyncState.cs" />
+    <Compile Include="../../Models/ReaderModels.cs" Link="Production/ReaderModels.cs" />
+    <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
+    <None Include="../../Strings/en-US/Resources.resw" Link="Strings/en-US/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../Strings/zh-CN/Resources.resw" Link="Strings/zh-CN/Resources.resw" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="Microsoft.Graph" Version="5.80.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.72.1" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.72.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Downloader" Version="5.9.6" />
+  </ItemGroup>
+</Project>

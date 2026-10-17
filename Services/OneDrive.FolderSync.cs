@@ -21,7 +21,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public static GraphFolderSyncTarget CreateFolderSyncTarget(FolderSyncBinding binding)
         {
             var authentication = Ioc.Default.GetService<IAccountAuthenticationService>();
-            return new GraphFolderSyncTarget(GraphAccountDriveResolver.CreateClient(authentication, binding.AccountId), binding);
+            return new GraphFolderSyncTarget(GraphAccountDriveResolver.CreateClient(authentication, binding.AccountId, binding.DriveId), binding);
         }
     }
     // This adapter never downloads or deletes content and never requests conflictBehavior=rename.

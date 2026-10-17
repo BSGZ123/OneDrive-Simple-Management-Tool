@@ -15,38 +15,123 @@ namespace OneDrive_Simple_Management_Tool.Pages
     public sealed partial class CloudPage : Page
     {
         private CloudViewModel Model => (CloudViewModel)DataContext;
+        private bool _managing;
+        private AccountLifecycleService Lifecycle => Ioc.Default.GetRequiredService<AccountLifecycleService>();
         public CloudPage()
         {
             InitializeComponent();
             DataContext = new CloudViewModel();
-            Loaded += async (_, _) => { await Model.LoadDrivesFromDisk(); LoadCapacities(); };
+            Loaded += async (_, _) =>
+            {
+                Lifecycle.Access.Changed -= AccessChanged;
+                Lifecycle.Access.Changed += AccessChanged;
+                await Model.LoadDrivesFromDisk();
+                Model.HasPendingCleanup = Lifecycle.Access.Pending.Count > 0;
+                if (Model.HasPendingCleanup) Model.ManagementMessage = "AccountLifecycle_Pending".GetLocalized();
+                LoadCapacities();
+            };
+            Unloaded += (_, _) => Lifecycle.Access.Changed -= AccessChanged;
+        }
+
+        private void AccessChanged(AccountScope scope)
+        {
+            if (!Lifecycle.Access.IsBlocked(scope.AccountId, scope.DriveId)) Model.ManagementMessage = "";
         }
 
         // Silent only: a drive that needs sign-in reports that on its card instead of prompting.
         private void LoadCapacities()
         {
-            foreach (var drive in Model.Drives.Where(d => string.IsNullOrEmpty(d.StorageInfo) && !d.GetCapacityCommand.IsRunning))
+            foreach (var drive in Model.Drives.Where(d => !d.IsSignedOut && string.IsNullOrEmpty(d.StorageInfo) && !d.GetCapacityCommand.IsRunning))
                 drive.GetCapacityCommand.Execute(null);
         }
 
         private async void ShowCreateDriveDialogAsync(object sender, RoutedEventArgs e)
         {
+            if (_managing) return;
             await new CreateDrive { XamlRoot = XamlRoot, DataContext = new CreateDriveViewModel(Model) }.ShowAsync();
             LoadCapacities();
         }
 
         private void OpenDrive(DriveViewModel drive)
         {
-            if (drive != null) (App.StartupWindow as MainWindow)?.Navigate(typeof(DrivePage), drive);
+            if (!_managing && drive != null) (App.StartupWindow as MainWindow)?.Navigate(typeof(DrivePage), drive);
         }
         // Raised for a click and for Enter or Space on the focused card.
         private void OpenClicked(object sender, ItemClickEventArgs e) => OpenDrive(e.ClickedItem as DriveViewModel);
         private void OpenFromMenu(object sender, RoutedEventArgs e) => OpenDrive((sender as FrameworkElement)?.DataContext as DriveViewModel);
-        private async void Retry(object sender, RoutedEventArgs e) { await Model.LoadDrivesFromDisk(); LoadCapacities(); }
+        private async void Retry(object sender, RoutedEventArgs e)
+        {
+            if (_managing) return;
+            await RunManagementAsync(() => Lifecycle.RetryPendingAsync(), "AccountLifecycle_RetryDone");
+        }
+
+        private async void SignOutAccount(object sender, RoutedEventArgs e) => await ConfirmManagementAsync(sender, false);
+        private async void RemoveDrive(object sender, RoutedEventArgs e) => await ConfirmManagementAsync(sender, true);
+
+        private async Task ConfirmManagementAsync(object sender, bool remove)
+        {
+            if (_managing || (sender as FrameworkElement)?.DataContext is not DriveViewModel drive) return;
+            _managing = true;
+            try
+            {
+                var scope = new AccountScope(drive.Provider.HomeAccountId, remove ? drive.Provider.DriveId : null);
+                var sync = Ioc.Default.GetRequiredService<FolderSyncService>();
+                await sync.InitializeAsync();
+                int syncCount = sync.Jobs.Count(x => scope.Contains(x.Binding.AccountId, x.Binding.DriveId));
+                string bookmarkCount;
+                try
+                {
+                    var bookmarks = await Ioc.Default.GetRequiredService<IBookmarkStore>().LoadAsync();
+                    bookmarkCount = bookmarks.Count(x => scope.Contains(x.AccountId, x.DriveId)).ToString();
+                }
+                catch { bookmarkCount = "AccountLifecycle_UnknownCount".GetLocalized(); }
+                int driveCount = Model.Drives.Count(x => scope.Contains(x.Provider.HomeAccountId, x.Provider.DriveId));
+                var panel = new StackPanel { Spacing = 12, MaxWidth = 460 };
+                panel.Children.Add(new TextBlock { Text = string.Format((remove ? "AccountLifecycle_RemoveExplanation" : "AccountLifecycle_SignOutExplanation").GetLocalized(),
+                    drive.DisplayName, driveCount, syncCount, bookmarkCount), TextWrapping = TextWrapping.Wrap });
+                panel.Children.Add(new TextBlock { Text = "AccountLifecycle_FileNotice".GetLocalized(), TextWrapping = TextWrapping.Wrap });
+                var deleteBookmarks = new CheckBox { Content = "AccountLifecycle_DeleteBookmarks".GetLocalized(), IsChecked = false };
+                if (remove) panel.Children.Add(deleteBookmarks);
+                var dialog = new ContentDialog
+                {
+                    XamlRoot = XamlRoot,
+                    Title = (remove ? "AccountLifecycle_RemoveTitle" : "AccountLifecycle_SignOutTitle").GetLocalized(),
+                    Content = panel,
+                    PrimaryButtonText = (remove ? "AccountLifecycle_RemoveButton" : "AccountLifecycle_SignOutButton").GetLocalized(),
+                    CloseButtonText = "Account_Cancel".GetLocalized(), DefaultButton = ContentDialogButton.Close
+                };
+                if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+                await RunManagementAsync(() => Lifecycle.ExecuteAsync(scope, remove && deleteBookmarks.IsChecked == true),
+                    remove ? "AccountLifecycle_Removed" : "AccountLifecycle_SignedOutDone");
+            }
+            catch (Exception error) { Model.ErrorMessage = AccountConfigurationErrors.Message(error); }
+            finally { _managing = false; }
+        }
+
+        private async Task RunManagementAsync(Func<Task> action, string successKey)
+        {
+            _managing = true;
+            AccountPanel.IsHitTestVisible = false;
+            DriveList.IsEnabled = false;
+            string message;
+            try { await action(); message = successKey.GetLocalized(); }
+            catch (AccountLifecycleException error)
+            {
+                message = ("AccountLifecycle_Failed" + error.Stage).GetLocalized();
+                if (Lifecycle.Access.Pending.Count > 0) message += " " + "AccountLifecycle_Pending".GetLocalized();
+            }
+            catch (Exception error) { message = AccountConfigurationErrors.Message(error); }
+            finally { AccountPanel.IsHitTestVisible = true; DriveList.IsEnabled = true; _managing = false; }
+            await Model.LoadDrivesFromDisk();
+            Model.ManagementMessage = message;
+            Model.HasPendingCleanup = Lifecycle.Access.Pending.Count > 0;
+            LoadCapacities();
+        }
         private async void RestoreBackup(object sender, RoutedEventArgs e) => await RecoverAsync(() => Ioc.Default.GetService<DriveConfigurationStore>().RestoreBackupAsync());
 
         private async Task RecoverAsync(Func<Task> action)
         {
+            if (_managing) return;
             try { await action(); await Model.LoadDrivesFromDisk(); LoadCapacities(); }
             catch (Exception exception) { Model.ErrorMessage = AccountConfigurationErrors.Message(exception); }
         }

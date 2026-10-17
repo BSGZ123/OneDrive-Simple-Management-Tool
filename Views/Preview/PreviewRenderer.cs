@@ -1,4 +1,5 @@
 using CommunityToolkit.WinUI.UI.Controls;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -317,7 +318,22 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
             _host.Children.Add(web);
             // A new control per attempt isolates initialization/navigation callbacks from previous retries.
             _cleanup.Add(web.Close);
-            try { await web.EnsureCoreWebView2Async().AsTask().WaitAsync(token); }
+            try
+            {
+                // Preview URLs can grant access without another token request. Keep PDF browser
+                // data in a private session, rather than an unowned cache shared by all accounts.
+                var paths = Ioc.Default.GetService<ApplicationDataPaths>() ?? new ApplicationDataPaths();
+                var environment = await CoreWebView2Environment.CreateWithOptionsAsync(null,
+                    Path.Combine(paths.Root, "Preview", "WebView2"), new CoreWebView2EnvironmentOptions());
+                token.ThrowIfCancellationRequested();
+                var options = environment.CreateCoreWebView2ControllerOptions();
+                options.ProfileName = "PdfPreview";
+                options.IsInPrivateModeEnabled = true;
+                var initializing = web.EnsureCoreWebView2Async(environment, options).AsTask();
+                _ = CloseCancelledPdfAsync(initializing, web, token);
+                try { await initializing.WaitAsync(token); }
+                finally { if (token.IsCancellationRequested) web.Close(); }
+            }
             catch (OperationCanceledException) { throw; }
             catch (Exception exception) { throw new PreviewException(PreviewFailure.RuntimeUnavailable, inner: exception); }
             token.ThrowIfCancellationRequested();
@@ -370,6 +386,20 @@ namespace OneDrive_Simple_Management_Tool.Views.Preview
             });
             core.Navigate(content.Uri.AbsoluteUri);
             await completion.Task.WaitAsync(token);
+        }
+
+        private static async Task CloseCancelledPdfAsync(Task initializing, WebView2 web, CancellationToken token)
+        {
+            try { await initializing; }
+            catch { }
+            finally
+            {
+                if (token.IsCancellationRequested)
+                {
+                    try { web.Close(); }
+                    catch (Exception) { System.Diagnostics.Debug.WriteLine("Cancelled PDF teardown failed."); }
+                }
+            }
         }
     }
 }

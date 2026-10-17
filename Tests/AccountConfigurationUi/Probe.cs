@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using OneDrive_Simple_Management_Tool;
 using OneDrive_Simple_Management_Tool.Models.DTO;
+using OneDrive_Simple_Management_Tool.Models;
 using OneDrive_Simple_Management_Tool.Pages;
 using OneDrive_Simple_Management_Tool.Services;
 using OneDrive_Simple_Management_Tool.ViewModels;
@@ -21,6 +22,7 @@ using System.Threading.Tasks;
 
 internal static class AccountConfigurationUiProbe
 {
+    private static OfflineAuthentication _authentication;
     [STAThread]
     private static void Main()
     {
@@ -41,10 +43,20 @@ internal static class AccountConfigurationUiProbe
             var paths = new ApplicationDataPaths(root, Path.Combine(root, "application"));
             var protector = new Protector();
             var store = new DriveConfigurationStore(paths, protector);
+            var access = new AccountAccessState(paths);
+            await access.InitializeAsync();
+            _authentication = new OfflineAuthentication(access);
             SafeDiagnostics.Configure(new SafeDiagnostics(paths.Diagnostics));
             await store.AddAsync(Record("A"), 0);
             await store.AddAsync(Record("B"), 1);
-            Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(store).AddSingleton<TaskManagerViewModel>().AddOfflineHome(paths).BuildServiceProvider());
+            var bookmarks = new BookmarkStore(paths);
+            foreach (string account in new[] { "A", "B" })
+                await bookmarks.AddAsync(new Bookmark { AccountId = "fake-account-" + account, DriveId = "fake-drive-" + account,
+                    ItemId = "local-file", Name = "Fictional bookmark " + account, DriveName = "同名网盘", AddedAt = DateTimeOffset.UtcNow });
+            Ioc.Default.ConfigureServices(new ServiceCollection().AddSingleton(paths).AddSingleton(store).AddSingleton(access)
+                .AddSingleton<IAccountAuthenticationService>(_authentication).AddSingleton<IBookmarkStore>(bookmarks)
+                .AddSingleton<ReaderWorkspace>().AddSingleton<IAccountLifecycleEffects, AccountLifecycleEffects>().AddSingleton<AccountLifecycleService>()
+                .AddSingleton<TaskManagerViewModel>().AddOfflineHome(paths).BuildServiceProvider());
             var model = new CloudViewModel(store, CreateDrive);
             await model.LoadDrivesFromDisk();
             var window = new MainWindow { Title = "Account configuration UI test - LOCAL ONLY" };
@@ -82,9 +94,9 @@ internal static class AccountConfigurationUiProbe
     private static DriveDTO Record(string id) => new() { DisplayName = "同名网盘", Provider = new() { HomeAccountId = "fake-account-" + id, DriveId = "fake-drive-" + id } };
     private static DriveViewModel CreateDrive(DriveDTO record)
     {
-        var provider = new OneDrive(record.Provider.DriveId, record.Provider.HomeAccountId, null) { IsAuthenticated = true };
-        var client = new GraphServiceClient(new HttpClient(new Handler(record.Provider.DriveId)), new AnonymousAuthenticationProvider());
-        typeof(OneDrive).GetField("graphClient", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(provider, client);
+        var provider = new OneDrive(record.Provider.DriveId, record.Provider.HomeAccountId, _authentication, new OfflineResolver(),
+            (account, drive) => new GraphServiceClient(new HttpClient(new AccountRequestHandler(_authentication.Access, account, drive)
+                { InnerHandler = new Handler(drive) }), new AnonymousAuthenticationProvider())) { IsAuthenticated = true };
         return new DriveViewModel(provider, record.DisplayName);
     }
 
@@ -96,6 +108,27 @@ internal static class AccountConfigurationUiProbe
                 Content = new StringContent("{\"value\":[{\"id\":\"local-file\",\"name\":\"Selected " + drive + ".txt\",\"file\":{},\"size\":42}]}",
                     System.Text.Encoding.UTF8, "application/json")
             });
+    }
+
+    private sealed class OfflineResolver : IAccountDriveResolver
+    {
+        public Task<string> ResolveAsync(string account, string drive, CancellationToken token) => Task.FromResult(drive);
+    }
+    private sealed class OfflineAuthentication(AccountAccessState access) : IAccountAuthenticationService
+    {
+        public AccountAccessState Access => access;
+        public Task<AccountToken> AcquireSilentAsync(string account, CancellationToken token)
+        {
+            access.Check(account); return Task.FromResult(new AccountToken(account, "fictional"));
+        }
+        public async Task<AccountToken> AcquireInteractiveAsync(string account, CancellationToken token)
+        {
+            long generation = access.Generation;
+            await Task.Delay(100, token);
+            await access.ResumeAccountAsync(account, generation);
+            return new(account, "fictional");
+        }
+        public Task SignOutAsync(string account, CancellationToken token) => Task.CompletedTask;
     }
 
     private sealed class Protector : IConfigurationProtector

@@ -2,6 +2,8 @@
 
 此测试入口使用生产预览弹窗、ViewModel、加载服务和渲染器。本地生成 TXT、Markdown、PNG、SVG、BMP、PDF 和无声 WAV；PDF/媒体由本机 TCP 服务返回，不登录、不读取令牌、不访问真实 OneDrive。
 
+2026-10-17：PDF 改用私密 WebView2 会话后重新构建并运行 **Run preview regression**，结果为 `ALL AUTOMATED UI CHECKS PASSED`，包括 PDF 正常打开、无效内容/403/附件响应、关闭与 20 轮重复打开。测试用 WebView2 数据目录位于隔离输出目录 `probe-data`。本轮未重复执行基础阅读回归或真实 OneDrive CDN 验收。
+
 ```powershell
 msbuild "OneDrive Simple Management Tool.csproj" /restore /p:Configuration=Debug /p:Platform=x64 /p:CustomAfterMicrosoftCommonTargets="$PWD\Tests\PreviewUi\Probe.targets" /p:OutputPath=bin\PreviewUi\ /p:IntermediateOutputPath=obj\PreviewUi\
 & ".\bin\PreviewUi\OneDrive Simple Management Tool.exe"

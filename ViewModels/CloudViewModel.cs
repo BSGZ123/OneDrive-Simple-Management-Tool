@@ -33,6 +33,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [ObservableProperty] private bool _needsRecovery;
         [ObservableProperty] private bool _hasDuplicates;
         [ObservableProperty] private DriveViewModel _selectedDrive;
+        [ObservableProperty] private bool _hasPendingCleanup;
+        [ObservableProperty] private string _managementMessage = "";
 
         public async Task LoadDrivesFromDisk()
         {
@@ -66,6 +68,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 Drives.Add(drive);
             }
             _revision = snapshot.Revision;
+            if (SelectedDrive != null && !Drives.Contains(SelectedDrive)) SelectedDrive = null;
             OnPropertyChanged(nameof(IsEmpty));
         }
 
@@ -74,10 +77,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             await _changes.WaitAsync(token);
             try
             {
+                var access = drive.Provider.Access;
+                access?.CheckCanAdd(drive.Provider.HomeAccountId);
                 var duplicate = Drives.FirstOrDefault(d => d.Provider.HomeAccountId == drive.Provider.HomeAccountId && d.Provider.DriveId == drive.Provider.DriveId);
                 if (duplicate != null)
                 {
                     SelectedDrive = duplicate;
+                    if (access?.IsBlocked(drive.Provider.HomeAccountId, drive.Provider.DriveId) == true)
+                    {
+                        await access.RestoreDriveAsync(drive.Provider.HomeAccountId, drive.Provider.DriveId);
+                        return;
+                    }
                     throw new ConfigurationException(ConfigurationFailure.Duplicate);
                 }
                 var snapshot = await _store.AddAsync(new DriveDTO
@@ -85,6 +95,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                     DisplayName = drive.DisplayName,
                     Provider = new ProviderDTO { HomeAccountId = drive.Provider.HomeAccountId, DriveId = drive.Provider.DriveId }
                 }, _revision, token);
+                if (access != null) await access.RestoreDriveAsync(drive.Provider.HomeAccountId, drive.Provider.DriveId);
                 Apply(snapshot);
                 SelectedDrive = Drives.First(d => d.Provider.HomeAccountId == drive.Provider.HomeAccountId && d.Provider.DriveId == drive.Provider.DriveId);
                 ErrorMessage = _store.LegacyCleanupPending ? "Configuration_LegacyCleanup".GetLocalized() : "";

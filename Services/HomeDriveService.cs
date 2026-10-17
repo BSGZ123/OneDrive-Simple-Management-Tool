@@ -50,6 +50,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             {
                 throw new HomeOverviewException(exception switch
                 {
+                    AccountAccessException => "Home_SignInRequired",
                     AccountAuthenticationException { Failure: AuthenticationFailure.RequiresSignIn } => "Home_SignInRequired",
                     AccountAuthenticationException { Failure: AuthenticationFailure.Network } => "Home_QuotaNetwork",
                     ApiException { ResponseStatusCode: 401 } => "Home_SignInRequired",

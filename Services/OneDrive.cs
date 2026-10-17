@@ -28,15 +28,17 @@ namespace OneDrive_Simple_Management_Tool.Services
         public OneDrive(string driveId, string homeAccountId)
             : this(driveId, homeAccountId, Ioc.Default.GetService<IAccountAuthenticationService>()) { }
 
-        public OneDrive(string driveId, string homeAccountId, IAccountAuthenticationService authentication, IAccountDriveResolver resolver = null)
+        public OneDrive(string driveId, string homeAccountId, IAccountAuthenticationService authentication, IAccountDriveResolver resolver = null,
+            Func<string, string, GraphServiceClient> clientFactory = null)
         {
             DriveId = driveId;
             HomeAccountId = homeAccountId;
             _authentication = authentication;
+            _createClient = clientFactory ?? ((account, drive) => GraphAccountDriveResolver.CreateClient(authentication, account, drive));
             if (authentication != null)
             {
                 _session = new DriveAuthenticationSession(authentication, resolver ?? new GraphAccountDriveResolver(authentication));
-                if (homeAccountId != null) graphClient = GraphAccountDriveResolver.CreateClient(authentication, homeAccountId);
+                if (homeAccountId != null) graphClient = _createClient(homeAccountId, driveId);
             }
         }
 
@@ -478,6 +480,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         private async Task AuthenticateAsync(bool interactive, CancellationToken token)
         {
             if (_authentication == null) throw new AccountAuthenticationException(AuthenticationFailure.RequiresSignIn);
+            long generation = Access?.Generation ?? 0;
             long attempt;
             string accountId, driveId;
             lock (_authenticationGate) { attempt = ++_authenticationAttempt; accountId = HomeAccountId; driveId = DriveId; }
@@ -486,7 +489,9 @@ namespace OneDrive_Simple_Management_Tool.Services
             {
                 token.ThrowIfCancellationRequested();
                 if (attempt != _authenticationAttempt) throw new OperationCanceledException();
-                graphClient = GraphAccountDriveResolver.CreateClient(_authentication, identity.AccountId);
+                Access?.CheckGeneration(identity.AccountId, generation);
+                if (driveId != null) Access?.Check(identity.AccountId, identity.DriveId);
+                graphClient = _createClient(identity.AccountId, identity.DriveId);
                 HomeAccountId = identity.AccountId;
                 DriveId = identity.DriveId;
                 IsAuthenticated = true;
@@ -494,6 +499,9 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         private readonly IAccountAuthenticationService _authentication;
+        private readonly Func<string, string, GraphServiceClient> _createClient;
+        public AccountAccessState Access => _authentication?.Access;
+        public void CheckAccess() => Access?.Check(HomeAccountId, DriveId);
         private readonly DriveAuthenticationSession _session;
         private readonly object _authenticationGate = new();
         private long _authenticationAttempt;

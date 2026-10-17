@@ -4,6 +4,7 @@ using Microsoft.Kiota.Abstractions.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,17 +27,22 @@ namespace OneDrive_Simple_Management_Tool.Services
 
     public interface IAccountAuthenticationService
     {
+        AccountAccessState Access => null;
+        Task SignOutAsync(string accountId, CancellationToken token) => throw new NotSupportedException();
         Task<AccountToken> AcquireSilentAsync(string accountId, CancellationToken token);
         Task<AccountToken> AcquireInteractiveAsync(string expectedAccountId, CancellationToken token);
     }
 
-    public sealed class MsalAccountAuthenticationService(IPublicClientApplication app) : IAccountAuthenticationService
+    public sealed class MsalAccountAuthenticationService(IPublicClientApplication app, AccountAccessState access = null) : IAccountAuthenticationService
     {
+        public AccountAccessState Access => access;
         private static readonly string[] Scopes = { "User.Read", "Files.ReadWrite.All" };
         private readonly SemaphoreSlim _interactive = new(1, 1);
 
         public async Task<AccountToken> AcquireSilentAsync(string accountId, CancellationToken token)
         {
+            using var lease = access?.Enter(accountId, null, token);
+            token = lease?.Token ?? token;
             token.ThrowIfCancellationRequested();
             if (string.IsNullOrWhiteSpace(accountId)) throw new AccountAuthenticationException(AuthenticationFailure.RequiresSignIn);
             var account = (await app.GetAccountsAsync().ConfigureAwait(false))
@@ -56,12 +62,26 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public async Task<AccountToken> AcquireInteractiveAsync(string expectedAccountId, CancellationToken token)
         {
+            long generation = access?.Generation ?? 0;
+            using var lease = access?.EnterInteractive(expectedAccountId, token);
+            token = lease?.Token ?? token;
             await _interactive.WaitAsync(token);
             try
             {
                 // Only a foreground user action calls this method. Token callbacks are always silent.
                 var result = await app.AcquireTokenInteractive(Scopes).WithPrompt(Prompt.SelectAccount).ExecuteAsync(token);
-                return Validate(result, expectedAccountId, token);
+                try
+                {
+                    var validated = Validate(result, expectedAccountId, token);
+                    if (access != null) await access.ResumeAccountAsync(validated.AccountId, generation);
+                    return validated;
+                }
+                catch
+                {
+                    // MSAL may have cached a response after sign-out. Remove only that account.
+                    if (result?.Account != null && access?.IsBlocked(result.Account.HomeAccountId.Identifier) == true) await app.RemoveAsync(result.Account);
+                    throw;
+                }
             }
             catch (MsalClientException exception) when (exception.ErrorCode == "authentication_canceled")
             {
@@ -72,6 +92,16 @@ namespace OneDrive_Simple_Management_Tool.Services
             { throw new AccountAuthenticationException(AuthenticationFailure.Network); }
             catch (MsalException) { throw new AccountAuthenticationException(AuthenticationFailure.Failed); }
             finally { _interactive.Release(); }
+        }
+
+        public async Task SignOutAsync(string accountId, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            foreach (var account in (await app.GetAccountsAsync()).Where(a => a.HomeAccountId.Identifier == accountId))
+            {
+                token.ThrowIfCancellationRequested();
+                await app.RemoveAsync(account);
+            }
         }
 
         private static AccountToken Validate(AuthenticationResult result, string expected, CancellationToken token)
@@ -86,7 +116,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
     }
 
-    public sealed class AccountTokenProvider(IAccountAuthenticationService authentication, string accountId) : IAccessTokenProvider
+    public sealed class AccountTokenProvider(IAccountAuthenticationService authentication, string accountId, string driveId = null) : IAccessTokenProvider
     {
         public AllowedHostsValidator AllowedHostsValidator { get; } = new(new[] { "graph.microsoft.com" });
 
@@ -94,6 +124,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             Dictionary<string, object> additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            authentication.Access?.Check(accountId, driveId ?? DriveFromUri(uri));
             if (uri == null || uri.Scheme != Uri.UriSchemeHttps || !uri.IsDefaultPort ||
                 uri.UserInfo.Length != 0 || !AllowedHostsValidator.IsUrlHostValid(uri))
                 throw new AccountAuthenticationException(AuthenticationFailure.Failed);
@@ -102,6 +133,15 @@ namespace OneDrive_Simple_Management_Tool.Services
             if (result?.AccountId != accountId || string.IsNullOrWhiteSpace(result.AccessToken))
                 throw new AccountAuthenticationException(AuthenticationFailure.AccountMismatch);
             return result.AccessToken;
+        }
+
+        internal static string DriveFromUri(Uri uri)
+        {
+            var segments = uri?.AbsolutePath.Split('/');
+            if (segments == null) return null;
+            for (int index = 0; index + 1 < segments.Length; index++)
+                if (segments[index] == "drives") return Uri.UnescapeDataString(segments[index + 1]);
+            return null;
         }
     }
 
@@ -114,7 +154,7 @@ namespace OneDrive_Simple_Management_Tool.Services
     {
         public async Task<string> ResolveAsync(string accountId, string existingDriveId, CancellationToken token)
         {
-            using var client = CreateClient(authentication, accountId);
+            using var client = CreateClient(authentication, accountId, existingDriveId);
             var drive = existingDriveId == null
                 ? await client.Me.Drive.GetAsync(cancellationToken: token)
                 : await client.Drives[existingDriveId].GetAsync(cancellationToken: token);
@@ -123,8 +163,27 @@ namespace OneDrive_Simple_Management_Tool.Services
             return drive.Id;
         }
 
-        public static GraphServiceClient CreateClient(IAccountAuthenticationService authentication, string accountId) =>
-            new(new BaseBearerTokenAuthenticationProvider(new AccountTokenProvider(authentication, accountId)));
+        public static GraphServiceClient CreateClient(IAccountAuthenticationService authentication, string accountId) => CreateClient(authentication, accountId, null);
+
+        public static GraphServiceClient CreateClient(IAccountAuthenticationService authentication, string accountId, string driveId)
+        {
+            var provider = new BaseBearerTokenAuthenticationProvider(new AccountTokenProvider(authentication, accountId, driveId));
+            if (authentication.Access == null) return new(provider);
+            var handlers = GraphClientFactory.CreateDefaultHandlers();
+            handlers.Insert(0, new AccountRequestHandler(authentication.Access, accountId, driveId));
+            return new(GraphClientFactory.Create(handlers), provider);
+        }
+    }
+
+    public sealed class AccountRequestHandler(AccountAccessState access, string account, string drive) : DelegatingHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
+        {
+            using var lease = access.Enter(account, drive ?? AccountTokenProvider.DriveFromUri(request.RequestUri), token);
+            var response = await base.SendAsync(request, lease.Token).ConfigureAwait(false);
+            if (lease.Token.IsCancellationRequested) { response.Dispose(); lease.Token.ThrowIfCancellationRequested(); }
+            return response;
+        }
     }
 
     // One instance per drive, so a late authentication attempt cannot replace a newer result.

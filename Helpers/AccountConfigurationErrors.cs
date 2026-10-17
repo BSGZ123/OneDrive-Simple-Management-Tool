@@ -10,6 +10,7 @@ namespace OneDrive_Simple_Management_Tool.Helpers
     {
         public static string Key(Exception exception) => exception switch
         {
+            AccountAccessException => "Account_RequiresSignIn",
             OperationCanceledException => "Account_Cancelled",
             AccountAuthenticationException auth => "Account_" + auth.Failure,
             ConfigurationException configuration => "Configuration_" + configuration.Failure,

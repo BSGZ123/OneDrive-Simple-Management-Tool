@@ -93,6 +93,16 @@ namespace OneDrive_Simple_Management_Tool.Services
             return committed;
         }
 
+        public async Task RemoveAsync(string accountId, string driveId, CancellationToken token = default)
+        {
+            using var lease = await ConfigurationFileLease.AcquireAsync(_file.Path, token);
+            var current = await LoadLockedAsync(token);
+            var next = current.Data.Where(d => d.Provider.HomeAccountId != accountId || d.Provider.DriveId != driveId).ToList();
+            if (next.Count == current.Data.Count) return;
+            await _file.WriteAsync(next, checked(current.Revision + 1), current.Revision > 0, token);
+            await CompleteMigrationAsync(CancellationToken.None);
+        }
+
         public async Task RestoreBackupAsync(CancellationToken token = default)
         {
             using var lease = await ConfigurationFileLease.AcquireAsync(_file.Path, token);

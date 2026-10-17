@@ -152,6 +152,26 @@ namespace OneDrive_Simple_Management_Tool.Services
             await WriteIndexAsync(entries, revision, existing, token).ConfigureAwait(false);
             return retained;
         }
+        public async Task<int> ClearScopeAsync(string accountId, string driveId = null, CancellationToken token = default)
+        {
+            using var gate = await ConfigurationFileLease.AcquireAsync(_index.Path, token).ConfigureAwait(false);
+            CheckRoot();
+            // Without a readable index ownership is unknown: leave files alone and report failure.
+            var snapshot = await _index.ReadAsync(token).ConfigureAwait(false);
+            if (snapshot == null) return 0;
+            var entries = snapshot.Data;
+            int retained = 0;
+            foreach (var entry in entries.Where(x => x.Identity.AccountId == accountId &&
+                (driveId == null || x.Identity.DriveId == driveId)).ToArray())
+            {
+                token.ThrowIfCancellationRequested();
+                if (TryDelete(entry.FileName)) entries.Remove(entry);
+                else retained++;
+            }
+            await WriteIndexAsync(entries, snapshot.Revision, true, token).ConfigureAwait(false);
+            return retained;
+        }
+
         private Task WriteIndexAsync(List<ReaderCacheEntry> entries, long revision, bool preserve, CancellationToken token) =>
             _index.WriteAsync(entries, checked(revision + 1), preserve, token);
         private void CleanupOrphans(List<ReaderCacheEntry> entries)

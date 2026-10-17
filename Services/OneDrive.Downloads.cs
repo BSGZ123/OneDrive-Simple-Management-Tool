@@ -12,6 +12,8 @@ namespace OneDrive_Simple_Management_Tool.Services
 {
     public partial class OneDrive : IDownloadTreeSource
     {
+        string IDownloadTreeSource.AccountId => HomeAccountId;
+        string IDownloadTreeSource.DriveId => DriveId;
         public async Task<DownloadTreeItem> GetDownloadItemAsync(string itemId, CancellationToken token)
         {
             try

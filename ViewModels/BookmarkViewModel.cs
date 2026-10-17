@@ -33,7 +33,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
     }
 
-    public partial class BookmarkViewModel(IBookmarkStore store, IBookmarkResolver resolver) : ObservableObject
+    public partial class BookmarkViewModel(IBookmarkStore store, IBookmarkResolver resolver,
+        DriveConfigurationStore drives = null, IAccountAuthenticationService authentication = null) : ObservableObject
     {
         private List<BookmarkItemViewModel> _all = new();
         private CancellationTokenSource _request;
@@ -105,6 +106,18 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             token.ThrowIfCancellationRequested();
             _all = bookmarks.OrderByDescending(item => item.AddedAt).ThenBy(item => item.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Select(item => new BookmarkItemViewModel(item, this)).ToList();
+            if (drives != null)
+            {
+                var configured = await drives.LoadAsync(token);
+                foreach (var item in _all)
+                {
+                    var mark = item.Bookmark;
+                    if (!configured.Data.Any(x => x.Provider.HomeAccountId == mark.AccountId && x.Provider.DriveId == mark.DriveId))
+                        item.ErrorMessage = "Bookmarks_AccountUnavailable".GetLocalized();
+                    else if (authentication?.Access?.IsBlocked(mark.AccountId, mark.DriveId) == true)
+                        item.ErrorMessage = "Bookmarks_SignInRequired".GetLocalized();
+                }
+            }
             NeedsRecovery = false;
             Filter();
         }

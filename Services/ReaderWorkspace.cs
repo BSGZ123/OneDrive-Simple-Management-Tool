@@ -41,6 +41,9 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
         public Task CloseOthersAsync(ReaderSession active) => Task.WhenAll(_sessions.Where(x => x != active).ToArray().Select(x => x.CloseAsync()));
         public Task CloseAllAsync() => Task.WhenAll(_sessions.ToArray().Select(x => x.CloseAsync()));
+        public Task CloseScopeAsync(string account, string drive = null) => Task.WhenAll(_sessions.Where(x =>
+            x.Request?.Identity?.AccountId == account && (drive == null || x.Request.Identity.DriveId == drive)).ToArray().Select(x => x.CloseAsync()));
+        public Task<int> ClearScopeCacheAsync(string account, string drive = null) => _cache.ClearScopeAsync(account, drive);
         public Task<int> ClearCacheAsync() => _cache.ClearAsync();
     }
 }

@@ -26,7 +26,9 @@
                         <MenuFlyoutItem x:Uid="CloudPage_Open" Click="OpenFromMenu" />
                         <MenuFlyoutItem x:Uid="CloudPage_SignIn" Command="{Binding SignInCommand}" />
                         <MenuFlyoutItem x:Uid="CloudPage_Flyout_GetCapacity" Command="{Binding GetCapacityCommand}" />
-                        <!--<MenuFlyoutItem x:Uid="CloudPage_Flyout_RemoveDrive" Command="{Binding Cloud.RemoveDriveCommand}" CommandParameter="{Binding}" />-->
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem x:Uid="AccountLifecycle_SignOutMenu" Click="SignOutAccount" />
+                        <MenuFlyoutItem x:Uid="CloudPage_Flyout_RemoveDrive" Click="RemoveDrive" />
                     </MenuFlyout>
                 </Grid.ContextFlyout>
                 <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
@@ -41,6 +43,8 @@
                             <FontIcon Grid.Column="2" Glyph="&#xE76C;" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         </Grid>
                         <ProgressBar IsIndeterminate="True" Visibility="{Binding GetCapacityCommand.IsRunning, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock Text="{Binding AccountStatus}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding AccountStatus, Converter={StaticResource StringVisibilityConverter}}" />
                         <TextBlock Text="{Binding StorageInfo}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Visibility="{Binding StorageInfo, Converter={StaticResource StringVisibilityConverter}}" />
                         <!-- ShowPaused only supplies the caution color for a nearly full drive. -->
@@ -61,7 +65,7 @@
     </Page.Resources>
 
 
-    <Grid Padding="24,20,24,0" RowSpacing="16" MaxWidth="1120">
+    <Grid x:Name="AccountPanel" Padding="24,20,24,0" RowSpacing="16" MaxWidth="1120">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -84,6 +88,10 @@
                 Click="ShowCreateDriveDialogAsync"/>
         </Grid>
 
+        <TextBlock Text="{Binding ManagementMessage}" TextWrapping="Wrap"
+                   Visibility="{Binding ManagementMessage, Converter={StaticResource StringVisibilityConverter}}" />
+        <Button x:Uid="AccountLifecycle_RetryButton" Click="Retry"
+                Visibility="{Binding HasPendingCleanup, Converter={StaticResource BoolToVisibilityConverter}}" />
         <!-- Recovery actions appear only with the configuration problem they resolve. -->
         <InfoBar IsOpen="True" IsClosable="False" Severity="Warning" Message="{Binding ErrorMessage}"
                  Visibility="{Binding ErrorMessage, Converter={StaticResource StringVisibilityConverter}}">

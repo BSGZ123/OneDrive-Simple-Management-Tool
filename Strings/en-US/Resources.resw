@@ -842,7 +842,7 @@
   <data name="CreateDrive_Name.PlaceholderText" xml:space="preserve"><value>Drive name</value></data>
   <data name="CloudPage_Open.Text" xml:space="preserve"><value>Open</value></data>
   <data name="CloudPage_SignIn.Text" xml:space="preserve"><value>Sign in again</value></data>
-  <data name="CloudPage_Description.Text" xml:space="preserve"><value>Choose a drive to browse its files. Right-click a drive to sign in again or refresh its storage.</value></data>
+  <data name="CloudPage_Description.Text" xml:space="preserve"><value>Choose a drive to browse files. Right-click to sign in, refresh storage, sign out of the account, or remove the drive.</value></data>
   <data name="CloudPage_EmptyTitle.Text" xml:space="preserve"><value>No drives yet</value></data>
   <data name="CloudPage_Empty.Text" xml:space="preserve"><value>Add a OneDrive account to choose a drive here and browse its files.</value></data>
   <data name="CloudPage_EmptyAdd.Content" xml:space="preserve"><value>Add drive</value></data>
@@ -1415,4 +1415,28 @@
   <data name="Transfer_StopTracking.Content" xml:space="preserve">
     <value>End tracking (cloud copy may continue)</value>
   </data>
+  <data name="AccountLifecycle_SignOutMenu.Text" xml:space="preserve"><value>Sign out of this account</value></data>
+  <data name="AccountLifecycle_RetryButton.Content" xml:space="preserve"><value>Retry pending sign-out or removal</value></data>
+  <data name="AccountLifecycle_RemoveTitle" xml:space="preserve"><value>Remove drive</value></data>
+  <data name="AccountLifecycle_SignOutTitle" xml:space="preserve"><value>Sign out of this app</value></data>
+  <data name="AccountLifecycle_RemoveButton" xml:space="preserve"><value>Remove drive</value></data>
+  <data name="AccountLifecycle_SignOutButton" xml:space="preserve"><value>Sign out</value></data>
+  <data name="AccountLifecycle_RemoveExplanation" xml:space="preserve"><value>Remove “{0}”, stop and unlink {2} sync bindings, and clear this drive’s app content cache. Keep {3} bookmarks as unavailable unless selected below; adding the same drive restores access. Credentials are retained for other drives of this account, and cleared when its last drive is removed.</value></data>
+  <data name="AccountLifecycle_SignOutExplanation" xml:space="preserve"><value>Sign out of all {1} drives belonging to the account used by “{0}” in this app. Pause {2} sync jobs; keep drive settings, sync bindings, and {3} bookmarks. Clear this account’s credentials and app content cache. Sign in again and manually resume sync when ready. This signs out of this app only, not your browser or other apps.</value></data>
+  <data name="AccountLifecycle_FileNotice" xml:space="preserve"><value>Cloud files, local sync files, and downloaded files are kept, along with reading progress. Related transfers stop and app-owned temporary files are cleaned up. Operations already submitted to the cloud cannot be undone. Other accounts are unaffected.</value></data>
+  <data name="AccountLifecycle_DeleteBookmarks" xml:space="preserve"><value>Also delete this drive’s bookmarks</value></data>
+  <data name="AccountLifecycle_SignedOut" xml:space="preserve"><value>Signed out. Sign in again to browse, then manually resume sync.</value></data>
+  <data name="AccountLifecycle_CleanupStatus" xml:space="preserve"><value>Access is disabled and cleanup is pending. Retry the unfinished sign-out or removal.</value></data>
+  <data name="AccountLifecycle_RemovedStatus" xml:space="preserve"><value>This drive was removed. Add it again from the drive list.</value></data>
+  <data name="AccountLifecycle_Pending" xml:space="preserve"><value>Access for this scope is disabled, but some cleanup is pending. Select “Retry pending sign-out or removal”; cleanup is also retried on restart.</value></data>
+  <data name="AccountLifecycle_Removed" xml:space="preserve"><value>Drive removed, related sync bindings unlinked, and app cache cleared. Cloud and local files were kept.</value></data>
+  <data name="AccountLifecycle_SignedOutDone" xml:space="preserve"><value>Signed out of this account. Related sync is paused; credentials and app cache are cleared. Settings, bookmarks, and files were kept. Sign in again to manually resume sync.</value></data>
+  <data name="AccountLifecycle_RetryDone" xml:space="preserve"><value>Pending cleanup is complete.</value></data>
+  <data name="AccountLifecycle_FailedStop" xml:space="preserve"><value>Related tasks have not fully stopped.</value></data>
+  <data name="AccountLifecycle_FailedSync" xml:space="preserve"><value>Sync settings could not be updated.</value></data>
+  <data name="AccountLifecycle_FailedBookmarks" xml:space="preserve"><value>Bookmark cleanup is incomplete.</value></data>
+  <data name="AccountLifecycle_FailedCache" xml:space="preserve"><value>App cache cleanup is incomplete. A file may be in use or its ownership index could not be read.</value></data>
+  <data name="AccountLifecycle_FailedCredentials" xml:space="preserve"><value>Account credentials could not be cleared.</value></data>
+  <data name="AccountLifecycle_FailedConfiguration" xml:space="preserve"><value>The account operation or drive settings could not be saved.</value></data>
+  <data name="AccountLifecycle_UnknownCount" xml:space="preserve"><value>an unknown number of</value></data>
 </root>
