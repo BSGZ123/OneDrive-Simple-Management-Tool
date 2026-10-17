@@ -35,7 +35,8 @@ internal static class Program
             ("Unsupported conversion never opens the picker", UnsupportedConversion),
             ("English and Chinese mutation error and validation resources resolve", Resources)
         ];
-        cases = cases.Concat(BrowsingChecks.Cases).Concat(AccountViewModelChecks.Cases).Concat(BookmarkNavigationChecks.Cases).Concat(ReaderSourceChecks.Cases).ToArray();
+        cases = cases.Concat(BrowsingChecks.Cases).Concat(AccountViewModelChecks.Cases).Concat(BookmarkNavigationChecks.Cases).Concat(ReaderSourceChecks.Cases).Concat(BatchManagementChecks.Cases).Concat(DownloadTreeChecks.Cases).ToArray();
+        cases = cases.Concat(FileTransferChecks.Cases).ToArray();
         foreach (var test in cases)
         {
             await Microsoft.UI.Dispatching.TestUiContext.Run(test.Run);
@@ -49,7 +50,7 @@ internal static class Program
         using var fixture = new GraphFixture();
         var drive = fixture.Drive;
         await drive.GetFiles();
-        drive.SelectedItem = drive.Files[1];
+        drive.SelectedItem = drive.Files.Single(file => file.Id == "file-id");
         var selection = drive.SelectedItem;
         int requests = fixture.Handler.Requests.Count;
         drive.Layout = FileLayout.Grid;
@@ -77,7 +78,7 @@ internal static class Program
         using var fixture = new GraphFixture();
         var drive = fixture.Drive;
         await drive.GetFiles();
-        drive.SelectedItem = drive.Files[1];
+        drive.SelectedItem = drive.Files.Single(file => file.Id == "file-id");
         var selected = drive.SelectedItem;
         fixture.Handler.ListStatus = HttpStatusCode.Forbidden;
         await drive.OpenFolder(drive.Files[0]);
@@ -95,7 +96,7 @@ internal static class Program
         using var fixture = new GraphFixture();
         var drive = fixture.Drive;
         await drive.GetFiles();
-        drive.SelectedItem = drive.Files[1];
+        drive.SelectedItem = drive.Files.Single(file => file.Id == "file-id");
         var old = drive.SelectedItem;
         await drive.Refresh();
         Assert(drive.SelectedItem?.Id == old.Id && drive.SelectedItem != old, "Selection was not remapped.");
@@ -139,7 +140,7 @@ internal static class Program
     {
         using var fixture = new GraphFixture();
         await fixture.Drive.GetFiles();
-        var rename = new RenameFileViewModel(fixture.Drive, fixture.Drive.Files[1]);
+        var rename = new RenameFileViewModel(fixture.Drive, fixture.Drive.Files.Single(file => file.Id == "file-id"));
         var create = new CreateFolderViewModel(fixture.Drive);
         int requests = fixture.Handler.Requests.Count;
         await rename.RenameFile();
@@ -177,7 +178,7 @@ internal static class Program
         using var fixture = new GraphFixture();
         await fixture.Drive.GetFiles();
         fixture.Handler.MutationGate = new TaskCompletionSource();
-        var model = new RenameFileViewModel(fixture.Drive, fixture.Drive.Files[1]) { FileName = "new.docx" };
+        var model = new RenameFileViewModel(fixture.Drive, fixture.Drive.Files.Single(file => file.Id == "file-id")) { FileName = "new.docx" };
         Task first = model.RenameFile();
         await model.RenameFile();
         Assert(model.IsBusy && !model.CanSubmit && fixture.Handler.Requests.Count(request => request.Method == "PATCH") == 1, "Duplicate request while busy.");
@@ -191,7 +192,7 @@ internal static class Program
     {
         using var fixture = new GraphFixture();
         await fixture.Drive.GetFiles();
-        var model = new RenameFileViewModel(fixture.Drive, fixture.Drive.Files[1]) { FileName = "retry.docx" };
+        var model = new RenameFileViewModel(fixture.Drive, fixture.Drive.Files.Single(file => file.Id == "file-id")) { FileName = "retry.docx" };
         fixture.Handler.MutationStatus = HttpStatusCode.Conflict;
         await model.RenameFile();
         Assert(model.HasError && model.CanSubmit && !model.HasSucceeded && model.FileName == "retry.docx", "Failed mutation lost input/state.");
@@ -220,7 +221,7 @@ internal static class Program
         {
             using var fixture = new GraphFixture();
             await fixture.Drive.GetFiles();
-            var file = fixture.Drive.Files[1];
+            var file = fixture.Drive.Files.Single(file => file.Id == "file-id");
             fixture.Drive.SelectedItem = file;
             var model = new DeleteFileViewModel(file) { PermanentDelete = permanent };
             await model.DeleteFile();
@@ -234,7 +235,7 @@ internal static class Program
     {
         using var fixture = new GraphFixture();
         await fixture.Drive.GetFiles();
-        var file = fixture.Drive.Files[1];
+        var file = fixture.Drive.Files.Single(file => file.Id == "file-id");
         fixture.Drive.SelectedItem = file;
         fixture.Handler.ListStatus = HttpStatusCode.Forbidden;
         var model = new DeleteFileViewModel(file);
@@ -250,7 +251,7 @@ internal static class Program
         using var fixture = new GraphFixture();
         await fixture.Drive.GetFiles();
         int requests = fixture.Handler.Requests.Count;
-        var model = new ConvertFileFormatViewModel(fixture.Drive.Files[1], () => Task.FromResult<StorageFile>(null));
+        var model = new ConvertFileFormatViewModel(fixture.Drive.Files.Single(file => file.Id == "file-id"), () => Task.FromResult<StorageFile>(null));
         await model.ConvertFileFormat();
         Assert(fixture.Handler.Requests.Count == requests && !model.HasError && !model.IsBusy && model.SavedFilePath == "", "Cancelled conversion made a request.");
     }
@@ -261,7 +262,7 @@ internal static class Program
         await fixture.Drive.GetFiles();
         var file = new StorageFile("converted.pdf", 0);
         var picker = new TaskCompletionSource<StorageFile>();
-        var model = new ConvertFileFormatViewModel(fixture.Drive.Files[1], () => picker.Task);
+        var model = new ConvertFileFormatViewModel(fixture.Drive.Files.Single(file => file.Id == "file-id"), () => picker.Task);
         Task first = model.ConvertFileFormat();
         await model.ConvertFileFormat();
         Assert(model.IsBusy && !model.ConvertFileFormatCommand.CanExecute(null), "Conversion was not guarded.");

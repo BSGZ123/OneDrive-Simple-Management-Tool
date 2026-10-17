@@ -1,0 +1,4 @@
+<Project>
+  <PropertyGroup><StartupObject>FileTransferUiProbe</StartupObject></PropertyGroup>
+  <ItemGroup><Compile Include="$(MSBuildProjectDirectory)\Tests\FileTransferUi\Probe.cs" /></ItemGroup>
+</Project>

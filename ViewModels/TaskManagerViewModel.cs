@@ -4,7 +4,9 @@ using Windows.Storage;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 using OneDrive_Simple_Management_Tool.Models;
+using OneDrive_Simple_Management_Tool.Services;
 
 namespace OneDrive_Simple_Management_Tool.ViewModels
 {
@@ -50,6 +52,16 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             DownloadTaskViewModel downloadTask = new(drive, itemId, file);
             DownloadTasks.Add(downloadTask);
             await downloadTask.StartDownload();
+        }
+
+        public DownloadTaskViewModel QueueDownloadBatch(IDownloadTreeSource source, IEnumerable<string> ids, string destination,
+            string name, IReadOnlyDictionary<string, string> names = null)
+        {
+            if (IsShuttingDown) return null;
+            var session = new DownloadBatchSession(source, ids, destination, names: names);
+            var task = new DownloadTaskViewModel(name, session, this);
+            DownloadTasks.Add(task);
+            return task;
         }
 
         //重新开始所有下载任务

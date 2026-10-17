@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="OneDrive_Simple_Management_Tool.Views.FileTransferView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Uid="Transfer_Dialog" Title="{Binding Title}" DefaultButton="None"
+    PrimaryButtonText="{Binding SubmitText}" IsPrimaryButtonEnabled="{Binding CanSubmit}">
+    <ScrollViewer MaxHeight="560" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
+        <StackPanel Spacing="10" MinWidth="360" MaxWidth="480">
+            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding DestinationPath}" TextWrapping="Wrap" FontWeight="SemiBold" />
+            <StackPanel Spacing="10" Visibility="{Binding PickerVisibility}">
+                <TextBlock x:Uid="Transfer_TargetHint" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Uid="Transfer_Up" Command="{Binding GoUpCommand}" IsEnabled="{Binding CanGoUp}" />
+                    <Button x:Uid="Transfer_Reload" Command="{Binding ReloadCommand}" IsEnabled="{Binding CanChoose}" />
+                </StackPanel>
+                <ListView x:Uid="Transfer_Folders" ItemsSource="{Binding Folders}" IsItemClickEnabled="True" ItemClick="OpenFolder"
+                          IsEnabled="{Binding CanChoose}" SelectionMode="None" Height="130">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="Folder" />
+                                <TextBlock Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <ComboBox x:Uid="Transfer_Conflict" SelectedIndex="{Binding ConflictIndex, Mode=TwoWay}" IsEnabled="{Binding CanChoose}" HorizontalAlignment="Stretch">
+                    <ComboBoxItem x:Uid="Transfer_KeepBoth" />
+                    <ComboBoxItem x:Uid="Transfer_Skip" />
+                </ComboBox>
+            </StackPanel>
+            <TextBlock x:Uid="Transfer_Rules" TextWrapping="Wrap" FontSize="12" />
+            <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" />
+            <Button x:Uid="Transfer_StopTracking" Command="{Binding StopTrackingCommand}" IsEnabled="{Binding CanStopTracking}" Visibility="{Binding TrackingVisibility}" />
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <ProgressRing IsActive="{Binding IsBusy}" Width="24" Height="24" />
+                <TextBlock Grid.Column="1" Text="{Binding ProgressText}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                <Button Grid.Column="2" x:Uid="Transfer_Stop" Command="{Binding StopCommand}" IsEnabled="{Binding IsBusy}" />
+            </Grid>
+            <ScrollViewer MaxHeight="260" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Spacing="2" Margin="0,4">
+                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding TargetName}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding StatusText}" />
+                                <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <InfoBar IsOpen="{Binding HasError}" Message="{Binding ErrorMessage}" Severity="Error" IsClosable="False" />
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

@@ -23,6 +23,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             public string Query;
             public string Filter;
             public string SelectionId;
+            public HashSet<string> SelectionIds = new(StringComparer.Ordinal);
             public string RequiredSelectionId;
             public List<BreadcrumbItem> Path;
             public bool ResolvePath;
@@ -55,7 +56,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         public Task OpenLocationAsync(string folderId, string selectedItemId) => RunLoad(new Listing
         {
-            ParentId = folderId, SelectionId = selectedItemId, RequiredSelectionId = selectedItemId, ResolvePath = true
+            ParentId = folderId, SelectionId = selectedItemId, RequiredSelectionId = selectedItemId, ResolvePath = true,
+            SelectionIds = selectedItemId == null ? new() : new() { selectedItemId }
         });
 
         [RelayCommand(AllowConcurrentExecutions = true)]
@@ -71,6 +73,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 ParentId = target?.ParentId ?? "Root", Query = target?.Query, Filter = target?.Filter,
                 Path = target?.Path ?? BreadcrumbItems.ToList(), ResolvePath = target?.ResolvePath == true && !target.Committed,
                 SelectionId = target == _view ? SelectedItem?.Id ?? target?.SelectionId : target?.SelectionId,
+                SelectionIds = new HashSet<string>(target?.SelectionIds ?? Enumerable.Empty<string>(), StringComparer.Ordinal),
                 RequiredSelectionId = target?.RequiredSelectionId
             });
         }
@@ -92,7 +95,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             return RunLoad(new Listing
             {
                 ParentId = parentId, Query = query, Filter = filter, Path = path, ResolvePath = resolvePath,
-                SelectionId = parentId == ParentItemId && query == _view?.Query ? SelectedItem?.Id ?? _view?.SelectionId : null
+                SelectionId = parentId == ParentItemId && query == _view?.Query ? SelectedItem?.Id ?? _view?.SelectionId : null,
+                SelectionIds = parentId == ParentItemId && query == _view?.Query && _view != null
+                    ? new HashSet<string>(_view.SelectionIds, StringComparer.Ordinal) : new(StringComparer.Ordinal)
             });
         }
 
@@ -130,7 +135,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                     {
                         _view = listing;
                         listing.Committed = true;
-                        SetVisibleFiles(Array.Empty<FileViewModel>(), null);
+                        SetVisibleFiles(Array.Empty<FileViewModel>());
                         BreadcrumbItems.Clear();
                         foreach (var crumb in listing.Path ?? new List<BreadcrumbItem> { RootBreadcrumb() }) BreadcrumbItems.Add(crumb);
                         OnPropertyChanged(nameof(ParentItemId));
@@ -143,16 +148,16 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                         listing.Items.Add(file.Id, file);
                         if (Matches(file, listing.Filter))
                         {
-                            Files.Add(file);
-                            if (file.IsImage) Images.Add(file);
-                            if (file.Id == listing.SelectionId) SelectedItem = file;
+                            InsertSorted(Files, file);
+                            if (file.IsImage) InsertSorted(Images, file);
                         }
                     }
                     if (link != null) listing.LoadedLinks.Add(link);
                     listing.ExcludedCount += page.ExcludedCount;
                     listing.NextLink = page.NextLink;
                     listing.Complete = page.NextLink == null;
-                    if (listing.Complete && SelectedItem == null) listing.SelectionId = null;
+                    RestoreSelection();
+                    if (listing.Complete) RememberSelection();
                     NotifyListing();
                     // Render each page and process navigation/cancellation between pages.
                     await Task.Yield();
@@ -205,25 +210,123 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         private static bool Matches(FileViewModel file, string filter) => filter == null ||
             file.Name.Contains(filter, StringComparison.OrdinalIgnoreCase);
 
-        private void SetVisibleFiles(IEnumerable<FileViewModel> files, string selectionId)
+        private void SetVisibleFiles(IEnumerable<FileViewModel> files)
         {
             _updatingSelection = true;
             try
             {
                 // One reset per filter change avoids thousands of Remove notifications.
-                Files = new ObservableCollection<FileViewModel>(files);
+                Files = new ObservableCollection<FileViewModel>(files.OrderBy(file => file, Comparer<FileViewModel>.Create(CompareFiles)));
                 Images = new ObservableCollection<FileViewModel>(Files.Where(file => file.IsImage));
                 OnPropertyChanged(nameof(Files));
                 OnPropertyChanged(nameof(Images));
-                SelectedItem = Files.FirstOrDefault(file => file.Id == selectionId);
+                RestoreSelection();
             }
             finally { _updatingSelection = false; }
         }
 
         partial void OnSelectedItemChanged(FileViewModel value)
         {
-            if (!_updatingSelection && _view != null && (value != null || IsLoading != Visibility.Visible))
-                _view.SelectionId = value?.Id;
+            if (!_updatingSelection) SetSelection(value == null ? Array.Empty<FileViewModel>() : new[] { value }, value);
+        }
+
+        // The view model owns selection. Both layouts mirror this snapshot instead of
+        // binding their individual SelectedItem properties back over one another.
+        public IReadOnlyList<FileViewModel> SelectedItems { get; private set; } = Array.Empty<FileViewModel>();
+        public int SelectedCount => SelectedItems.Count;
+        public string SelectionText => string.Format("Drive_SelectedCount".GetLocalized(), SelectedCount);
+        public bool CanDeleteSelection => SelectedCount > 0 && IsLoading != Visibility.Visible;
+        public bool CanDownloadSelection => SelectedCount > 0 && IsLoading != Visibility.Visible;
+        public bool CanTransferSelection => SelectedCount > 0 && IsLoading != Visibility.Visible;
+        public bool IsUpdatingSelection => _updatingSelection;
+
+        public void SetSelection(IEnumerable<FileViewModel> items, FileViewModel focused = null)
+        {
+            var ids = items.Where(file => file?.Drive == this).Select(file => file.Id).ToHashSet(StringComparer.Ordinal);
+            PublishSelection(Files.Where(file => ids.Contains(file.Id)).ToArray(), focused?.Id);
+            RememberSelection();
+        }
+
+        public void SelectForContextMenu(FileViewModel file)
+        {
+            if (file?.Drive != this || !Files.Contains(file)) return;
+            if (SelectedItems.Contains(file)) PublishSelection(SelectedItems, file.Id);
+            else SetSelection(new[] { file }, file);
+            RememberSelection();
+        }
+
+        [RelayCommand]
+        public void SelectAll() => SetSelection(Files, SelectedItem);
+
+        [RelayCommand]
+        public void ClearSelection() => SetSelection(Array.Empty<FileViewModel>());
+
+        private void RestoreSelection() => PublishSelection(
+            Files.Where(file => _view?.SelectionIds.Contains(file.Id) == true).ToArray(), _view?.SelectionId);
+
+        private void PublishSelection(IReadOnlyList<FileViewModel> items, string focusedId)
+        {
+            bool wasUpdating = _updatingSelection;
+            _updatingSelection = true;
+            try
+            {
+                SelectedItems = items;
+                SelectedItem = items.FirstOrDefault(file => file.Id == focusedId) ?? items.FirstOrDefault();
+                foreach (string property in new[] { nameof(SelectedItems), nameof(SelectedCount), nameof(SelectionText), nameof(CanDeleteSelection), nameof(CanDownloadSelection), nameof(CanTransferSelection) })
+                    OnPropertyChanged(property);
+            }
+            finally { _updatingSelection = wasUpdating; }
+        }
+
+        private void RememberSelection()
+        {
+            if (_view == null) return;
+            _view.SelectionIds = SelectedItems.Select(file => file.Id).ToHashSet(StringComparer.Ordinal);
+            _view.SelectionId = SelectedItem?.Id;
+        }
+
+        [ObservableProperty] private int _sortIndex;
+        [ObservableProperty] private bool _sortDescending;
+        [ObservableProperty] private bool _foldersFirst = true;
+        partial void OnSortIndexChanged(int value) => ApplySort();
+        partial void OnSortDescendingChanged(bool value) => ApplySort();
+        partial void OnFoldersFirstChanged(bool value) => ApplySort();
+
+        private void ApplySort() => SetVisibleFiles(Files);
+
+        private int CompareFiles(FileViewModel left, FileViewModel right)
+        {
+            if (FoldersFirst && left.IsFolder != right.IsFolder) return left.IsFolder ? -1 : 1;
+            // Unknown metadata stays last in either direction.
+            int result = (FileSortField)SortIndex switch
+            {
+                FileSortField.Size => CompareOptional(left.Size, right.Size),
+                FileSortField.Modified => CompareOptional(left.Updated, right.Updated),
+                _ => CompareDirection(StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name))
+            };
+            if (result != 0) return result;
+            result = StringComparer.CurrentCultureIgnoreCase.Compare(left.Name, right.Name);
+            return result != 0 ? result : StringComparer.Ordinal.Compare(left.Id, right.Id);
+        }
+
+        private int CompareDirection(int value) => SortDescending ? -Math.Sign(value) : Math.Sign(value);
+
+        private int CompareOptional<T>(T? left, T? right) where T : struct, IComparable<T>
+        {
+            if (!left.HasValue || !right.HasValue) return left.HasValue ? -1 : right.HasValue ? 1 : 0;
+            return CompareDirection(left.Value.CompareTo(right.Value));
+        }
+
+        private void InsertSorted(ObservableCollection<FileViewModel> collection, FileViewModel file)
+        {
+            int low = 0, high = collection.Count;
+            while (low < high)
+            {
+                int middle = low + (high - low) / 2;
+                if (CompareFiles(collection[middle], file) <= 0) low = middle + 1;
+                else high = middle;
+            }
+            collection.Insert(low, file);
         }
 
         public void FilterByName(string name)
@@ -232,9 +335,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             if (!string.IsNullOrEmpty(name) && !SearchQueryRules.TryNormalize(name, out name)) return;
             if (_attempt != _view) CancelLoading();
             _view.Filter = string.IsNullOrEmpty(name) ? null : name;
-            string selectedId = SelectedItem?.Id ?? _view.SelectionId;
-            SetVisibleFiles(_view.Items.Values.Where(file => Matches(file, _view.Filter)), selectedId);
-            _view.SelectionId = SelectedItem?.Id ?? (IsLoading == Visibility.Visible ? selectedId : null);
+            // A filter change drops hidden selections, including not-yet-loaded IDs.
+            SetVisibleFiles(_view.Items.Values.Where(file => Matches(file, _view.Filter)));
+            RememberSelection();
             NotifyListing();
         }
 
@@ -280,10 +383,15 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public void RemoveFile(string id)
         {
             _view?.Items.Remove(id);
+            _view?.SelectionIds.Remove(id);
             var file = Files.FirstOrDefault(item => item.Id == id);
-            if (file != null) { Files.Remove(file); Images.Remove(file); }
-            if (SelectedItem?.Id == id) SelectedItem = null;
-            if (_view?.SelectionId == id) _view.SelectionId = null;
+            _updatingSelection = true;
+            try
+            {
+                if (file != null) { Files.Remove(file); Images.Remove(file); }
+                RestoreSelection();
+            }
+            finally { _updatingSelection = false; }
             NotifyListing();
         }
 
@@ -291,9 +399,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         {
             if (_view == null || !_view.Items.TryGetValue(id, out var file)) return;
             file.UpdateName(name);
-            string selectionId = SelectedItem?.Id;
-            SetVisibleFiles(_view.Items.Values.Where(item => Matches(item, _view.Filter)), selectionId);
-            _view.SelectionId = SelectedItem?.Id;
+            SetVisibleFiles(_view.Items.Values.Where(item => Matches(item, _view.Filter)));
+            if (IsComplete) RememberSelection();
             NotifyListing();
         }
 
@@ -327,7 +434,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         {
             foreach (string property in new[] { nameof(IsSearchActive), nameof(SearchVisibility), nameof(SearchDescription),
                 nameof(Keyword), nameof(IsDriveSearch), nameof(IsComplete), nameof(LoadedCount), nameof(StatusText),
-                nameof(CanRetry), nameof(RetryVisibility), nameof(CanCreateHere) }) OnPropertyChanged(property);
+                nameof(CanRetry), nameof(RetryVisibility), nameof(CanCreateHere), nameof(CanDeleteSelection), nameof(CanDownloadSelection), nameof(CanTransferSelection) }) OnPropertyChanged(property);
         }
 
         [ObservableProperty] private Visibility _isLoading = Visibility.Collapsed;
@@ -349,6 +456,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [NotifyPropertyChangedFor(nameof(HasBookmarkMessage))]
         private string _bookmarkMessage = string.Empty;
         public bool HasBookmarkMessage => !string.IsNullOrEmpty(BookmarkMessage);
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasDownloadMessage))]
+        private string _downloadMessage = string.Empty;
+        public bool HasDownloadMessage => !string.IsNullOrEmpty(DownloadMessage);
 
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
         public Visibility ListVisibility => Layout == FileLayout.List ? Visibility.Visible : Visibility.Collapsed;

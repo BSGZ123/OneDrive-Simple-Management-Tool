@@ -8,7 +8,7 @@ namespace OneDrive_Simple_Management_Tool.Views
         public DeleteFileView()
         {
             InitializeComponent();
-            FileOperationDialog.Configure(this, () => ((DeleteFileViewModel)DataContext).DeleteFileCommand.ExecuteAsync(null));
+            FileOperationDialog.Configure(this, () => ((DeleteFileViewModel)DataContext).DeleteFileCommand.ExecuteAsync(null), closeOnSuccess: false);
         }
     }
 }

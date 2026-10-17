@@ -17,11 +17,13 @@ namespace OneDrive_Simple_Management_Tool.Services
         public int MaxAttempts { get; init; } = 3;
         public int BlockTimeoutMilliseconds { get; init; } = 15000;
         public TimeSpan RetryDelay { get; init; } = TimeSpan.FromSeconds(1);
+        public bool ReplaceExisting { get; init; } = true;
+        public Action<string> ValidateDestination { get; init; }
     }
 
     // Owns one runtime-only transfer. Pausing stops and drains the current attempt;
     // the retained package can then be resumed with a fresh preauthenticated URL.
-    public sealed class DownloadSession
+    public sealed class DownloadSession : IDownloadSession
     {
         private static readonly ConcurrentDictionary<string, DownloadSession> Destinations =
             new(StringComparer.OrdinalIgnoreCase);
@@ -135,6 +137,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                     try
                     {
                         token.ThrowIfCancellationRequested();
+                        _options.ValidateDestination?.Invoke(DestinationPath);
                         Update(state: DownloadTaskState.Preparing, attempt: attempt);
                         DownloadSource source = await _resolveSource(token).ConfigureAwait(false);
                         token.ThrowIfCancellationRequested();
@@ -171,7 +174,8 @@ namespace OneDrive_Simple_Management_Tool.Services
                         }
                         // Staging is in the destination directory. A failed replacement leaves the
                         // existing destination intact and the complete staging file available to retry.
-                        File.Move(_stagingPath, DestinationPath, true);
+                        _options.ValidateDestination?.Invoke(DestinationPath);
+                        File.Move(_stagingPath, DestinationPath, _options.ReplaceExisting);
                         _readyToSave = false;
                         await ReleasePackageAsync().ConfigureAwait(false);
                         ReleaseDestination();

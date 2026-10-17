@@ -22,7 +22,7 @@
                 <TextBlock Grid.Column="4" x:Uid="FileProperty_Updated" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </Grid>
         </Border>
-        <ListView x:Name="FileList" Grid.Row="1" ItemsSource="{Binding Files}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" SelectionMode="Single" SelectionChanged="ScrollToSelection">
+        <ListView x:Name="FileList" Grid.Row="1" SelectionMode="Extended">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />

@@ -7,7 +7,14 @@
     <DefineConstants>$(DefineConstants);FILE_MANAGEMENT_REGRESSION</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../Models/FileTransfer.cs" Link="Production/FileTransfer.cs" />
+    <Compile Include="../../Services/OneDrive.Transfers.cs" Link="Production/OneDrive.Transfers.cs" />
+    <Compile Include="../../Services/GraphFileTransferService.cs" Link="Production/GraphFileTransferService.cs" />
+    <Compile Include="../../ViewModels/FileTransferViewModel.cs" Link="Production/FileTransferViewModel.cs" />
     <Compile Include="../../Services/OneDrive.cs" Link="Production/OneDrive.cs" />
+    <Compile Include="../../Services/OneDrive.Downloads.cs" Link="Production/OneDrive.Downloads.cs" />
+    <Compile Include="../../Services/IDownloadTreeSource.cs" Link="Production/IDownloadTreeSource.cs" />
+    <Compile Include="../../Models/DownloadTree.cs" Link="Production/DownloadTree.cs" />
     <Compile Include="../../Services/GraphReaderSource.cs" Link="Production/GraphReaderSource.cs" />
     <Compile Include="../../Services/ReaderProtocol.cs" Link="Production/ReaderProtocol.cs" />
     <Compile Include="../../Models/ReaderModels.cs" Link="Production/ReaderModels.cs" />
@@ -23,6 +30,7 @@
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
     <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
     <Compile Include="../../Models/FileLayout.cs" Link="Production/FileLayout.cs" />
+    <Compile Include="../../Models/FileSortField.cs" Link="Production/FileSortField.cs" />
     <Compile Include="../../Models/BreadcrumbItem.cs" Link="Production/BreadcrumbItem.cs" />
     <Compile Include="../../ViewModels/UploadTaskViewModel.cs" Link="Production/UploadTaskViewModel.cs" />
     <Compile Include="../../ViewModels/DriveViewModel.cs" Link="Production/DriveViewModel.cs" />

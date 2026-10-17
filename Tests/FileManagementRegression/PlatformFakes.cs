@@ -17,6 +17,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public DriveViewModel Drive { get; } = drive;
         public string Id => item.Id;
         public string Name => item.Name;
+        public long? Size => item.Size;
+        public DateTimeOffset? Updated => item.LastModifiedDateTime;
         public void UpdateName(string name) => item.Name = name;
         public bool IsFolder => item.Folder != null;
         public bool IsImage => !IsFolder && item.Image != null;

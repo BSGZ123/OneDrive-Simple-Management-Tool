@@ -11,6 +11,7 @@
         <KeyboardAccelerator Key="Enter" Invoked="OnFileAccelerator" />
         <KeyboardAccelerator Key="F2" Invoked="OnFileAccelerator" />
         <KeyboardAccelerator Key="Delete" Invoked="OnFileAccelerator" />
+        <KeyboardAccelerator Modifiers="Control" Key="A" Invoked="OnFileAccelerator" />
         <KeyboardAccelerator Modifiers="Menu" Key="Enter" Invoked="OnFileAccelerator" />
         <KeyboardAccelerator Key="F5" Invoked="OnFileAccelerator" />
         <KeyboardAccelerator Modifiers="Control,Shift" Key="N" Invoked="OnFileAccelerator" />
@@ -43,6 +44,22 @@
                 <Button x:Uid="Sync_BindCurrent" Click="BindCurrentFolder" IsEnabled="{Binding CanCreateHere}"><SymbolIcon Symbol="Sync" /></Button>
                 <Button x:Uid="Drive_Search" Click="ShowSearchDialogAsync"><SymbolIcon Symbol="Find" /></Button>
                 <Button x:Uid="Drive_Refresh" Command="{Binding RefreshCommand}"><SymbolIcon Symbol="Refresh" /></Button>
+                <Button x:Uid="Drive_Sort">
+                    <FontIcon Glyph="&#xE8CB;" />
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel Spacing="12" Width="220">
+                                <ComboBox x:Uid="Drive_SortField" SelectedIndex="{Binding SortIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem x:Uid="Drive_SortName" />
+                                    <ComboBoxItem x:Uid="Drive_SortSize" />
+                                    <ComboBoxItem x:Uid="Drive_SortModified" />
+                                </ComboBox>
+                                <CheckBox x:Uid="Drive_SortDescending" IsChecked="{Binding SortDescending, Mode=TwoWay}" />
+                                <CheckBox x:Uid="Drive_FoldersFirst" IsChecked="{Binding FoldersFirst, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
                 <Button x:Uid="Drive_Layout">
                     <SymbolIcon Symbol="ViewAll" />
                     <Button.Flyout>
@@ -56,6 +73,22 @@
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="2" Margin="24,0">
+            <Grid ColumnSpacing="8" Margin="0,4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding SelectionText}" VerticalAlignment="Center" />
+                <Button Grid.Column="1" x:Uid="Drive_SelectAll" Command="{Binding SelectAllCommand}" />
+                <Button Grid.Column="2" x:Uid="Drive_ClearSelection" Command="{Binding ClearSelectionCommand}" />
+                <Button Grid.Column="3" x:Uid="Drive_DownloadSelected" IsEnabled="{Binding CanDownloadSelection}" Click="DownloadSelected" />
+                <Button Grid.Column="4" x:Uid="Drive_DeleteSelected" IsEnabled="{Binding CanDeleteSelection}" Click="DeleteSelected" />
+                <Button Grid.Column="5" x:Uid="Drive_Organize" IsEnabled="{Binding CanTransferSelection}">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Uid="FileView_Flyout_Move" Click="MoveSelected" />
+                            <MenuFlyoutItem x:Uid="FileView_Flyout_Copy" Click="CopySelected" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
             <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="12,6" Margin="0,0,0,4" Visibility="{Binding SearchVisibility}">
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -77,6 +110,9 @@
             </InfoBar>
             <InfoBar x:Name="UploadErrorInfoBar" Severity="Error" IsOpen="False" IsClosable="True" />
             <InfoBar Message="{Binding BookmarkMessage}" IsOpen="{Binding HasBookmarkMessage}" Severity="Informational" IsClosable="False" />
+            <InfoBar Message="{Binding DownloadMessage}" IsOpen="{Binding HasDownloadMessage}" Severity="Informational" IsClosable="False">
+                <InfoBar.ActionButton><Button x:Uid="DownloadBatch_ViewTasks" Click="ViewDownloadTasks" /></InfoBar.ActionButton>
+            </InfoBar>
         </StackPanel>
         <!-- 8 + the 16 item padding lines rows up with the 24 page gutter. -->
         <Grid Grid.Row="3" x:Name="CloudControl" Background="Transparent" AllowDrop="True" Margin="8,0"

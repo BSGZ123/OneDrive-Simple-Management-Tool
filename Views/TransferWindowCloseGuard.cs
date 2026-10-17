@@ -15,6 +15,8 @@ namespace OneDrive_Simple_Management_Tool.Views
             {
                 if (allowClose) return;
                 args.Cancel = true;
+                // Let an in-flight move/copy retain its acknowledgement before the app can exit.
+                if (FileActions.IsFileTransferBusy(((Microsoft.UI.Xaml.FrameworkElement)window.Content).XamlRoot)) return;
                 if (handlingClose) return;
                 handlingClose = true;
                 try

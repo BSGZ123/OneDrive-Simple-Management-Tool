@@ -1266,4 +1266,153 @@
   <data name="Transfer_Stopping" xml:space="preserve"><value>Stopping transfers and cleaning up. The window will close when this finishes.</value></data>
   <data name="Transfer_ExitFailed" xml:space="preserve"><value>Could not finish stopping transfers or saving. The window remains open. Finish any open dialog, check the tasks, and try closing again.</value></data>
   <data name="Home_StatSkipped.Text" xml:space="preserve"><value>Skipped</value></data>
+  <data name="Drive_SelectedCount" xml:space="preserve"><value>{0} selected</value></data>
+  <data name="Drive_SelectAll.Content" xml:space="preserve"><value>Select all shown</value></data>
+  <data name="Drive_ClearSelection.Content" xml:space="preserve"><value>Clear selection</value></data>
+  <data name="Drive_DeleteSelected.Content" xml:space="preserve"><value>Delete selected</value></data>
+  <data name="Drive_Sort.ToolTipService.ToolTip" xml:space="preserve"><value>Sort files</value></data>
+  <data name="Drive_Sort.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Sort files</value></data>
+  <data name="Drive_SortField.Header" xml:space="preserve"><value>Sort by</value></data>
+  <data name="Drive_SortName.Content" xml:space="preserve"><value>Name</value></data>
+  <data name="Drive_SortSize.Content" xml:space="preserve"><value>Size</value></data>
+  <data name="Drive_SortModified.Content" xml:space="preserve"><value>Modified time</value></data>
+  <data name="Drive_SortDescending.Content" xml:space="preserve"><value>Descending</value></data>
+  <data name="Drive_FoldersFirst.Content" xml:space="preserve"><value>Folders first</value></data>
+  <data name="DeleteBatch_Dialog.Title" xml:space="preserve"><value>Delete items</value></data>
+  <data name="DeleteBatch_Dialog.CloseButtonText" xml:space="preserve"><value>Close</value></data>
+  <data name="DeleteBatch_Question" xml:space="preserve"><value>Delete these {0} items? They will be moved to the recycle bin unless permanent deletion is selected. Folder contents are included.</value></data>
+  <data name="DeleteBatch_Results" xml:space="preserve"><value>Deletion results</value></data>
+  <data name="DeleteBatch_Summary" xml:space="preserve"><value>{0} succeeded, {1} failed / {2} items</value></data>
+  <data name="DeleteBatch_RetryHint" xml:space="preserve"><value>Some items could not be deleted. Retry only the failed items, or close to review the remaining selection.</value></data>
+  <data name="DeleteBatch_Retry" xml:space="preserve"><value>Retry failed items</value></data>
+  <data name="DeleteBatch_Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="DeleteBatch_Working" xml:space="preserve"><value>Deleting…</value></data>
+  <data name="DeleteBatch_Succeeded" xml:space="preserve"><value>Deleted</value></data>
+  <data name="DeleteBatch_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Drive_DownloadSelected.Content" xml:space="preserve"><value>Download selected</value></data>
+  <data name="DownloadBatch_Title" xml:space="preserve"><value>Batch download ({0} items)</value></data>
+  <data name="DownloadBatch_Queued" xml:space="preserve"><value>Download added. View progress, pause, cancel or retry in Tasks.</value></data>
+  <data name="DownloadBatch_ViewTasks.Content" xml:space="preserve"><value>View tasks</value></data>
+  <data name="DownloadBatch_Scanning" xml:space="preserve"><value>Scanning folders…</value></data>
+  <data name="DownloadBatch_Summary" xml:space="preserve"><value>Files: {0}/{1} completed · Folders: {2} · Failures: {3}</value></data>
+  <data name="DownloadBatch_IncompleteScan" xml:space="preserve"><value>Folder scan is not yet complete.</value></data>
+  <data name="DownloadBatch_KeepBoth" xml:space="preserve"><value>Folder structure is preserved. Existing names are kept; conflicts use a new name. Unsupported Windows filename characters are replaced.</value></data>
+  <data name="DownloadBatch_Failures.Header" xml:space="preserve"><value>Failed items (retry only unfinished work)</value></data>
+  <data name="DownloadBatch_Cancel.ToolTipService.ToolTip" xml:space="preserve"><value>Cancel batch; keep completed files</value></data>
+  <data name="DownloadBatch_Cancel.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Cancel batch; keep completed files</value></data>
+  <data name="DownloadError_UnsupportedItem" xml:space="preserve"><value>This item or folder page contains an unsupported, deleted or shared shortcut item. The folder could not be downloaded completely.</value></data>
+  <data name="FileView_Flyout_Move.Text" xml:space="preserve">
+    <value>Move…</value>
+  </data>
+  <data name="FileView_Flyout_Copy.Text" xml:space="preserve">
+    <value>Copy…</value>
+  </data>
+  <data name="Drive_Organize.Content" xml:space="preserve">
+    <value>Organize</value>
+  </data>
+  <data name="Transfer_Dialog.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Transfer_MoveTitle" xml:space="preserve">
+    <value>Move selected items</value>
+  </data>
+  <data name="Transfer_CopyTitle" xml:space="preserve">
+    <value>Copy selected items</value>
+  </data>
+  <data name="Transfer_Move" xml:space="preserve">
+    <value>Move here</value>
+  </data>
+  <data name="Transfer_Copy" xml:space="preserve">
+    <value>Copy here</value>
+  </data>
+  <data name="Transfer_Retry" xml:space="preserve">
+    <value>Retry / check status</value>
+  </data>
+  <data name="Transfer_Description" xml:space="preserve">
+    <value>{0} selected items · {1}</value>
+  </data>
+  <data name="Transfer_TargetHint.Text" xml:space="preserve">
+    <value>Open a folder below to choose it as the destination.</value>
+  </data>
+  <data name="Transfer_Up.Content" xml:space="preserve">
+    <value>Up</value>
+  </data>
+  <data name="Transfer_Reload.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Transfer_Folders.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Destination folders</value>
+  </data>
+  <data name="Transfer_Conflict.Header" xml:space="preserve">
+    <value>When a name already exists</value>
+  </data>
+  <data name="Transfer_KeepBoth.Content" xml:space="preserve">
+    <value>Keep both (rename automatically)</value>
+  </data>
+  <data name="Transfer_Skip.Content" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="Transfer_Rules.Text" xml:space="preserve">
+    <value>Same drive only. Folders include their contents; copies use the latest version. Stop prevents later items; an accepted cloud copy may continue. Reopen Organize to check its status. After restarting the app, check the destination first.</value>
+  </data>
+  <data name="Transfer_Stop.Content" xml:space="preserve">
+    <value>Stop waiting</value>
+  </data>
+  <data name="Transfer_Summary" xml:space="preserve">
+    <value>Completed {0} · Skipped {1} · Failed / uncertain {2} · Total {3}</value>
+  </data>
+  <data name="Transfer_Included" xml:space="preserve">
+    <value>Handled with its selected parent folder.</value>
+  </data>
+  <data name="Transfer_AncestorFailed" xml:space="preserve">
+    <value>Its selected parent folder has not completed. Retry the parent first.</value>
+  </data>
+  <data name="Transfer_AlreadyHere" xml:space="preserve">
+    <value>Already in this folder.</value>
+  </data>
+  <data name="Transfer_ConflictSkipped" xml:space="preserve">
+    <value>Skipped because the destination already contains this name.</value>
+  </data>
+  <data name="Transfer_StillRunning" xml:space="preserve">
+    <value>The cloud copy is still running. Check its status again; it will not be submitted twice.</value>
+  </data>
+  <data name="Transfer_Changed" xml:space="preserve">
+    <value>The item changed during this operation. Check the source and destination before trying again.</value>
+  </data>
+  <data name="Transfer_Uncertain" xml:space="preserve">
+    <value>The server result could not be confirmed. Check the destination before creating a new operation.</value>
+  </data>
+  <data name="Transfer_InvalidTarget" xml:space="preserve">
+    <value>Choose a folder in this drive, outside the selected folders and their descendants.</value>
+  </data>
+  <data name="Transfer_Unsupported" xml:space="preserve">
+    <value>This item is unavailable or is a shortcut to another drive.</value>
+  </data>
+  <data name="Transfer_Percentage" xml:space="preserve">
+    <value>Copying · {0:0}%</value>
+  </data>
+  <data name="Transfer_State_Pending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="Transfer_State_Working" xml:space="preserve">
+    <value>Working…</value>
+  </data>
+  <data name="Transfer_State_Succeeded" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="Transfer_State_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="Transfer_State_Failed" xml:space="preserve">
+    <value>Failed — retry available</value>
+  </data>
+  <data name="Transfer_State_Waiting" xml:space="preserve">
+    <value>Waiting for confirmation — check again</value>
+  </data>
+  <data name="Transfer_State_Uncertain" xml:space="preserve">
+    <value>Result uncertain — check the destination</value>
+  </data>
+  <data name="Transfer_StopTracking.Content" xml:space="preserve">
+    <value>End tracking (cloud copy may continue)</value>
+  </data>
 </root>

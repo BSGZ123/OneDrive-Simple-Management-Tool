@@ -7,6 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Services/DownloadSession.cs" Link="Production/DownloadSession.cs" />
+    <Compile Include="../../Services/IDownloadSession.cs" Link="Production/IDownloadSession.cs" />
+    <Compile Include="../../Services/IDownloadTreeSource.cs" Link="Production/IDownloadTreeSource.cs" />
+    <Compile Include="../../Services/DownloadBatchSession.cs" Link="Production/DownloadBatchSession.cs" />
+    <Compile Include="../../Services/DownloadBatchPaths.cs" Link="Production/DownloadBatchPaths.cs" />
+    <Compile Include="../../Models/DownloadTree.cs" Link="Production/DownloadTree.cs" />
     <Compile Include="../../Services/DownloadResponseHandler.cs" Link="Production/DownloadResponseHandler.cs" />
     <Compile Include="../../Models/UploadConflict.cs" Link="Production/UploadConflict.cs" />
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />

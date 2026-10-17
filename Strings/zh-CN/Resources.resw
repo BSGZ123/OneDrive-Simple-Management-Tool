@@ -1266,4 +1266,153 @@
   <data name="Transfer_Stopping" xml:space="preserve"><value>正在停止传输并清理，请稍候。完成后窗口会自动关闭。</value></data>
   <data name="Transfer_ExitFailed" xml:space="preserve"><value>停止传输、清理或保存未能完成，窗口已保留。请先处理已打开的对话框，检查任务后再次尝试退出。</value></data>
   <data name="Home_StatSkipped.Text" xml:space="preserve"><value>已跳过</value></data>
+  <data name="Drive_SelectedCount" xml:space="preserve"><value>已选择 {0} 项</value></data>
+  <data name="Drive_SelectAll.Content" xml:space="preserve"><value>全选已显示项</value></data>
+  <data name="Drive_ClearSelection.Content" xml:space="preserve"><value>取消选择</value></data>
+  <data name="Drive_DeleteSelected.Content" xml:space="preserve"><value>删除选中项</value></data>
+  <data name="Drive_Sort.ToolTipService.ToolTip" xml:space="preserve"><value>文件排序</value></data>
+  <data name="Drive_Sort.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>文件排序</value></data>
+  <data name="Drive_SortField.Header" xml:space="preserve"><value>排序依据</value></data>
+  <data name="Drive_SortName.Content" xml:space="preserve"><value>名称</value></data>
+  <data name="Drive_SortSize.Content" xml:space="preserve"><value>大小</value></data>
+  <data name="Drive_SortModified.Content" xml:space="preserve"><value>修改时间</value></data>
+  <data name="Drive_SortDescending.Content" xml:space="preserve"><value>降序</value></data>
+  <data name="Drive_FoldersFirst.Content" xml:space="preserve"><value>文件夹优先</value></data>
+  <data name="DeleteBatch_Dialog.Title" xml:space="preserve"><value>删除项目</value></data>
+  <data name="DeleteBatch_Dialog.CloseButtonText" xml:space="preserve"><value>关闭</value></data>
+  <data name="DeleteBatch_Question" xml:space="preserve"><value>确定删除以下 {0} 项吗？默认移入回收站，勾选永久删除后将无法恢复。删除文件夹包含其中的内容。</value></data>
+  <data name="DeleteBatch_Results" xml:space="preserve"><value>删除结果</value></data>
+  <data name="DeleteBatch_Summary" xml:space="preserve"><value>已成功 {0} 项，失败 {1} 项，共 {2} 项</value></data>
+  <data name="DeleteBatch_RetryHint" xml:space="preserve"><value>部分项目删除失败。可仅重试失败项，或关闭弹窗查看剩余选择。</value></data>
+  <data name="DeleteBatch_Retry" xml:space="preserve"><value>重试失败项</value></data>
+  <data name="DeleteBatch_Pending" xml:space="preserve"><value>等待删除</value></data>
+  <data name="DeleteBatch_Working" xml:space="preserve"><value>正在删除…</value></data>
+  <data name="DeleteBatch_Succeeded" xml:space="preserve"><value>已删除</value></data>
+  <data name="DeleteBatch_Failed" xml:space="preserve"><value>删除失败</value></data>
+  <data name="Drive_DownloadSelected.Content" xml:space="preserve"><value>下载选中项</value></data>
+  <data name="DownloadBatch_Title" xml:space="preserve"><value>批量下载（{0} 个项目）</value></data>
+  <data name="DownloadBatch_Queued" xml:space="preserve"><value>已加入下载任务，可在任务页查看进度、暂停、取消或重试。</value></data>
+  <data name="DownloadBatch_ViewTasks.Content" xml:space="preserve"><value>查看任务</value></data>
+  <data name="DownloadBatch_Scanning" xml:space="preserve"><value>正在扫描文件夹…</value></data>
+  <data name="DownloadBatch_Summary" xml:space="preserve"><value>文件：已完成 {0}/{1} · 文件夹：{2} · 失败：{3}</value></data>
+  <data name="DownloadBatch_IncompleteScan" xml:space="preserve"><value>目录尚未扫描完整。</value></data>
+  <data name="DownloadBatch_KeepBoth" xml:space="preserve"><value>保留目录结构；同名项目自动另存，不覆盖已有内容。Windows 不支持的文件名字符将被替换。</value></data>
+  <data name="DownloadBatch_Failures.Header" xml:space="preserve"><value>失败明细（重试仅处理未完成部分）</value></data>
+  <data name="DownloadBatch_Cancel.ToolTipService.ToolTip" xml:space="preserve"><value>取消批次，保留已完成文件</value></data>
+  <data name="DownloadBatch_Cancel.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>取消批次，保留已完成文件</value></data>
+  <data name="DownloadError_UnsupportedItem" xml:space="preserve"><value>此项目或目录页包含不支持、已删除或共享快捷方式项目，无法完整下载该目录。</value></data>
+  <data name="FileView_Flyout_Move.Text" xml:space="preserve">
+    <value>移动…</value>
+  </data>
+  <data name="FileView_Flyout_Copy.Text" xml:space="preserve">
+    <value>复制…</value>
+  </data>
+  <data name="Drive_Organize.Content" xml:space="preserve">
+    <value>整理</value>
+  </data>
+  <data name="Transfer_Dialog.CloseButtonText" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Transfer_MoveTitle" xml:space="preserve">
+    <value>移动所选项目</value>
+  </data>
+  <data name="Transfer_CopyTitle" xml:space="preserve">
+    <value>复制所选项目</value>
+  </data>
+  <data name="Transfer_Move" xml:space="preserve">
+    <value>移动到这里</value>
+  </data>
+  <data name="Transfer_Copy" xml:space="preserve">
+    <value>复制到这里</value>
+  </data>
+  <data name="Transfer_Retry" xml:space="preserve">
+    <value>重试 / 查询状态</value>
+  </data>
+  <data name="Transfer_Description" xml:space="preserve">
+    <value>已选择 {0} 项 · {1}</value>
+  </data>
+  <data name="Transfer_TargetHint.Text" xml:space="preserve">
+    <value>打开下方文件夹，即可将其选为目标位置。</value>
+  </data>
+  <data name="Transfer_Up.Content" xml:space="preserve">
+    <value>上一级</value>
+  </data>
+  <data name="Transfer_Reload.Content" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Transfer_Folders.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>目标文件夹</value>
+  </data>
+  <data name="Transfer_Conflict.Header" xml:space="preserve">
+    <value>遇到同名项目时</value>
+  </data>
+  <data name="Transfer_KeepBoth.Content" xml:space="preserve">
+    <value>保留两者（自动改名）</value>
+  </data>
+  <data name="Transfer_Skip.Content" xml:space="preserve">
+    <value>跳过</value>
+  </data>
+  <data name="Transfer_Rules.Text" xml:space="preserve">
+    <value>仅限当前网盘；文件夹包含全部内容，复制使用最新版本。停止会阻止后续项目，已提交的云端复制可能继续。关闭弹窗后可从“整理”继续查询；重启应用后请先核对目标位置。</value>
+  </data>
+  <data name="Transfer_Stop.Content" xml:space="preserve">
+    <value>停止等待</value>
+  </data>
+  <data name="Transfer_Summary" xml:space="preserve">
+    <value>已完成 {0} · 已跳过 {1} · 失败 / 待核实 {2} · 共 {3} 项</value>
+  </data>
+  <data name="Transfer_Included" xml:space="preserve">
+    <value>随选中的上级文件夹一起处理。</value>
+  </data>
+  <data name="Transfer_AncestorFailed" xml:space="preserve">
+    <value>选中的上级文件夹尚未完成，请先重试上级文件夹。</value>
+  </data>
+  <data name="Transfer_AlreadyHere" xml:space="preserve">
+    <value>已位于此文件夹。</value>
+  </data>
+  <data name="Transfer_ConflictSkipped" xml:space="preserve">
+    <value>目标位置存在同名项目，已跳过。</value>
+  </data>
+  <data name="Transfer_StillRunning" xml:space="preserve">
+    <value>云端仍在复制。可再次查询状态，不会重复提交。</value>
+  </data>
+  <data name="Transfer_Changed" xml:space="preserve">
+    <value>操作期间项目发生变化，请检查源位置和目标位置后再试。</value>
+  </data>
+  <data name="Transfer_Uncertain" xml:space="preserve">
+    <value>暂时无法确认服务器结果。重新发起操作前，请检查目标位置。</value>
+  </data>
+  <data name="Transfer_InvalidTarget" xml:space="preserve">
+    <value>请选择当前网盘中的文件夹，且不能是所选文件夹自身或其子目录。</value>
+  </data>
+  <data name="Transfer_Unsupported" xml:space="preserve">
+    <value>此项目不可用，或是指向其他网盘的快捷方式。</value>
+  </data>
+  <data name="Transfer_Percentage" xml:space="preserve">
+    <value>正在复制 · {0:0}%</value>
+  </data>
+  <data name="Transfer_State_Pending" xml:space="preserve">
+    <value>待处理</value>
+  </data>
+  <data name="Transfer_State_Working" xml:space="preserve">
+    <value>处理中…</value>
+  </data>
+  <data name="Transfer_State_Succeeded" xml:space="preserve">
+    <value>已完成</value>
+  </data>
+  <data name="Transfer_State_Skipped" xml:space="preserve">
+    <value>已跳过</value>
+  </data>
+  <data name="Transfer_State_Failed" xml:space="preserve">
+    <value>失败，可重试</value>
+  </data>
+  <data name="Transfer_State_Waiting" xml:space="preserve">
+    <value>等待确认，可再次查询</value>
+  </data>
+  <data name="Transfer_State_Uncertain" xml:space="preserve">
+    <value>结果待核实，请检查目标位置</value>
+  </data>
+  <data name="Transfer_StopTracking.Content" xml:space="preserve">
+    <value>结束跟踪（云端复制可能继续）</value>
+  </data>
 </root>

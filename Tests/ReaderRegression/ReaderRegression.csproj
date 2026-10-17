@@ -4,6 +4,7 @@
     <Compile Include="../../Models/ReaderModels.cs" Link="Production/ReaderModels.cs" />
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
     <Compile Include="../../Services/DownloadSession.cs" Link="Production/DownloadSession.cs" />
+    <Compile Include="../../Services/IDownloadSession.cs" Link="Production/IDownloadSession.cs" />
     <Compile Include="../../Services/DownloadResponseHandler.cs" Link="Production/DownloadResponseHandler.cs" />
     <Compile Include="../../Services/Reader*.cs" Link="Production/%(Filename)%(Extension)" />
     <Compile Include="../../Services/ApplicationDataPaths.cs" Link="Production/ApplicationDataPaths.cs" />

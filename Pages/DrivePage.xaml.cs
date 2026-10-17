@@ -120,6 +120,28 @@ namespace OneDrive_Simple_Management_Tool.Pages
                 drive.Layout = layout;
         }
 
+        private async void DeleteSelected(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is DriveViewModel drive) await FileActions.DeleteSelectionAsync(this, drive);
+        }
+
+        private async void DownloadSelected(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is DriveViewModel drive) await FileActions.DownloadSelectionAsync(this, drive);
+        }
+
+        private void ViewDownloadTasks(object sender, RoutedEventArgs e) => (App.StartupWindow as MainWindow)?.Navigate(typeof(TaskManagerPage));
+
+        private async void MoveSelected(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is DriveViewModel drive) await FileActions.TransferSelectionAsync(this, drive, Models.FileTransferKind.Move);
+        }
+
+        private async void CopySelected(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is DriveViewModel drive) await FileActions.TransferSelectionAsync(this, drive, Models.FileTransferKind.Copy);
+        }
+
         private async void OnFileAccelerator(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
             if (!FileActions.CanUseShortcuts(this) || DataContext is not DriveViewModel drive) return;
@@ -130,11 +152,12 @@ namespace OneDrive_Simple_Management_Tool.Pages
             switch (sender.Key)
             {
                 case VirtualKey.F5: await drive.Refresh(); break;
+                case VirtualKey.A: drive.SelectAll(); break;
                 case VirtualKey.N: await ShowCreateFolder(); break;
                 case VirtualKey.Back:
                 case VirtualKey.Left: await drive.GoUp(); break;
                 case VirtualKey.F2: await FileActions.ExecuteAsync(FileAction.Rename, this, drive.SelectedItem); break;
-                case VirtualKey.Delete: await FileActions.ExecuteAsync(FileAction.Delete, this, drive.SelectedItem); break;
+                case VirtualKey.Delete: await FileActions.DeleteSelectionAsync(this, drive); break;
                 case VirtualKey.Enter:
                     await FileActions.ExecuteAsync(sender.Modifiers == VirtualKeyModifiers.Menu ? FileAction.Property : FileAction.Open, this, drive.SelectedItem);
                     break;

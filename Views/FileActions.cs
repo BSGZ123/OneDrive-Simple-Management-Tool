@@ -22,6 +22,8 @@ namespace OneDrive_Simple_Management_Tool.Views
         Open,
         Read,
         Download,
+        Move,
+        Copy,
         Delete,
         Convert,
         Share,
@@ -38,10 +40,16 @@ namespace OneDrive_Simple_Management_Tool.Views
         {
             public bool IsOpen;
             public TaskCompletionSource Closed;
+            public ContentDialog ActiveDialog;
         }
         private static readonly ConditionalWeakTable<XamlRoot, DialogState> Dialogs = new();
+        private sealed class PendingTransfer { public FileTransferViewModel Model; }
+        private static readonly ConditionalWeakTable<DriveViewModel, PendingTransfer> Transfers = new();
 
         public static bool IsDialogOpen(XamlRoot root) => root != null && (Dialogs.GetOrCreateValue(root).IsOpen || TransferDialogs.IsOpen);
+
+        internal static bool IsFileTransferBusy(XamlRoot root) => root != null &&
+            Dialogs.GetOrCreateValue(root).ActiveDialog?.DataContext is FileTransferViewModel { IsBusy: true };
 
         internal static Task WaitForDialogAsync(XamlRoot root) =>
             root == null ? Task.CompletedTask : Dialogs.GetOrCreateValue(root).Closed?.Task ?? Task.CompletedTask;
@@ -57,7 +65,7 @@ namespace OneDrive_Simple_Management_Tool.Views
             };
             owner.RightTapped += (_, _) =>
             {
-                if (owner.DataContext is FileViewModel file) file.Drive.SelectedItem = file;
+                if (owner.DataContext is FileViewModel file) file.Drive.SelectForContextMenu(file);
             };
         }
 
@@ -65,9 +73,12 @@ namespace OneDrive_Simple_Management_Tool.Views
         {
             if (owner.DataContext is not FileViewModel file) return;
             MenuFlyout menu = new();
+            menu.Opening += (_, _) => file.Drive.SelectForContextMenu(file);
             Add(FileAction.Open, file.CanOpen);
             if (file.CanRead) Add(FileAction.Read);
-            Add(FileAction.Download, file.IsFile);
+            Add(FileAction.Download);
+            Add(FileAction.Move);
+            Add(FileAction.Copy);
             Add(FileAction.Delete);
             if (file.CanConvert) Add(FileAction.Convert);
             Add(FileAction.Share);
@@ -84,6 +95,10 @@ namespace OneDrive_Simple_Management_Tool.Views
                     IsEnabled = enabled
                 };
                 item.Click += async (_, _) => await ExecuteAsync(action, owner, file);
+                menu.Opening += (_, _) => item.IsEnabled = enabled &&
+                    (action == FileAction.Delete ? file.Drive.CanDeleteSelection : action == FileAction.Download
+                        ? file.Drive.CanDownloadSelection : action is FileAction.Move or FileAction.Copy
+                        ? file.Drive.CanTransferSelection : file.Drive.SelectedCount == 1);
                 menu.Items.Add(item);
             }
         }
@@ -99,9 +114,11 @@ namespace OneDrive_Simple_Management_Tool.Views
             {
                 if (store == null) return;
                 request?.Cancel();
+                request = null;
+                item.IsEnabled = false;
+                if (file.Drive.SelectedCount != 1) return;
                 using var current = new CancellationTokenSource();
                 request = current;
-                item.IsEnabled = false;
                 try
                 {
                     var bookmarks = await store.LoadAsync(current.Token);
@@ -109,7 +126,7 @@ namespace OneDrive_Simple_Management_Tool.Views
                     bool saved = bookmarks.Any(b => b.Identity == (file.Drive.Provider.HomeAccountId, file.Drive.Provider.DriveId, file.Id));
                     action = saved ? FileAction.RemoveBookmark : FileAction.AddBookmark;
                     item.Text = (saved ? "Bookmarks_Remove" : "Bookmarks_Add").GetLocalized();
-                    item.IsEnabled = true;
+                    item.IsEnabled = file.Drive.SelectedCount == 1;
                 }
                 catch (OperationCanceledException) when (current.IsCancellationRequested) { }
                 catch (Exception exception)
@@ -126,6 +143,25 @@ namespace OneDrive_Simple_Management_Tool.Views
         {
             if (file == null || IsDialogOpen(owner.XamlRoot)) return;
             if (file.Drive.IsLoading == Visibility.Visible && !(action == FileAction.Open && file.IsFolder)) return;
+            if (action == FileAction.Delete)
+            {
+                file.Drive.SelectForContextMenu(file);
+                await DeleteSelectionAsync(owner, file.Drive);
+                return;
+            }
+            if (action == FileAction.Download)
+            {
+                file.Drive.SelectForContextMenu(file);
+                await DownloadSelectionAsync(owner, file.Drive);
+                return;
+            }
+            if (action is FileAction.Move or FileAction.Copy)
+            {
+                file.Drive.SelectForContextMenu(file);
+                await TransferSelectionAsync(owner, file.Drive, action == FileAction.Move ? FileTransferKind.Move : FileTransferKind.Copy);
+                return;
+            }
+            if (action != FileAction.Open && file.Drive.SelectedCount > 1) return;
             file.Drive.SelectedItem = file;
             try
             {
@@ -166,12 +202,6 @@ namespace OneDrive_Simple_Management_Tool.Views
                                 await file.DownloadFileCommand.ExecuteAsync(file.Id);
                         }
                         break;
-                    case FileAction.Download when file.IsFile:
-                        if (file.DownloadFileCommand.CanExecute(file.Id)) await file.DownloadFileCommand.ExecuteAsync(file.Id);
-                        break;
-                    case FileAction.Delete:
-                        await ShowDialogAsync(owner, new DeleteFileView { DataContext = new DeleteFileViewModel(file) });
-                        break;
                     case FileAction.Convert when file.CanConvert:
                         await ShowDialogAsync(owner, new ConvertFileFormatView { DataContext = new ConvertFileFormatViewModel(file) });
                         break;
@@ -207,6 +237,67 @@ namespace OneDrive_Simple_Management_Tool.Views
             }
         }
 
+        public static async Task DownloadSelectionAsync(FrameworkElement owner, DriveViewModel drive)
+        {
+            if (!drive.CanDownloadSelection || IsDialogOpen(owner.XamlRoot) || owner.XamlRoot == null) return;
+            var targets = drive.SelectedItems.ToArray();
+            drive.ErrorMessage = drive.DownloadMessage = "";
+            // Keep the existing save-as flow for one file. Folder and multi-item
+            // downloads choose a directory once and start one independently owned batch.
+            if (targets.Length == 1 && targets[0].IsFile)
+            {
+                if (targets[0].DownloadFileCommand.CanExecute(targets[0].Id))
+                    await targets[0].DownloadFileCommand.ExecuteAsync(targets[0].Id);
+                return;
+            }
+            var state = Dialogs.GetOrCreateValue(owner.XamlRoot);
+            state.IsOpen = true;
+            state.Closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            try
+            {
+                var destination = await DownloadFolderPickerHelper.PickAsync();
+                if (destination == null) return;
+                var manager = Ioc.Default.GetRequiredService<TaskManagerViewModel>();
+                string name = targets.Length == 1 ? targets[0].Name : string.Format("DownloadBatch_Title".GetLocalized(), targets.Length);
+                var task = manager.QueueDownloadBatch(drive.Provider, targets.Select(item => item.Id), destination.Path,
+                    name, targets.ToDictionary(item => item.Id, item => item.Name));
+                if (task == null) return;
+                _ = task.StartDownload();
+                drive.DownloadMessage = "DownloadBatch_Queued".GetLocalized();
+            }
+            catch (Exception exception) { drive.ErrorMessage = FileOperationErrors.GetMessage(exception); }
+            finally
+            {
+                state.IsOpen = false;
+                state.Closed.TrySetResult();
+            }
+        }
+
+        public static async Task TransferSelectionAsync(FrameworkElement owner, DriveViewModel drive, FileTransferKind kind)
+        {
+            if (!drive.CanTransferSelection || IsDialogOpen(owner.XamlRoot)) return;
+            try
+            {
+                var pending = Transfers.GetOrCreateValue(drive);
+                // Reopening a pending server copy resumes its monitor instead of posting another copy.
+                if (pending.Model?.HasPendingCopy != true)
+                    pending.Model = new FileTransferViewModel(drive.SelectedItems.ToArray(), kind);
+                await ShowDialogAsync(owner, new FileTransferView { DataContext = pending.Model });
+                if (!pending.Model.HasPendingCopy) pending.Model = null;
+            }
+            catch (Exception exception) { drive.ErrorMessage = FileOperationErrors.GetMessage(exception); }
+        }
+
+        public static async Task DeleteSelectionAsync(FrameworkElement owner, DriveViewModel drive)
+        {
+            if (!drive.CanDeleteSelection || IsDialogOpen(owner.XamlRoot)) return;
+            try
+            {
+                await ShowDialogAsync(owner, new DeleteFileView { DataContext = new DeleteFileViewModel(drive.SelectedItems.ToArray()) });
+            }
+            catch (Exception exception) { drive.ErrorMessage = FileOperationErrors.GetMessage(exception); }
+        }
+
         public static async Task ShowDialogAsync(FrameworkElement owner, ContentDialog dialog)
         {
             if (owner.XamlRoot == null) return;
@@ -216,11 +307,13 @@ namespace OneDrive_Simple_Management_Tool.Views
             state.Closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             try
             {
+                state.ActiveDialog = dialog;
                 dialog.XamlRoot = owner.XamlRoot;
                 await dialog.ShowAsync();
             }
             finally
             {
+                state.ActiveDialog = null;
                 state.IsOpen = false;
                 state.Closed.TrySetResult();
             }

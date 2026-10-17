@@ -283,6 +283,7 @@ await Test("overlong chunked bodies stop at the metadata byte budget", async fix
     catch (InvalidDataException) { Check(destination.Length <= 1024, "Excess response bytes reached the destination"); }
 });
 await ShutdownChecks.RunAsync(services);
+await BatchDownloadChecks.RunAsync(services);
 Console.WriteLine("All download regression checks passed.");
 
 static void Check(bool condition, string message)

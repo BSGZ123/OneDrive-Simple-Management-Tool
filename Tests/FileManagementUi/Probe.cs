@@ -71,6 +71,10 @@ internal static class FileManagementUiProbe
             pageFailure.Checked += (_, _) => handler.FailLaterPage = true;
             pageFailure.Unchecked += (_, _) => handler.FailLaterPage = false;
             browsing.Children.Add(pageFailure);
+            var itemFailure = new CheckBox { Content = "Reject Report once" };
+            itemFailure.Checked += (_, _) => handler.RejectReportOnce = true;
+            itemFailure.Unchecked += (_, _) => handler.RejectReportOnce = false;
+            browsing.Children.Add(itemFailure);
             controls.Children.Add(browsing);
             panel.Children.Add(controls);
             var frame = new Frame();
@@ -95,6 +99,7 @@ internal static class FileManagementUiProbe
         public bool FailMutation;
         public bool FailRefresh;
         public bool FailLaterPage;
+        public bool RejectReportOnce;
         private readonly Dictionary<string, string> _names = new()
         {
             ["folder"] = "Demo folder", ["document"] = "Report.docx", ["notes"] = "Notes.md", ["plain"] = "LICENSE"
@@ -146,6 +151,11 @@ internal static class FileManagementUiProbe
             if (request.Method == HttpMethod.Delete || id == "permanentDelete")
             {
                 if (id == "permanentDelete") id = path.Split('/')[^2];
+                if (id == "document" && RejectReportOnce)
+                {
+                    RejectReportOnce = false;
+                    return Json("{\"error\":{\"code\":\"accessDenied\",\"message\":\"One simulated deletion failure\"}}", HttpStatusCode.Forbidden);
+                }
                 _names.Remove(id);
                 return new HttpResponseMessage(HttpStatusCode.NoContent);
             }

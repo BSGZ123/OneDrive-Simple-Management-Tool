@@ -130,7 +130,8 @@ namespace OneDrive_Simple_Management_Tool.Services
             {
                 DriveItem item = await graphClient.Drives[DriveId].Items[itemId]
                     .GetAsync(cancellationToken: cancellationToken);
-                if (item?.File == null || item.Size == null ||
+                if (item?.File == null || item.Id != itemId || item.Folder != null || item.Deleted != null ||
+                    !IsInCurrentDrive(item) || item.Size == null ||
                     !item.AdditionalData.TryGetValue("@microsoft.graph.downloadUrl", out object url))
                     throw new DownloadFailureException(DownloadFailure.InvalidResponse);
 

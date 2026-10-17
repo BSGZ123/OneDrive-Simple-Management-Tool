@@ -33,6 +33,7 @@ internal sealed class GraphHandler : HttpMessageHandler
     public Exception ListError { get; set; }
     public bool InvalidList { get; set; }
     public TaskCompletionSource MutationGate { get; set; }
+    public Dictionary<string, HttpStatusCode> ItemMutationStatus { get; } = new();
     public Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> OnGet { get; set; }
     public List<(string Method, string Path, string Query, string Body)> Requests { get; } = [];
     public Dictionary<string, string> Names { get; } = new()
@@ -73,6 +74,7 @@ internal sealed class GraphHandler : HttpMessageHandler
         if (request.Method == HttpMethod.Delete || path.EndsWith("/permanentDelete"))
         {
             if (path.EndsWith("/permanentDelete")) id = path.Split('/')[^2];
+            if (ItemMutationStatus.TryGetValue(id, out var status) && status != HttpStatusCode.OK) return Error(status);
             Names.Remove(id);
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         }

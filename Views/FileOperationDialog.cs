@@ -7,7 +7,7 @@ namespace OneDrive_Simple_Management_Tool.Views
 {
     internal static class FileOperationDialog
     {
-        public static void Configure(ContentDialog dialog, Func<Task> submit)
+        public static void Configure(ContentDialog dialog, Func<Task> submit, bool closeOnSuccess = true)
         {
             dialog.PrimaryButtonClick += async (_, args) =>
             {
@@ -17,7 +17,7 @@ namespace OneDrive_Simple_Management_Tool.Views
                 try
                 {
                     await submit();
-                    args.Cancel = !model.HasSucceeded;
+                    args.Cancel = !closeOnSuccess || !model.HasSucceeded;
                 }
                 finally
                 {
