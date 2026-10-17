@@ -70,7 +70,9 @@ namespace OneDrive_Simple_Management_Tool.Pages
                 }
 
                 TaskManagerViewModel manager = Ioc.Default.GetService<TaskManagerViewModel>();
-                await Task.WhenAll(items.Select(item => manager.AddUploadTask(drive, parentItemId, item)));
+                var conflicts = new UploadConflictResolver(TransferDialogs.ResolveAsync);
+                await Task.WhenAll(items.Select(item => manager.AddUploadTask(drive, parentItemId, item, conflicts)));
+                if (manager.IsShuttingDown) return;
                 if (!await drive.RefreshAfterMutation())
                 {
                     UploadErrorInfoBar.Title = "UploadRefreshFailedTitle".GetLocalized();

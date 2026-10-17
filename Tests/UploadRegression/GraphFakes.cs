@@ -64,6 +64,9 @@ internal sealed class MetadataHandler(string uploadUrl) : HttpMessageHandler
     public int EmptyFiles;
     public Func<HttpRequestMessage, CancellationToken, Task> BeforeResponse { get; set; }
     public int ActiveRequests;
+    public Func<string, bool> Conflicts { get; set; } = _ => false;
+    public bool ExistingFolderIsFile { get; set; }
+    public ConcurrentQueue<(string Method, string Path, string Behavior)> Requests { get; } = new();
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -87,10 +90,13 @@ internal sealed class MetadataHandler(string uploadUrl) : HttpMessageHandler
         }
 
         string path = request.RequestUri!.AbsolutePath;
+        string behavior = null;
         HttpStatusCode status;
         object body;
         if (path.EndsWith("createUploadSession"))
         {
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(cancellationToken));
+            behavior = json.RootElement.GetProperty("item").GetProperty("@microsoft.graph.conflictBehavior").GetString();
             Interlocked.Increment(ref Sessions);
             status = RejectFileName != null && path.Contains(RejectFileName) ? HttpStatusCode.Forbidden : SessionStatus;
             body = InvalidSession ? new { uploadUrl = "" } : (object)new
@@ -102,12 +108,15 @@ internal sealed class MetadataHandler(string uploadUrl) : HttpMessageHandler
         }
         else if (request.Method == HttpMethod.Post && path.EndsWith("children"))
         {
+            using var json = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(cancellationToken));
+            behavior = json.RootElement.GetProperty("@microsoft.graph.conflictBehavior").GetString();
             int id = Interlocked.Increment(ref Folders);
             status = FolderStatus;
             body = new { id = $"folder-{id}" };
         }
         else if (request.Method == HttpMethod.Put && path.EndsWith("content"))
         {
+            behavior = Uri.UnescapeDataString(request.RequestUri.Query).Split("@microsoft.graph.conflictBehavior=").Last().Split('&')[0];
             Interlocked.Increment(ref EmptyFiles);
             if ((await request.Content!.ReadAsByteArrayAsync(cancellationToken)).Length != 0)
             {
@@ -116,14 +125,21 @@ internal sealed class MetadataHandler(string uploadUrl) : HttpMessageHandler
             status = EmptyFileStatus;
             body = new { id = "empty-item" };
         }
+        else if (request.Method == HttpMethod.Get)
+        {
+            status = HttpStatusCode.OK;
+            body = ExistingFolderIsFile ? new { id = "existing-file", file = new { } } : (object)new { id = "existing-folder", folder = new { } };
+        }
         else
         {
             throw new InvalidOperationException($"Unexpected metadata request: {request.Method} {path}");
         }
 
+        Requests.Enqueue((request.Method.Method, path, behavior));
+        if (behavior == "fail" && Conflicts(path)) status = HttpStatusCode.Conflict;
         if ((int)status >= 400)
         {
-            body = new { error = new { code = "accessDenied", message = "Simulated metadata rejection." } };
+            body = new { error = new { code = status == HttpStatusCode.Conflict ? "nameAlreadyExists" : "accessDenied", message = "Simulated metadata rejection." } };
         }
 
         if (BeforeResponse != null) await BeforeResponse(request, cancellationToken);
@@ -144,6 +160,7 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
     private readonly Task _acceptLoop;
     public ConcurrentQueue<Dictionary<string, string>> Headers { get; } = new();
     public int StatusCode { get; set; } = 200;
+    public string ErrorCode { get; set; } = "accessDenied";
     public bool OmitItemId { get; set; }
     public bool AllowDisconnects { get; set; }
     public Func<CancellationToken, Task> BeforeSliceResponse { get; set; }
@@ -243,7 +260,7 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
             bool last = next == long.Parse(range[2]);
             int status = StatusCode >= 400 ? StatusCode : last ? 201 : 202;
             object response = status >= 400
-                ? new { error = new { code = "accessDenied", message = "Simulated slice rejection." } }
+                ? new { error = new { code = ErrorCode, message = "Simulated slice rejection." } }
                 : last ? OmitItemId ? new { name = "missing-id" } : (object)new { id = "uploaded-item" }
                 : new { nextExpectedRanges = new[] { $"{next}-" }, expirationDateTime = DateTimeOffset.UtcNow.AddHours(1) };
             byte[] body = JsonSerializer.SerializeToUtf8Bytes(response);

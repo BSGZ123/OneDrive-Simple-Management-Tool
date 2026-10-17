@@ -983,7 +983,7 @@
     <value>Unknown</value>
   </data>
   <data name="Home_TransferSummary" xml:space="preserve">
-    <value>Active {0} · Waiting/paused {1} · Failed {2} · Completed {3} · Cancelled {4}</value>
+    <value>Active {0} · Waiting/paused {1} · Failed {2} · Completed {3} · Cancelled {4} · Skipped {5}</value>
   </data>
   <data name="Home_SyncSummary" xml:space="preserve">
     <value>Total {0} · Syncing {1} · Paused {2} · Needs attention {3}</value>
@@ -1246,4 +1246,24 @@
   <data name="Reader_CacheCleared" xml:space="preserve"><value>Reading cache cleared.</value></data>
   <data name="Reader_CacheRetained" xml:space="preserve"><value>Unused cache cleared. Books in use can be cleared after they close.</value></data>
   <data name="Reader_CacheClearFailed" xml:space="preserve"><value>Could not clear the reading cache. Close the reader and retry.</value></data>
+  <data name="Upload_ConflictTitle" xml:space="preserve"><value>Upload name conflict</value></data>
+  <data name="Upload_ConflictMessage" xml:space="preserve"><value>“{0}” already exists in the destination. Choose how to proceed.</value></data>
+  <data name="Upload_FolderMerge" xml:space="preserve"><value>Replace overwrites files. For folders, it merges contents and keeps cloud-only files; conflicts inside the folder follow your choices.</value></data>
+  <data name="Upload_Choose" xml:space="preserve"><value>Choose an action</value></data>
+  <data name="Upload_ChoiceReplace" xml:space="preserve"><value>Replace</value></data>
+  <data name="Upload_ChoiceSkip" xml:space="preserve"><value>Skip</value></data>
+  <data name="Upload_ChoiceKeepBoth" xml:space="preserve"><value>Keep both (rename the upload)</value></data>
+  <data name="Upload_ApplyBatch" xml:space="preserve"><value>Apply to remaining conflicts in this upload batch</value></data>
+  <data name="Upload_ConfirmChoice" xml:space="preserve"><value>Continue</value></data>
+  <data name="Upload_CancelChoice" xml:space="preserve"><value>Cancel this upload</value></data>
+  <data name="Upload_SkippedCount" xml:space="preserve"><value>Skipped {0} conflicting files or folders.</value></data>
+  <data name="Upload_Waiting.Text" xml:space="preserve"><value>Waiting for a conflict decision</value></data>
+  <data name="Upload_Cancelled.Text" xml:space="preserve"><value>Upload cancelled. Files already uploaded are kept.</value></data>
+  <data name="Transfer_ExitTitle" xml:space="preserve"><value>Unfinished transfers</value></data>
+  <data name="Transfer_ExitMessage" xml:space="preserve"><value>There are {0} unfinished uploads and {1} unfinished downloads, including paused and failed tasks. Stop them and exit? Completed files will be kept. Unfinished downloads will be cleaned up. Tasks are not saved for the next launch; add unfinished tasks again to restart them.</value></data>
+  <data name="Transfer_StopAndExit" xml:space="preserve"><value>Stop transfers and exit</value></data>
+  <data name="Transfer_CancelExit" xml:space="preserve"><value>Cancel exit</value></data>
+  <data name="Transfer_Stopping" xml:space="preserve"><value>Stopping transfers and cleaning up. The window will close when this finishes.</value></data>
+  <data name="Transfer_ExitFailed" xml:space="preserve"><value>Could not finish stopping transfers or saving. The window remains open. Finish any open dialog, check the tasks, and try closing again.</value></data>
+  <data name="Home_StatSkipped.Text" xml:space="preserve"><value>Skipped</value></data>
 </root>

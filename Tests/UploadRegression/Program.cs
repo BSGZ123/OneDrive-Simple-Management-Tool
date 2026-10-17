@@ -34,7 +34,9 @@ internal static partial class Program
             ("A completed slice response without an item ID is rejected", InvalidCompletedItem),
             ("Folder creation errors never mark completion", FolderCreationFailure),
             ("A failed descendant prevents folder completion", DescendantFailure),
-            .. CancellationCases()
+            .. CancellationCases(),
+            .. ConflictCases(),
+            .. DialogCases()
         ];
 
         foreach (var test in cases)

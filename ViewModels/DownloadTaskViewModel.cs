@@ -30,6 +30,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         public string Name { get; }
         public string DestinationPath => _session.DestinationPath;
+        // Read the session directly: a queued UI snapshot can lag behind a finalization or pause.
+        public bool NeedsExitProtection => _session.Snapshot.State is not (DownloadTaskState.Completed or DownloadTaskState.Cancelled);
         public DateTime StartTime { get; private set; }
         public DateTime? FinishTime { get; private set; }
 
@@ -59,6 +61,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
         public async Task StartDownload()
         {
+            if (_manager.IsShuttingDown) return;
             if (StartTime == default) StartTime = DateTime.Now;
             await _session.StartAsync();
             ApplySnapshot(_session.Snapshot);
@@ -87,6 +90,13 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 _session.Changed -= OnSessionChanged;
                 _manager.RemoveSelectedDownloadTasks(this);
             }
+        }
+
+        public async Task StopForExitAsync()
+        {
+            await CancelTaskAsync();
+            if (_session.Snapshot.State is not (DownloadTaskState.Cancelled or DownloadTaskState.Completed))
+                throw new InvalidOperationException("Download cleanup did not finish.");
         }
 
         [RelayCommand(CanExecute = nameof(Completed))]

@@ -37,10 +37,14 @@ namespace OneDrive_Simple_Management_Tool.Views
         private sealed class DialogState
         {
             public bool IsOpen;
+            public TaskCompletionSource Closed;
         }
         private static readonly ConditionalWeakTable<XamlRoot, DialogState> Dialogs = new();
 
-        public static bool IsDialogOpen(XamlRoot root) => root != null && Dialogs.GetOrCreateValue(root).IsOpen;
+        public static bool IsDialogOpen(XamlRoot root) => root != null && (Dialogs.GetOrCreateValue(root).IsOpen || TransferDialogs.IsOpen);
+
+        internal static Task WaitForDialogAsync(XamlRoot root) =>
+            root == null ? Task.CompletedTask : Dialogs.GetOrCreateValue(root).Closed?.Task ?? Task.CompletedTask;
 
         public static void Attach(UserControl owner)
         {
@@ -207,8 +211,9 @@ namespace OneDrive_Simple_Management_Tool.Views
         {
             if (owner.XamlRoot == null) return;
             var state = Dialogs.GetOrCreateValue(owner.XamlRoot);
-            if (state.IsOpen) return;
+            if (state.IsOpen || TransferDialogs.IsOpen) return;
             state.IsOpen = true;
+            state.Closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             try
             {
                 dialog.XamlRoot = owner.XamlRoot;
@@ -217,6 +222,7 @@ namespace OneDrive_Simple_Management_Tool.Views
             finally
             {
                 state.IsOpen = false;
+                state.Closed.TrySetResult();
             }
         }
 

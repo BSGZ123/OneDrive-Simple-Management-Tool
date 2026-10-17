@@ -9,6 +9,7 @@ using OneDrive_Simple_Management_Tool.Helpers;
 using OneDrive_Simple_Management_Tool.Pages;
 using OneDrive_Simple_Management_Tool.Services;
 using OneDrive_Simple_Management_Tool.ViewModels;
+using OneDrive_Simple_Management_Tool.Views;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -125,19 +126,12 @@ namespace OneDrive_Simple_Management_Tool
                 m_window = window;
                 var appearance = Services.GetRequiredService<SettingViewModel>();
                 appearance.AttachAppearance(preferences => Helpers.ThemeHelper.Apply(window, preferences));
-                bool waitingForPreferences = false;
-                window.AppWindow.Closing += async (_, args) =>
-                {
-                    var readers = Services.GetRequiredService<ReaderWorkspace>();
-                    bool readerOpen = readers.HasOpenSessions;
-                    if (!appearance.IsSaving && !readerOpen) return;
-                    args.Cancel = true;
-                    if (waitingForPreferences) return;
-                    waitingForPreferences = true;
-                    if (readerOpen) await readers.CloseAllAsync();
-                    await appearance.FlushAsync();
-                    window.Close();
-                };
+                TransferWindowCloseGuard.Attach(window, Services.GetRequiredService<TaskManagerViewModel>(),
+                    async () =>
+                    {
+                        await Services.GetRequiredService<ReaderWorkspace>().CloseAllAsync();
+                        await appearance.FlushAsync();
+                    });
                 window.Closed += (_, _) =>
                 {
                     Services.GetRequiredService<FolderSyncService>().Stop();

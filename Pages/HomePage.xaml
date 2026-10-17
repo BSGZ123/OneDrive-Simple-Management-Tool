@@ -252,6 +252,12 @@
                                         <TextBlock x:Uid="Home_StatCancelled" Style="{StaticResource HomeStatLabel}" />
                                     </StackPanel>
                                 </Border>
+                                <Border Style="{StaticResource HomeStat}" Visibility="{Binding HasSkippedTransfers, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SkippedTransfers}" Style="{StaticResource HomeStatValue}" />
+                                        <TextBlock x:Uid="Home_StatSkipped" Style="{StaticResource HomeStatLabel}" />
+                                    </StackPanel>
+                                </Border>
                             </localControls:AdaptiveGridPanel>
                             <TextBlock x:Uid="Home_NoTransfers" TextWrapping="Wrap" Visibility="{Binding HasNoTransfers, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <TextBlock x:Uid="Home_TransferScope" Style="{StaticResource HomeStatLabel}" />

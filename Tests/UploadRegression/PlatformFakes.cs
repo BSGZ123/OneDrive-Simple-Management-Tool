@@ -165,6 +165,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
 
     public sealed class TaskManagerViewModel
     {
+        public bool IsShuttingDown { get; set; }
         public List<UploadTaskViewModel> Removed { get; } = [];
         public Action<UploadTaskViewModel> OnRemove { get; set; }
         public void RemoveSelectedUploadTasks(UploadTaskViewModel task)

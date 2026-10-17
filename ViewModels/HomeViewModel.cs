@@ -35,6 +35,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         [ObservableProperty] private int _failedTransfers;
         [ObservableProperty] private int _completedTransfers;
         [ObservableProperty] private int _cancelledTransfers;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasSkippedTransfers))]
+        private int _skippedTransfers;
         [ObservableProperty] private int _totalTransfers;
         [ObservableProperty] private int _syncCount;
         [ObservableProperty] private int _activeSyncs;
@@ -49,9 +52,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool HasError => ErrorMessage.Length > 0;
         public bool HasSyncError => SyncErrorMessage.Length > 0;
         public bool HasNoTransfers => TotalTransfers == 0;
+        public bool HasSkippedTransfers => SkippedTransfers > 0;
         public bool HasNoSyncs => SyncCount == 0 && !HasSyncError;
         public string TransferSummary => string.Format("Home_TransferSummary".GetLocalized(),
-            ActiveTransfers, WaitingTransfers, FailedTransfers, CompletedTransfers, CancelledTransfers);
+            ActiveTransfers, WaitingTransfers, FailedTransfers, CompletedTransfers, CancelledTransfers, SkippedTransfers);
         public string SyncSummary => string.Format("Home_SyncSummary".GetLocalized(), SyncCount, ActiveSyncs, PausedSyncs, SyncIssues);
         partial void OnErrorMessageChanged(string value) => OnPropertyChanged(nameof(HasError));
 
@@ -231,10 +235,11 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 DownloadTaskState.Retrying or DownloadTaskState.Pausing or DownloadTaskState.Finalizing or DownloadTaskState.Cancelling) +
                 uploads.Count(t => t.State is UploadTaskState.Preparing or UploadTaskState.Uploading or UploadTaskState.Cancelling);
             WaitingTransfers = downloads.Count(t => t.State is DownloadTaskState.Pending or DownloadTaskState.Paused) +
-                uploads.Count(t => t.State == UploadTaskState.Pending);
+                uploads.Count(t => t.State is UploadTaskState.Pending or UploadTaskState.WaitingForConflict);
             FailedTransfers = downloads.Count(t => t.State == DownloadTaskState.Failed) + uploads.Count(t => t.State == UploadTaskState.Failed);
             CompletedTransfers = downloads.Count(t => t.State == DownloadTaskState.Completed) + uploads.Count(t => t.State == UploadTaskState.Completed);
             CancelledTransfers = downloads.Count(t => t.State == DownloadTaskState.Cancelled) + uploads.Count(t => t.State == UploadTaskState.Cancelled);
+            SkippedTransfers = uploads.Count(t => t.State == UploadTaskState.Skipped);
             SyncCount = sync.Bindings.Count;
             ActiveSyncs = sync.Bindings.Count(t => t.IsActive);
             PausedSyncs = sync.Bindings.Count(t => !t.Enabled);

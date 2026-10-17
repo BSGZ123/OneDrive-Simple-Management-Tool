@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="../../Services/DownloadSession.cs" Link="Production/DownloadSession.cs" />
     <Compile Include="../../Services/DownloadResponseHandler.cs" Link="Production/DownloadResponseHandler.cs" />
+    <Compile Include="../../Models/UploadConflict.cs" Link="Production/UploadConflict.cs" />
     <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
     <Compile Include="../../ViewModels/DownloadTaskViewModel.cs" Link="Production/DownloadTaskViewModel.cs" />
     <Compile Include="../../ViewModels/TaskManagerViewModel.cs" Link="Production/TaskManagerViewModel.cs" />

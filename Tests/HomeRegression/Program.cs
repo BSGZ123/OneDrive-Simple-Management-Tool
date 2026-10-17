@@ -92,11 +92,12 @@ await Check("Every transfer state belongs to one group; state changes and remova
     foreach (var state in Enum.GetValues<DownloadTaskState>()) f.Tasks.DownloadTasks.Add(new() { State = state });
     foreach (var state in Enum.GetValues<UploadTaskState>()) f.Tasks.UploadTasks.Add(new() { State = state });
     await f.Model.ActivateAsync();
-    Assert(f.Model.ActiveTransfers == 9 && f.Model.WaitingTransfers == 3 && f.Model.FailedTransfers == 2 &&
-        f.Model.CompletedTransfers == 2 && f.Model.CancelledTransfers == 2 && f.Model.TotalTransfers == 18);
+    Assert(f.Model.ActiveTransfers == 9 && f.Model.WaitingTransfers == 4 && f.Model.FailedTransfers == 2 &&
+        f.Model.CompletedTransfers == 2 && f.Model.CancelledTransfers == 2 && f.Model.SkippedTransfers == 1 &&
+        f.Model.HasSkippedTransfers && f.Model.TotalTransfers == 20);
     var task = f.Tasks.DownloadTasks[0];
     task.State = DownloadTaskState.Downloading;
-    Assert(f.Model.ActiveTransfers == 10 && f.Model.WaitingTransfers == 2);
+    Assert(f.Model.ActiveTransfers == 10 && f.Model.WaitingTransfers == 3);
     f.Tasks.DownloadTasks.Remove(task);
     int notifications = 0;
     f.Model.PropertyChanged += (_, _) => notifications++;
@@ -285,7 +286,7 @@ await Check("Both locales cover all Home keys and XAML UIDs", () =>
         foreach (var resource in languages) Assert(resource.Any(r => r.Key.StartsWith(uid + ".") && !string.IsNullOrWhiteSpace(r.Value)));
     foreach (var resource in languages)
     {
-        Assert(string.Format(resource["Home_TransferSummary"], 1, 2, 3, 4, 5).Contains('5'));
+        Assert(string.Format(resource["Home_TransferSummary"], 1, 2, 3, 4, 5, 6).Contains('6'));
         Assert(string.Format(resource["Home_SyncSummary"], 1, 2, 3, 4).Contains('4'));
     }
     return Task.CompletedTask;

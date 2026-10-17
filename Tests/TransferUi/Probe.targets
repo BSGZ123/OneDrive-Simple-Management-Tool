@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <StartupObject>TransferUiProbe</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\TransferUi\Probe.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\UploadRegression\GraphFakes.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Tests\DownloadRegression\LoopbackServer.cs" />
+  </ItemGroup>
+</Project>

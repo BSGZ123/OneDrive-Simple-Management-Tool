@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Graph.Models;
+using Microsoft.Graph.Models.ODataErrors;
+using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Graph.Drives.Item.Items.Item.Restore;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
@@ -160,7 +162,8 @@ namespace OneDrive_Simple_Management_Tool.Services
             return await graphClient.Drives[DriveId].Items[itemId].Content.GetAsync(cancellationToken: cancellationToken);
         }
 
-        public async Task<DriveItem> CreateFolder(string parentItemId, string folderName, CancellationToken cancellationToken = default)
+        public async Task<DriveItem> CreateFolder(string parentItemId, string folderName, CancellationToken cancellationToken = default,
+            string conflictBehavior = "rename")
         {
             cancellationToken.ThrowIfCancellationRequested();
             var requestBody = new DriveItem
@@ -170,7 +173,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 AdditionalData = new Dictionary<string, object>
                 {
                     {
-                        "@microsoft.graph.conflictBehavior" , "rename"
+                        "@microsoft.graph.conflictBehavior" , conflictBehavior
                     },
                 },
             };
@@ -187,8 +190,35 @@ namespace OneDrive_Simple_Management_Tool.Services
         }
 
         // Progress reports uploaded bytes for both files and folders.
-        public async Task UploadFileAsync(StorageFile file, string itemId, IProgress<long> progress = null,
-            CancellationToken cancellationToken = default)
+        public async Task<UploadOutcome> UploadFileAsync(StorageFile file, string itemId, IProgress<long> progress = null,
+            CancellationToken cancellationToken = default, UploadConflictResolver conflicts = null)
+        {
+            try
+            {
+                // Enforce this at the server, including collisions appearing after upload starts.
+                await UploadFileCoreAsync(file, itemId, "fail", progress, cancellationToken);
+            }
+            catch (Exception exception) when (IsUploadNameConflict(exception) && conflicts != null)
+            {
+                var choice = await conflicts.ResolveAsync(new(file.Name, false), cancellationToken);
+                if (choice == UploadConflictChoice.Cancel) throw new UploadAbortedException();
+                if (choice == UploadConflictChoice.Skip) return new(0, 1);
+                await UploadFileCoreAsync(file, itemId, choice == UploadConflictChoice.Replace ? "replace" : "rename",
+                    progress, cancellationToken);
+            }
+            return new(1, 0);
+        }
+
+        private static bool IsUploadNameConflict(Exception exception) => exception switch
+        {
+            ODataError error => error.ResponseStatusCode == 409 &&
+                string.Equals(error.Error?.Code, "nameAlreadyExists", StringComparison.OrdinalIgnoreCase),
+            ServiceException error => error.ResponseStatusCode == 409 && error.IsMatch("nameAlreadyExists"),
+            _ => false
+        };
+
+        private async Task UploadFileCoreAsync(StorageFile file, string itemId, string behavior, IProgress<long> progress,
+            CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             // Opening a stream has no cancellation overload. Await it and dispose it even if cancelled meanwhile.
@@ -197,8 +227,12 @@ namespace OneDrive_Simple_Management_Tool.Services
             if (stream.Length == 0)
             {
                 // Empty files cannot use an upload session.
-                DriveItem emptyItem = await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.PutAsync(stream,
-                    cancellationToken: cancellationToken);
+                var request = graphClient.Drives[DriveId].Items[itemId].ItemWithPath(file.Name).Content.ToPutRequestInformation(stream);
+                request.UrlTemplate += "{?%40microsoft.graph.conflictBehavior}";
+                request.QueryParameters["%40microsoft.graph.conflictBehavior"] = behavior;
+                DriveItem emptyItem = await graphClient.RequestAdapter.SendAsync(request, DriveItem.CreateFromDiscriminatorValue,
+                    new Dictionary<string, ParsableFactory<IParsable>>
+                    { ["4XX"] = ODataError.CreateFromDiscriminatorValue, ["5XX"] = ODataError.CreateFromDiscriminatorValue }, cancellationToken);
                 EnsureUploadedItem(emptyItem);
                 progress?.Report(0);
                 return;
@@ -210,7 +244,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 {
                     AdditionalData = new Dictionary<string, object>
                     {
-                        { "@microsoft.graph.conflictBehavior", "replace" },
+                        { "@microsoft.graph.conflictBehavior", behavior },
                     },
                 },
             };
@@ -243,7 +277,8 @@ namespace OneDrive_Simple_Management_Tool.Services
                 EnsureUploadedItem(uploadResult.ItemResponse);
                 progress?.Report(stream.Length);
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (Exception exception) when ((exception is OperationCanceledException && cancellationToken.IsCancellationRequested) ||
+                IsUploadNameConflict(exception))
             {
                 // The transfer has exited. Cleanup needs its own token because the upload token is cancelled.
                 using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -277,43 +312,78 @@ namespace OneDrive_Simple_Management_Tool.Services
             }
         }
 
-        public async Task UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null,
-            CancellationToken cancellationToken = default)
+        public async Task<UploadOutcome> UploadFolderAsync(StorageFolder folder, string itemId, IProgress<long> progress = null,
+            CancellationToken cancellationToken = default, UploadConflictResolver conflicts = null)
         {
             var tracker = new UploadProgressTracker(progress);
-            await UploadFolderCoreAsync(folder, itemId, tracker, cancellationToken);
+            using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var folderConflicts = conflicts == null ? null : new UploadConflictResolver(async (conflict, token) =>
+            {
+                var choice = await conflicts.ResolveAsync(conflict, token);
+                if (choice == UploadConflictChoice.Cancel) stop.Cancel();
+                return new(choice);
+            });
+            try
+            {
+                return await UploadFolderCoreAsync(folder, itemId, tracker, stop.Token, folderConflicts);
+            }
+            catch (OperationCanceledException) when (stop.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                throw new UploadAbortedException();
+            }
         }
 
-        private async Task UploadFolderCoreAsync(StorageFolder folder, string itemId, UploadProgressTracker tracker,
-            CancellationToken cancellationToken)
+        private async Task<UploadOutcome> UploadFolderCoreAsync(StorageFolder folder, string itemId, UploadProgressTracker tracker,
+            CancellationToken cancellationToken, UploadConflictResolver conflicts)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var files = await folder.GetFilesAsync().AsTask(cancellationToken);
-            DriveItem cloudFolder = await CreateFolder(itemId, folder.Name, cancellationToken);
+            DriveItem cloudFolder;
+            try
+            {
+                cloudFolder = await CreateFolder(itemId, folder.Name, cancellationToken, "fail");
+            }
+            catch (Exception exception) when (IsUploadNameConflict(exception) && conflicts != null)
+            {
+                var choice = await conflicts.ResolveAsync(new(folder.Name, true), cancellationToken);
+                if (choice == UploadConflictChoice.Cancel) throw new UploadAbortedException();
+                if (choice == UploadConflictChoice.Skip) return new(0, 1);
+                if (choice == UploadConflictChoice.KeepBoth)
+                    cloudFolder = await CreateFolder(itemId, folder.Name, cancellationToken, "rename");
+                else
+                {
+                    // Merge folders; never delete cloud-only descendants or replace a file with a folder.
+                    cloudFolder = await graphClient.Drives[DriveId].Items[itemId].ItemWithPath(folder.Name)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (cloudFolder?.Folder == null) throw new InvalidDataException("The conflicting item is not a folder.");
+                }
+            }
             if (string.IsNullOrWhiteSpace(cloudFolder?.Id))
             {
                 throw new InvalidOperationException("The server did not return the created folder.");
             }
 
             // Stop scheduling on cancellation, but always join every operation already started.
-            var uploadTasks = new List<Task>();
+            var uploadTasks = new List<Task<UploadOutcome>>();
             foreach (var file in files)
             {
                 if (cancellationToken.IsCancellationRequested) break;
-                uploadTasks.Add(UploadFileAsync(file, cloudFolder.Id, tracker.CreateFileProgress(), cancellationToken));
+                uploadTasks.Add(UploadFileAsync(file, cloudFolder.Id, tracker.CreateFileProgress(), cancellationToken, conflicts));
             }
             await Task.WhenAll(uploadTasks);
 
             cancellationToken.ThrowIfCancellationRequested();
             IReadOnlyList<StorageFolder> subfolders = await folder.GetFoldersAsync().AsTask(cancellationToken);
-            var subfolderTasks = new List<Task>();
+            var subfolderTasks = new List<Task<UploadOutcome>>();
             foreach (var subfolder in subfolders)
             {
                 if (cancellationToken.IsCancellationRequested) break;
-                subfolderTasks.Add(UploadFolderCoreAsync(subfolder, cloudFolder.Id, tracker, cancellationToken));
+                subfolderTasks.Add(UploadFolderCoreAsync(subfolder, cloudFolder.Id, tracker, cancellationToken, conflicts));
             }
             await Task.WhenAll(subfolderTasks);
             cancellationToken.ThrowIfCancellationRequested();
+            var results = uploadTasks.Concat(subfolderTasks).Select(task => task.Result).ToList();
+            return new(1 + results.Sum(result => result.Uploaded), results.Sum(result => result.Skipped));
         }
 
         public async Task<string> CreateLink(string itemId, DateTimeOffset? expirationDateTime = null, string password = null, string type = "view")

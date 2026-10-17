@@ -154,8 +154,11 @@
                         <StackPanel Grid.Column="1" Spacing="6">
 
                             <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
-                            <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsPreparing}" ShowError="{Binding HasFailed}" Visibility="{Binding Completed, Converter={StaticResource BoolToObjectConverter}}" />
+                            <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsPreparing}" ShowError="{Binding HasFailed}" Visibility="{Binding IsTerminal, Converter={StaticResource BoolToObjectConverter}}" />
                             <TextBlock x:Uid="Upload_Preparing" Style="{StaticResource TaskCaption}" Visibility="{Binding IsPreparing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Upload_Waiting" Style="{StaticResource TaskCaption}" Visibility="{Binding IsWaitingForConflict, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Upload_Cancelled" Style="{StaticResource TaskCaption}" Visibility="{Binding IsCancelled, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock Text="{Binding Notice}" Style="{StaticResource TaskCaption}" Visibility="{Binding Notice, Converter={StaticResource StringVisibilityConverter}}" />
                             <TextBlock x:Uid="Upload_Cancelling" Style="{StaticResource TaskCaption}" Visibility="{Binding IsCancelling, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <TextBlock x:Uid="TaskManagerPage_UploadCompleted" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                                        Visibility="{Binding Completed, Converter={StaticResource BoolToVisibilityConverter}}" />

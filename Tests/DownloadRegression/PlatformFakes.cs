@@ -52,13 +52,17 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
     // Upload behavior has its own regression project; only download paths run here.
     public sealed class UploadTaskViewModel
     {
-        public UploadTaskViewModel(DriveViewModel drive, string id, Windows.Storage.IStorageItem item) { }
-        public Task StartUpload() => Task.CompletedTask;
+        public UploadTaskViewModel(DriveViewModel drive, string id, Windows.Storage.IStorageItem item, UploadConflictResolver conflicts = null) { }
+        public bool NeedsExitProtection { get; set; }
+        public bool WasCancelled { get; private set; }
+        public Func<Task> OnCancel { get; set; } = () => Task.CompletedTask;
+        public Task StartUpload() { NeedsExitProtection = true; return Task.CompletedTask; }
+        public async Task CancelTaskAsync() { WasCancelled = true; await OnCancel(); NeedsExitProtection = false; }
     }
 }
 
 internal sealed class TestServices : IServiceProvider
 {
-    public TaskManagerViewModel Manager { get; } = new();
+    public TaskManagerViewModel Manager { get; set; } = new();
     public object GetService(Type type) => type == typeof(TaskManagerViewModel) ? Manager : null;
 }
