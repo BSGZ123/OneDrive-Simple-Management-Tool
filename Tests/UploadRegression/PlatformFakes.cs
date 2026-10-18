@@ -24,13 +24,17 @@ namespace Windows.Storage
     public interface IStorageItem
     {
         string Name { get; }
+        string Path { get; }
         StorageOperation<BasicProperties> GetBasicPropertiesAsync();
     }
 
     public sealed class StorageFile(string name, int size) : IStorageItem
     {
+        public static StorageOperation<StorageFile> GetFileFromPathAsync(string path) => new(_ => Task.FromResult(
+            File.Exists(path) ? new StorageFile(System.IO.Path.GetFileName(path), checked((int)new FileInfo(path).Length)) { LocalPath = path } : new StorageFile(path, 0)));
         public string Name { get; } = name;
-        public string Path => Name;
+        public string LocalPath { get; init; }
+        public string Path => LocalPath ?? Name;
         private MemoryStream _writtenContent = new();
         public byte[] WrittenContent => _writtenContent.ToArray();
         public Exception OpenError { get; init; }
@@ -63,6 +67,8 @@ namespace Windows.Storage
 
     public sealed class StorageFolder(string name) : IStorageItem
     {
+        public string Path => Name;
+        public static StorageOperation<StorageFolder> GetFolderFromPathAsync(string path) => new(_ => Task.FromResult(new StorageFolder(path)));
         public string Name { get; } = name;
         public List<StorageFile> Files { get; } = [];
         public List<StorageFolder> Folders { get; } = [];
@@ -168,10 +174,12 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool IsShuttingDown { get; set; }
         public List<UploadTaskViewModel> Removed { get; } = [];
         public Action<UploadTaskViewModel> OnRemove { get; set; }
-        public void RemoveSelectedUploadTasks(UploadTaskViewModel task)
+        public void SaveRequired(OneDrive_Simple_Management_Tool.Models.TransferRecord record) { }
+        public bool RemoveSelectedUploadTasks(UploadTaskViewModel task)
         {
             OnRemove?.Invoke(task);
             Removed.Add(task);
+            return true;
         }
     }
 }

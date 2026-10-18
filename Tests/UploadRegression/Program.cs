@@ -17,6 +17,9 @@ internal static partial class Program
         (string Name, Func<Task> Run)[] cases =
         [
             ("Slices are anonymous and final byte count is exact", AnonymousSlices),
+            ("Durable Graph uploads preserve sessions on interruption and resume anonymously", DurableGraphUpload),
+            ("Durable folder uploads share one task speed limit across concurrent files", ControlledFolderUpload),
+            ("Empty durable uploads honor task priority in the shared queue", DurableEmptyPriority),
             ("An empty file uses a zero-length PUT", EmptyFile),
             ("A completely empty folder succeeds", () => EmptyFolder(false)),
             ("Nested folders containing only empty files succeed", () => EmptyFolder(true)),
@@ -35,6 +38,7 @@ internal static partial class Program
             ("Folder creation errors never mark completion", FolderCreationFailure),
             ("A failed descendant prevents folder completion", DescendantFailure),
             .. CancellationCases(),
+            .. PauseCases(),
             .. ConflictCases(),
             .. DialogCases()
         ];

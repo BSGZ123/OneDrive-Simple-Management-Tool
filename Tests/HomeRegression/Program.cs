@@ -24,9 +24,11 @@ await Check("Multiple drives finish independently with at most three requests", 
     f.Service.Drives = Enumerable.Range(0, 8).Select(i => Drive(i.ToString())).ToArray();
     var first = new TaskCompletionSource<HomeQuota>();
     int active = 0, peak = 0;
+    object concurrencyGate = new();
     f.Service.Quota = async (drive, token) =>
     {
-        peak = Math.Max(peak, ++active);
+        // Console continuations can run on different pool threads.
+        lock (concurrencyGate) peak = Math.Max(peak, ++active);
         try
         {
             if (drive.DriveId == "0") return await first.Task.WaitAsync(token);
@@ -34,7 +36,7 @@ await Check("Multiple drives finish independently with at most three requests", 
             if (drive.DriveId == "1") throw new HomeOverviewException("Home_SignInRequired");
             return new HomeQuota(100, 20, 80);
         }
-        finally { active--; }
+        finally { lock (concurrencyGate) active--; }
     };
     var load = f.Model.ActivateAsync();
     await Until(() => f.Model.Drives.Count == 8 && !f.Model.Drives[7].IsLoading);
@@ -92,17 +94,17 @@ await Check("Every transfer state belongs to one group; state changes and remova
     foreach (var state in Enum.GetValues<DownloadTaskState>()) f.Tasks.DownloadTasks.Add(new() { State = state });
     foreach (var state in Enum.GetValues<UploadTaskState>()) f.Tasks.UploadTasks.Add(new() { State = state });
     await f.Model.ActivateAsync();
-    Assert(f.Model.ActiveTransfers == 9 && f.Model.WaitingTransfers == 4 && f.Model.FailedTransfers == 2 &&
+    Assert(f.Model.ActiveTransfers == 10 && f.Model.WaitingTransfers == 7 && f.Model.FailedTransfers == 2 &&
         f.Model.CompletedTransfers == 2 && f.Model.CancelledTransfers == 2 && f.Model.SkippedTransfers == 1 &&
-        f.Model.HasSkippedTransfers && f.Model.TotalTransfers == 20);
+        f.Model.HasSkippedTransfers && f.Model.TotalTransfers == 24);
     var task = f.Tasks.DownloadTasks[0];
     task.State = DownloadTaskState.Downloading;
-    Assert(f.Model.ActiveTransfers == 10 && f.Model.WaitingTransfers == 3);
+    Assert(f.Model.ActiveTransfers == 11 && f.Model.WaitingTransfers == 6);
     f.Tasks.DownloadTasks.Remove(task);
     int notifications = 0;
     f.Model.PropertyChanged += (_, _) => notifications++;
     task.State = DownloadTaskState.Completed;
-    Assert(notifications == 0 && f.Model.ActiveTransfers == 9);
+    Assert(notifications == 0 && f.Model.ActiveTransfers == 10);
     f.Tasks.DownloadTasks.Clear();
     f.Tasks.UploadTasks.Clear();
     Assert(f.Model.TotalTransfers == 0 && f.Model.HasNoTransfers && f.Model.ActiveTransfers == 0);

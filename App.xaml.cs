@@ -124,6 +124,8 @@ namespace OneDrive_Simple_Management_Tool
                             try { await Services.GetRequiredService<AccountLifecycleService>().RetryPendingAsync(); }
                             catch { _configurationNeedsAttention = true; }
                             await Services.GetRequiredService<SettingViewModel>().InitializeAsync();
+                            var transfers = Services.GetRequiredService<TaskManagerViewModel>();
+                            transfers.Initialize(new TransferStore(_paths.Transfers), record => TransferRestoration.Restore(transfers, record));
                             break;
                     }
                 });
@@ -148,6 +150,7 @@ namespace OneDrive_Simple_Management_Tool
                 startup.Close();
                 if (_configurationNeedsAttention) window.Navigate(typeof(CloudPage));
                 else if (Services.GetRequiredService<FolderSyncService>().ErrorKey != null) window.Navigate(typeof(FolderSyncPage));
+                else if (!string.IsNullOrEmpty(Services.GetRequiredService<TaskManagerViewModel>().PersistenceError)) window.Navigate(typeof(TaskManagerPage));
                 if (_cacheCleanupPending) window.ShowStartupNotice("Startup_CacheCleanup".GetLocalized());
                 SafeDiagnostics.Current.Record(DiagnosticEvent.Startup, DiagnosticLevel.Info);
             }

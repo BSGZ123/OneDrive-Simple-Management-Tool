@@ -143,7 +143,11 @@ namespace OneDrive_Simple_Management_Tool.Services
         public async Task UploadAsync(string relativePath, Stream content, IProgress<long> progress, CancellationToken token)
         {
             await UploadSlots.WaitAsync(token);
-            try { await UploadCoreAsync(relativePath, content, progress, token); }
+            try
+            {
+                using var slot = await TransferScheduler.Shared.EnterAsync(token);
+                await UploadCoreAsync(relativePath, content, progress, token);
+            }
             catch (ApiException exception) { throw new FolderSyncException(FolderSyncJob.GetErrorKey(exception)); }
             finally { UploadSlots.Release(); }
         }

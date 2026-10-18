@@ -19,6 +19,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         public string Authentication => Path.Combine(Root, "Authentication");
         public string LegacyTokenCache => Path.Combine(ApplicationDirectory, "cache", "CloudFlowTokenCache.bin");
         public string FolderSync => Path.Combine(Root, "FolderSync");
+        public string Transfers => Path.Combine(Root, "Transfers");
         public string Diagnostics => Path.Combine(Root, "Diagnostics");
         public string Appearance => Path.Combine(Root, "Configuration", "appearance.json");
         public string Bookmarks => Path.Combine(Root, "Configuration", "bookmarks.dat");

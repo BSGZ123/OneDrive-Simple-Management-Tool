@@ -16,6 +16,16 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public DownloadBatchPaths(string root) => _root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
 
+        public void Restore(string path)
+        {
+            Validate(path);
+            lock (Gate)
+            {
+                if (!Reserved.Add(path)) throw new IOException("A restored destination is already reserved.");
+                _owned.Add(path);
+            }
+        }
+
         public string Reserve(string parent, string name, bool folder)
         {
             string safe = SafeName(name);

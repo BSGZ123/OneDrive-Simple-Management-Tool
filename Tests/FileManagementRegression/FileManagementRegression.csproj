@@ -62,4 +62,19 @@
     <Compile Include="../../ViewModels/CloudViewModel.cs" Link="Production/CloudViewModel.cs" />
     <Compile Include="../../ViewModels/CreateDriveViewModel.cs" Link="Production/CreateDriveViewModel.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferScheduler.cs" Link="Production/TransferScheduler.cs" />
+    <Compile Include="../../Models/TransferRecord.cs" Link="Production/TransferRecord.cs" />
+    <Compile Include="../../Services/UploadRecordSession.cs" Link="Production/UploadRecordSession.cs" />
+    <Compile Include="../../Services/StorageUploadRecordSource.cs" Link="Production/StorageUploadRecordSource.cs" />
+    <Compile Include="../../ViewModels/TransferFailureRow.cs" Link="Production/TransferFailureRow.cs" />
+  </ItemGroup>
+  <ItemGroup><Compile Include="../../Services/OneDrive.ResumableUpload.cs" Link="Production/OneDrive.ResumableUpload.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../../Services/ResumableUploadSession.cs" Link="Production/ResumableUploadSession.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferPolicy.cs" Link="Production/TransferPolicy.cs" />
+    <Compile Include="../../Services/ThrottledUploadContent.cs" Link="Production/ThrottledUploadContent.cs" />
+    <Compile Include="../../Services/TransferProgressEstimator.cs" Link="Production/TransferProgressEstimator.cs" />
+    <Compile Include="../../ViewModels/TransferTaskControls.cs" Link="Production/TransferTaskControls.cs" />
+  </ItemGroup>
 </Project>

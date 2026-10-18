@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 
 var services = new TestServices();
 Ioc.Default.ConfigureServices(services);
+await ResponseStreamChecks.RunAsync();
 
 await Test("ordinary, empty, one-byte and unknown-length downloads", async fixture =>
 {
@@ -284,6 +285,8 @@ await Test("overlong chunked bodies stop at the metadata byte budget", async fix
 });
 await ShutdownChecks.RunAsync(services);
 await BatchDownloadChecks.RunAsync(services);
+await PersistenceLifecycleChecks.RunAsync(services).WaitAsync(TimeSpan.FromSeconds(40));
+await BatchControlChecks.RunAsync().WaitAsync(TimeSpan.FromSeconds(40));
 Console.WriteLine("All download regression checks passed.");
 
 static void Check(bool condition, string message)

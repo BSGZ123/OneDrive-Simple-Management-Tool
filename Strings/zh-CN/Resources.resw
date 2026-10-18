@@ -935,7 +935,7 @@
     <value>个进行中</value>
   </data>
   <data name="Home_TransferScope.Text" xml:space="preserve">
-    <value>仅统计本次会话中尚未移除的任务。</value>
+    <value>统计尚未移除的任务记录，包含重启后恢复的任务。</value>
   </data>
   <data name="Home_NoTransfers.Text" xml:space="preserve">
     <value>还没有传输任务。打开云盘后即可上传或下载文件。</value>
@@ -1260,10 +1260,10 @@
   <data name="Upload_Waiting.Text" xml:space="preserve"><value>等待选择重名处理方式</value></data>
   <data name="Upload_Cancelled.Text" xml:space="preserve"><value>上传已取消，已上传的文件会保留。</value></data>
   <data name="Transfer_ExitTitle" xml:space="preserve"><value>存在未完成的传输</value></data>
-  <data name="Transfer_ExitMessage" xml:space="preserve"><value>还有 {0} 个上传和 {1} 个下载未完成（包含暂停和失败的任务）。是否停止传输并退出？已完成的文件会保留，未完成下载的临时数据会清理。任务不会保存到下次启动，未完成的任务需要重新添加。</value></data>
-  <data name="Transfer_StopAndExit" xml:space="preserve"><value>停止传输并退出</value></data>
+  <data name="Transfer_ExitMessage" xml:space="preserve"><value>还有 {0} 个上传和 {1} 个下载未完成。是否保存进度并退出？下次启动后可继续传输。源文件变化或上传会话失效时，受影响的文件需要重新传输。</value></data>
+  <data name="Transfer_StopAndExit" xml:space="preserve"><value>保存任务并退出</value></data>
   <data name="Transfer_CancelExit" xml:space="preserve"><value>取消退出</value></data>
-  <data name="Transfer_Stopping" xml:space="preserve"><value>正在停止传输并清理，请稍候。完成后窗口会自动关闭。</value></data>
+  <data name="Transfer_Stopping" xml:space="preserve"><value>正在停止传输并保存逐文件结果，完成后窗口会自动关闭。</value></data>
   <data name="Transfer_ExitFailed" xml:space="preserve"><value>停止传输、清理或保存未能完成，窗口已保留。请先处理已打开的对话框，检查任务后再次尝试退出。</value></data>
   <data name="Home_StatSkipped.Text" xml:space="preserve"><value>已跳过</value></data>
   <data name="Drive_SelectedCount" xml:space="preserve"><value>已选择 {0} 项</value></data>
@@ -1439,4 +1439,40 @@
   <data name="AccountLifecycle_FailedCredentials" xml:space="preserve"><value>账户登录凭据清理失败。</value></data>
   <data name="AccountLifecycle_FailedConfiguration" xml:space="preserve"><value>账户操作记录或网盘配置保存失败。</value></data>
   <data name="AccountLifecycle_UnknownCount" xml:space="preserve"><value>数量未知的</value></data>
+  <data name="Transfer_RestartNotice" xml:space="preserve"><value>任务已恢复。继续后会校验已下载内容，并从保存的位置续传。</value></data>
+  <data name="Transfer_FileSummary" xml:space="preserve"><value>已处理 {0} / {1} 个文件 · {2} 个失败项目</value></data>
+  <data name="Transfer_ContinueUpload.ToolTipService.ToolTip" xml:space="preserve"><value>继续未完成文件 / 重试失败项目</value></data>
+  <data name="Transfer_RetryItem.Content" xml:space="preserve"><value>重试此项目</value></data>
+  <data name="DownloadState_Interrupted" xml:space="preserve"><value>已中断，待继续</value></data>
+  <data name="Transfer_SaveFailed" xml:space="preserve"><value>无法保存传输记录。请检查磁盘空间和写入权限，保持窗口打开并重试后再退出。</value></data>
+  <data name="Transfer_ContinueUpload.AutomationProperties.Name" xml:space="preserve"><value>继续上传</value></data>
+  <data name="Transfer_Interrupted.Text" xml:space="preserve"><value>任务已中断。继续后会校验源文件，并从云端已接收的位置续传；会话失效时重新上传。</value></data>
+  <data name="Upload_CompletionUnknown" xml:space="preserve"><value>最后一个分片的结果无法确认，且上传会话已不可用。请先核对云端文件；确认后可移除此任务并重新上传。</value></data>
+  <data name="Transfer_LoadFailed" xml:space="preserve"><value>无法读取传输记录。原记录已保留，新增传输已暂停。请检查磁盘访问权限后重试读取。</value></data>
+  <data name="Transfer_RetryPersistence.Content" xml:space="preserve"><value>重试保存 / 读取</value></data>
+  <data name="Transfer_Remaining" xml:space="preserve"><value>预计剩余：{0}</value></data>
+  <data name="Transfer_Controls.Header" xml:space="preserve"><value>传输设置</value></data>
+  <data name="Transfer_Priority.Header" xml:space="preserve"><value>优先级</value></data>
+  <data name="Transfer_Priority.AutomationProperties.Name" xml:space="preserve"><value>任务优先级</value></data>
+  <data name="Transfer_PriorityLow.Content" xml:space="preserve"><value>低</value></data>
+  <data name="Transfer_PriorityNormal.Content" xml:space="preserve"><value>普通</value></data>
+  <data name="Transfer_PriorityHigh.Content" xml:space="preserve"><value>高</value></data>
+  <data name="Transfer_SpeedLimit.Header" xml:space="preserve"><value>限速（KiB/s）</value></data>
+  <data name="Transfer_SpeedLimit.AutomationProperties.Name" xml:space="preserve"><value>任务限速，单位 KiB 每秒，0 表示不限速</value></data>
+  <data name="Transfer_ControlsHint.Text" xml:space="preserve"><value>0 表示不限速。文件夹内的所有文件共用一个上限。修改后自动保存并即时生效；优先级影响等待中的文件，正在传输的文件会先完成。剩余时间不包含扫描与最终校验。</value></data>
+  <data name="Upload_Pausing.Text" xml:space="preserve"><value>正在暂停上传，保存已确认的进度…</value></data>
+  <data name="Upload_Paused.Text" xml:space="preserve"><value>上传已暂停，继续后将恢复未完成文件。</value></data>
+  <data name="Upload_PauseMenu.Text" xml:space="preserve"><value>暂停上传</value></data>
+  <data name="Upload_ResumeMenu.Text" xml:space="preserve"><value>继续上传</value></data>
+  <data name="Transfer_PauseAll.Label" xml:space="preserve"><value>全部暂停</value></data>
+  <data name="Transfer_ResumeAll.Label" xml:space="preserve"><value>全部继续</value></data>
+  <data name="Transfer_RetryFailed.Label" xml:space="preserve"><value>重试失败</value></data>
+  <data name="Transfer_ClearCompleted.Label" xml:space="preserve"><value>清理已完成</value></data>
+  <data name="Transfer_BatchHint.Text" xml:space="preserve"><value>仅操作当前页任务；全部继续恢复等待或暂停的任务；清理已完成只移除记录，保留文件。</value></data>
+  <data name="Upload_PauseButton.AutomationProperties.Name" xml:space="preserve"><value>暂停上传</value></data>
+  <data name="Upload_PauseButton.ToolTipService.ToolTip" xml:space="preserve"><value>暂停上传</value></data>
+  <data name="Upload_ResumeButton.AutomationProperties.Name" xml:space="preserve"><value>继续上传</value></data>
+  <data name="Upload_ResumeButton.ToolTipService.ToolTip" xml:space="preserve"><value>继续上传</value></data>
+  <data name="Upload_RetryButton.AutomationProperties.Name" xml:space="preserve"><value>重试失败的上传</value></data>
+  <data name="Upload_RetryButton.ToolTipService.ToolTip" xml:space="preserve"><value>重试失败的上传</value></data>
 </root>

@@ -22,4 +22,19 @@
     <PackageReference Include="Downloader" Version="5.9.6" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferScheduler.cs" Link="Production/TransferScheduler.cs" />
+    <Compile Include="../../Models/TransferRecord.cs" Link="Production/TransferRecord.cs" />
+    <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
+    <Compile Include="../../Services/TransferStore.cs" Link="Production/TransferStore.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../ViewModels/TransferFailureRow.cs" Link="Production/TransferFailureRow.cs" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup><Compile Include="../../Services/DownloadSession.Resume.cs" Link="Production/DownloadSession.Resume.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferPolicy.cs" Link="Production/TransferPolicy.cs" />
+    <Compile Include="../../Services/TransferProgressEstimator.cs" Link="Production/TransferProgressEstimator.cs" />
+    <Compile Include="../../ViewModels/TransferTaskControls.cs" Link="Production/TransferTaskControls.cs" />
+  </ItemGroup>
 </Project>

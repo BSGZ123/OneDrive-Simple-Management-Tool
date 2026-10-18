@@ -11,7 +11,7 @@ namespace OneDrive_Simple_Management_Tool.Models
 
     public sealed record UploadConflict(string Name, bool IsFolder);
     public sealed record UploadConflictDecision(UploadConflictChoice Choice, bool ApplyToBatch = false);
-    public sealed record UploadOutcome(int Uploaded, int Skipped);
+    public sealed record UploadOutcome(int Uploaded, int Skipped, string TargetId = null, string TargetName = null);
     public sealed class UploadAbortedException : OperationCanceledException
     {
     }

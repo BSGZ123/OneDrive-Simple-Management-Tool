@@ -5,7 +5,8 @@ using OneDrive_Simple_Management_Tool.ViewModels;
 
 namespace Windows.Storage
 {
-    public interface IStorageItem { }
+    public interface IStorageItem { string Name { get; } string Path { get; } }
+    public sealed class StorageFolder : IStorageItem { public string Name => "folder"; public string Path => "folder"; }
     public sealed class StorageFile(string path) : IStorageItem
     {
         public string Name => System.IO.Path.GetFileName(path);
@@ -53,14 +54,28 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public SourceProvider Provider { get; } = provider;
     }
     // Upload behavior has its own regression project; only download paths run here.
-    public sealed class UploadTaskViewModel
+    public sealed class UploadTaskViewModel : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
     {
+        private UploadTaskState _state;
+        public UploadTaskState State { get => _state; set => SetProperty(ref _state, value); }
+        public bool Completed => State == UploadTaskState.Completed;
+        public bool CanRemove => true;
+        public bool CanPause => State is UploadTaskState.Pending or UploadTaskState.Uploading;
+        public bool CanResume => State is UploadTaskState.Pending or UploadTaskState.Paused or UploadTaskState.Interrupted;
+        public bool CanRetry => State == UploadTaskState.Failed;
+        public int Starts { get; private set; }
+        public Task PauseUpload() { State = UploadTaskState.Paused; return Task.CompletedTask; }
+        public Task ResumeUpload() => StartUpload();
+        public Task RetryUpload() => StartUpload();
+        public TransferRecord Record { get; private set; }
+        public void AttachRecord(TransferRecord record, Action<TransferRecord> save, bool restore = false) => Record = record;
+        public Task StopForExitAsync() => CancelTaskAsync();
         public UploadTaskViewModel(DriveViewModel drive, string id, Windows.Storage.IStorageItem item, UploadConflictResolver conflicts = null) { Drive = drive; }
         public DriveViewModel Drive { get; }
         public bool NeedsExitProtection { get; set; }
         public bool WasCancelled { get; private set; }
         public Func<Task> OnCancel { get; set; } = () => Task.CompletedTask;
-        public Task StartUpload() { NeedsExitProtection = true; return Task.CompletedTask; }
+        public Task StartUpload() { Starts++; State = UploadTaskState.Uploading; NeedsExitProtection = true; return Task.CompletedTask; }
         public async Task CancelTaskAsync() { WasCancelled = true; await OnCancel(); NeedsExitProtection = false; }
     }
 }

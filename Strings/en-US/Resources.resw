@@ -935,7 +935,7 @@
     <value>in progress</value>
   </data>
   <data name="Home_TransferScope.Text" xml:space="preserve">
-    <value>Tasks kept in the current session.</value>
+    <value>Saved tasks that have not been removed, including tasks restored after restart.</value>
   </data>
   <data name="Home_NoTransfers.Text" xml:space="preserve">
     <value>No transfers yet. Open a drive to upload or download files.</value>
@@ -1260,10 +1260,10 @@
   <data name="Upload_Waiting.Text" xml:space="preserve"><value>Waiting for a conflict decision</value></data>
   <data name="Upload_Cancelled.Text" xml:space="preserve"><value>Upload cancelled. Files already uploaded are kept.</value></data>
   <data name="Transfer_ExitTitle" xml:space="preserve"><value>Unfinished transfers</value></data>
-  <data name="Transfer_ExitMessage" xml:space="preserve"><value>There are {0} unfinished uploads and {1} unfinished downloads, including paused and failed tasks. Stop them and exit? Completed files will be kept. Unfinished downloads will be cleaned up. Tasks are not saved for the next launch; add unfinished tasks again to restart them.</value></data>
-  <data name="Transfer_StopAndExit" xml:space="preserve"><value>Stop transfers and exit</value></data>
+  <data name="Transfer_ExitMessage" xml:space="preserve"><value>There are {0} unfinished uploads and {1} unfinished downloads. Save progress and exit? Continue on the next launch. Files whose source changed or upload session expired will need to restart.</value></data>
+  <data name="Transfer_StopAndExit" xml:space="preserve"><value>Save tasks and exit</value></data>
   <data name="Transfer_CancelExit" xml:space="preserve"><value>Cancel exit</value></data>
-  <data name="Transfer_Stopping" xml:space="preserve"><value>Stopping transfers and cleaning up. The window will close when this finishes.</value></data>
+  <data name="Transfer_Stopping" xml:space="preserve"><value>Stopping transfers and saving file results. The window will close when this finishes.</value></data>
   <data name="Transfer_ExitFailed" xml:space="preserve"><value>Could not finish stopping transfers or saving. The window remains open. Finish any open dialog, check the tasks, and try closing again.</value></data>
   <data name="Home_StatSkipped.Text" xml:space="preserve"><value>Skipped</value></data>
   <data name="Drive_SelectedCount" xml:space="preserve"><value>{0} selected</value></data>
@@ -1439,4 +1439,40 @@
   <data name="AccountLifecycle_FailedCredentials" xml:space="preserve"><value>Account credentials could not be cleared.</value></data>
   <data name="AccountLifecycle_FailedConfiguration" xml:space="preserve"><value>The account operation or drive settings could not be saved.</value></data>
   <data name="AccountLifecycle_UnknownCount" xml:space="preserve"><value>an unknown number of</value></data>
+  <data name="Transfer_RestartNotice" xml:space="preserve"><value>Task restored. Continue to verify downloaded data and resume from the saved position.</value></data>
+  <data name="Transfer_FileSummary" xml:space="preserve"><value>{0} / {1} files finished · {2} failed items</value></data>
+  <data name="Transfer_ContinueUpload.ToolTipService.ToolTip" xml:space="preserve"><value>Continue unfinished files / retry failures</value></data>
+  <data name="Transfer_RetryItem.Content" xml:space="preserve"><value>Retry this item</value></data>
+  <data name="DownloadState_Interrupted" xml:space="preserve"><value>Interrupted — ready to continue</value></data>
+  <data name="Transfer_SaveFailed" xml:space="preserve"><value>Could not save transfer records. Check available space and permissions. Keep this window open and try again before exiting.</value></data>
+  <data name="Transfer_ContinueUpload.AutomationProperties.Name" xml:space="preserve"><value>Continue upload</value></data>
+  <data name="Transfer_Interrupted.Text" xml:space="preserve"><value>Interrupted. Continue to verify the source and resume from the bytes received by OneDrive. Expired sessions restart the file.</value></data>
+  <data name="Upload_CompletionUnknown" xml:space="preserve"><value>The final fragment's result is unknown and the upload session is unavailable. Check the cloud file before removing this task and uploading again.</value></data>
+  <data name="Transfer_LoadFailed" xml:space="preserve"><value>Could not read transfer records. Existing records are preserved and new transfers are blocked. Check disk access and retry loading.</value></data>
+  <data name="Transfer_RetryPersistence.Content" xml:space="preserve"><value>Retry saving / loading</value></data>
+  <data name="Transfer_Remaining" xml:space="preserve"><value>Estimated remaining: {0}</value></data>
+  <data name="Transfer_Controls.Header" xml:space="preserve"><value>Transfer settings</value></data>
+  <data name="Transfer_Priority.Header" xml:space="preserve"><value>Priority</value></data>
+  <data name="Transfer_Priority.AutomationProperties.Name" xml:space="preserve"><value>Task priority</value></data>
+  <data name="Transfer_PriorityLow.Content" xml:space="preserve"><value>Low</value></data>
+  <data name="Transfer_PriorityNormal.Content" xml:space="preserve"><value>Normal</value></data>
+  <data name="Transfer_PriorityHigh.Content" xml:space="preserve"><value>High</value></data>
+  <data name="Transfer_SpeedLimit.Header" xml:space="preserve"><value>Limit (KiB/s)</value></data>
+  <data name="Transfer_SpeedLimit.AutomationProperties.Name" xml:space="preserve"><value>Task speed limit in KiB per second; zero is unlimited</value></data>
+  <data name="Transfer_ControlsHint.Text" xml:space="preserve"><value>0 = unlimited. A folder shares one limit across its files. Changes are saved and apply immediately. Priority affects waiting files; active files finish first. Remaining time excludes scanning and final verification.</value></data>
+  <data name="Upload_Pausing.Text" xml:space="preserve"><value>Pausing upload… Saving confirmed progress.</value></data>
+  <data name="Upload_Paused.Text" xml:space="preserve"><value>Upload paused. Continue to resume unfinished files.</value></data>
+  <data name="Upload_PauseMenu.Text" xml:space="preserve"><value>Pause upload</value></data>
+  <data name="Upload_ResumeMenu.Text" xml:space="preserve"><value>Continue upload</value></data>
+  <data name="Transfer_PauseAll.Label" xml:space="preserve"><value>Pause all</value></data>
+  <data name="Transfer_ResumeAll.Label" xml:space="preserve"><value>Continue all</value></data>
+  <data name="Transfer_RetryFailed.Label" xml:space="preserve"><value>Retry failed</value></data>
+  <data name="Transfer_ClearCompleted.Label" xml:space="preserve"><value>Clear completed</value></data>
+  <data name="Transfer_BatchHint.Text" xml:space="preserve"><value>Applies to this tab. Continue all resumes waiting or paused tasks. Clear completed removes records only; files are kept.</value></data>
+  <data name="Upload_PauseButton.AutomationProperties.Name" xml:space="preserve"><value>Pause upload</value></data>
+  <data name="Upload_PauseButton.ToolTipService.ToolTip" xml:space="preserve"><value>Pause upload</value></data>
+  <data name="Upload_ResumeButton.AutomationProperties.Name" xml:space="preserve"><value>Continue upload</value></data>
+  <data name="Upload_ResumeButton.ToolTipService.ToolTip" xml:space="preserve"><value>Continue upload</value></data>
+  <data name="Upload_RetryButton.AutomationProperties.Name" xml:space="preserve"><value>Retry failed upload</value></data>
+  <data name="Upload_RetryButton.ToolTipService.ToolTip" xml:space="preserve"><value>Retry failed upload</value></data>
 </root>

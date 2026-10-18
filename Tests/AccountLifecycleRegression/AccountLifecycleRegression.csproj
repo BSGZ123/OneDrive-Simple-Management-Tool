@@ -35,4 +35,14 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="Downloader" Version="5.9.6" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferScheduler.cs" Link="Production/TransferScheduler.cs" />
+    <Compile Include="../../Models/TransferRecord.cs" Link="Production/TransferRecord.cs" />
+    <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
+    <Compile Include="../../Models/DownloadTree.cs" Link="Production/DownloadTree.cs" />
+  </ItemGroup>
+  <ItemGroup><Compile Include="../../Services/DownloadSession.Resume.cs" Link="Production/DownloadSession.Resume.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferPolicy.cs" Link="Production/TransferPolicy.cs" />
+  </ItemGroup>
 </Project>

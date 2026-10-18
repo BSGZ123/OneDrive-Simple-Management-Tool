@@ -22,4 +22,10 @@
     <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
     <Compile Include="../../Services/SafeDiagnostics.cs" Link="Production/SafeDiagnostics.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferScheduler.cs" Link="Production/TransferScheduler.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferPolicy.cs" Link="Production/TransferPolicy.cs" />
+  </ItemGroup>
 </Project>

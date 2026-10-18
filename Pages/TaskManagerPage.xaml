@@ -17,6 +17,7 @@
 
     <!--传输任务管理页面，三个标签页，分别为下载、上传与同步上传-->
     <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
         <Grid.Resources>
 
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
@@ -50,6 +51,29 @@
                 <Setter Property="Margin" Value="0,0,0,8" />
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             </Style>
+
+            <DataTemplate x:Key="TransferControlsTemplate">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource TaskCaption}">
+                        <Run Text="{Binding SpeedText}" /><Run Text=" · " /><Run Text="{Binding RemainingText}" />
+                    </TextBlock>
+                    <Expander x:Uid="Transfer_Controls" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                                <ComboBox x:Uid="Transfer_Priority" SelectedIndex="{Binding PriorityIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem x:Uid="Transfer_PriorityLow" />
+                                    <ComboBoxItem x:Uid="Transfer_PriorityNormal" />
+                                    <ComboBoxItem x:Uid="Transfer_PriorityHigh" />
+                                </ComboBox>
+                                <NumberBox Grid.Column="1" x:Uid="Transfer_SpeedLimit" Value="{Binding SpeedLimitKiB, Mode=TwoWay}"
+                                           Minimum="0" Maximum="1048576" SmallChange="128" LargeChange="1024" SpinButtonPlacementMode="Compact" />
+                            </Grid>
+                            <TextBlock x:Uid="Transfer_ControlsHint" Style="{StaticResource TaskCaption}" />
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </DataTemplate>
 
             <!--下载任务页数据模板-->
             <DataTemplate x:Key="DownloadTaskTemplate" x:DataType="viewmodels:DownloadTaskViewModel">
@@ -94,13 +118,10 @@
                                     <Run Text=" / " />
                                     <!--下载总字节-->
                                     <Run Text="{Binding TotalBytes,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
-                                    <Run Text=" · " />
-                                    <!--下载速度-->
-                                    <Run Text="{Binding DownloadSpeed,Converter={StaticResource FileSizeToFriendlyStringConverter}}" />
-                                    <Run Text="/s" />
                                 </TextBlock>
                             </Grid>
 
+                            <ContentControl Content="{Binding Controls}" ContentTemplate="{StaticResource TransferControlsTemplate}" HorizontalContentAlignment="Stretch" />
                             <!--可恢复的失败原因-->
                             <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                        Visibility="{Binding HasFailed, Converter={StaticResource BoolToVisibilityConverter}}" />
@@ -119,6 +140,7 @@
                                                 <StackPanel Spacing="2" Margin="0,4">
                                                     <TextBlock Text="{Binding Path}" TextWrapping="Wrap" FontWeight="SemiBold" />
                                                     <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                                    <Button x:Uid="Transfer_RetryItem" Command="{Binding RetryCommand}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -157,6 +179,9 @@
                 <Border Style="{StaticResource TaskCard}">
                     <Border.ContextFlyout>
                         <MenuFlyout>
+                            <MenuFlyoutItem x:Uid="Upload_PauseMenu" Command="{Binding PauseUploadCommand}" />
+                            <MenuFlyoutItem x:Uid="Upload_ResumeMenu" Command="{Binding ResumeUploadCommand}" />
+                            <MenuFlyoutItem x:Uid="TaskManagerPage_Retry" Command="{Binding RetryUploadCommand}" />
                             <MenuFlyoutItem x:Uid="Upload_RemoveMenu" Command="{Binding CancelTaskCommand}" />
                         </MenuFlyout>
                     </Border.ContextFlyout>
@@ -177,9 +202,13 @@
 
                             <TextBlock Text="{Binding Name}" Style="{StaticResource BodyStrongTextBlockStyle}" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
                             <ProgressBar Value="{Binding Progress}" IsIndeterminate="{Binding IsPreparing}" ShowError="{Binding HasFailed}" Visibility="{Binding IsTerminal, Converter={StaticResource BoolToObjectConverter}}" />
+                            <ContentControl Content="{Binding Controls}" ContentTemplate="{StaticResource TransferControlsTemplate}" HorizontalContentAlignment="Stretch" />
                             <TextBlock x:Uid="Upload_Preparing" Style="{StaticResource TaskCaption}" Visibility="{Binding IsPreparing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Upload_Pausing" Style="{StaticResource TaskCaption}" Visibility="{Binding IsPausing, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Upload_Paused" Style="{StaticResource TaskCaption}" Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <TextBlock x:Uid="Upload_Waiting" Style="{StaticResource TaskCaption}" Visibility="{Binding IsWaitingForConflict, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <TextBlock x:Uid="Upload_Cancelled" Style="{StaticResource TaskCaption}" Visibility="{Binding IsCancelled, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock x:Uid="Transfer_Interrupted" Style="{StaticResource TaskCaption}" Visibility="{Binding IsInterrupted, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <TextBlock Text="{Binding Notice}" Style="{StaticResource TaskCaption}" Visibility="{Binding Notice, Converter={StaticResource StringVisibilityConverter}}" />
                             <TextBlock x:Uid="Upload_Cancelling" Style="{StaticResource TaskCaption}" Visibility="{Binding IsCancelling, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <TextBlock x:Uid="TaskManagerPage_UploadCompleted" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
@@ -188,10 +217,35 @@
                                 <TextBlock x:Uid="TaskManagerPage_UploadFailed" Style="{StaticResource TaskCaption}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                 <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource TaskCaption}" />
                             </StackPanel>
+                            <Expander x:Uid="DownloadBatch_Failures" HorizontalAlignment="Stretch"
+                                      Visibility="{Binding HasFailures, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled">
+                                    <ItemsControl ItemsSource="{Binding Failures}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Spacing="2" Margin="0,4">
+                                                    <TextBlock Text="{Binding Path}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                                    <Button x:Uid="Transfer_RetryItem" Command="{Binding RetryCommand}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Expander>
                         </StackPanel>
 
                         <!--上传功能按钮-->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+                            <Button x:Uid="Upload_PauseButton" Command="{Binding PauseUploadCommand}" Visibility="{Binding CanPause, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE769;" FontSize="12" />
+                            </Button>
+                            <Button x:Uid="Upload_ResumeButton" Command="{Binding ResumeUploadCommand}" Visibility="{Binding CanResume, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE768;" FontSize="12" />
+                            </Button>
+                            <Button x:Uid="Upload_RetryButton" Command="{Binding RetryUploadCommand}" Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE72C;" FontSize="12" />
+                            </Button>
                             <Button x:Uid="Upload_RemoveButton" Command="{Binding CancelTaskCommand}">
                                 <FontIcon Glyph="&#xE711;" FontSize="12" />
                             </Button>
@@ -203,26 +257,46 @@
         </Grid.Resources>
 
         <!-- The Pivot stays the first child: UI checks reach it by position. -->
-        <Pivot x:Uid="TaskManagerPage_Pivot_Title" Margin="12,8,12,0">
+        <Pivot x:Uid="TaskManagerPage_Pivot_Title" Margin="12,8,12,0" Grid.Row="1">
             <PivotItem x:Uid="TaskManagerPage_Pivot_Download">
                 <Grid>
-                    <ListView ItemsSource="{Binding DownloadTasks}" ItemTemplate="{StaticResource DownloadTaskTemplate}" SelectionMode="None"
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <ListView Grid.Row="1" ItemsSource="{Binding DownloadTasks}" ItemTemplate="{StaticResource DownloadTaskTemplate}" SelectionMode="None"
                               ItemContainerStyle="{StaticResource TaskItemContainer}" Padding="0,8,0,24" />
-                    <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    <StackPanel Grid.Row="1" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Visibility="{Binding DownloadTasks.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
                         <FontIcon Glyph="&#xE896;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                         <TextBlock x:Uid="TaskManagerPage_NoDownloads" Style="{StaticResource TaskCaption}" TextAlignment="Center" MaxWidth="360" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <CommandBar DefaultLabelPosition="Right" HorizontalContentAlignment="Left" Background="Transparent">
+                            <AppBarButton x:Uid="Transfer_PauseAll" Icon="Pause" Command="{Binding PauseAllCommand}" CommandParameter="Download" />
+                            <AppBarButton x:Uid="Transfer_ResumeAll" Icon="Play" Command="{Binding ResumeAllCommand}" CommandParameter="Download" />
+                            <AppBarButton x:Uid="Transfer_RetryFailed" Icon="Refresh" Command="{Binding RetryFailedCommand}" CommandParameter="Download" />
+                            <AppBarButton x:Uid="Transfer_ClearCompleted" Icon="Clear" Command="{Binding ClearCompletedCommand}" CommandParameter="Download" />
+                        </CommandBar>
+                        <TextBlock x:Uid="Transfer_BatchHint" Style="{StaticResource TaskCaption}" TextWrapping="Wrap" Margin="8,0,8,4" />
                     </StackPanel>
                 </Grid>
             </PivotItem>
             <PivotItem x:Uid="TaskManagerPage_Pivot_Upload">
                 <Grid>
-                    <ListView ItemsSource="{Binding UploadTasks}" ItemTemplate="{StaticResource UploadTaskTemplate}" SelectionMode="None"
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <ListView Grid.Row="1" ItemsSource="{Binding UploadTasks}" ItemTemplate="{StaticResource UploadTaskTemplate}" SelectionMode="None"
                               ItemContainerStyle="{StaticResource TaskItemContainer}" Padding="0,8,0,24" />
-                    <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    <StackPanel Grid.Row="1" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Visibility="{Binding UploadTasks.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
                         <FontIcon Glyph="&#xE898;" FontSize="40" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                         <TextBlock x:Uid="TaskManagerPage_NoUploads" Style="{StaticResource TaskCaption}" TextAlignment="Center" MaxWidth="360" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <CommandBar DefaultLabelPosition="Right" HorizontalContentAlignment="Left" Background="Transparent">
+                            <AppBarButton x:Uid="Transfer_PauseAll" Icon="Pause" Command="{Binding PauseAllCommand}" CommandParameter="Upload" />
+                            <AppBarButton x:Uid="Transfer_ResumeAll" Icon="Play" Command="{Binding ResumeAllCommand}" CommandParameter="Upload" />
+                            <AppBarButton x:Uid="Transfer_RetryFailed" Icon="Refresh" Command="{Binding RetryFailedCommand}" CommandParameter="Upload" />
+                            <AppBarButton x:Uid="Transfer_ClearCompleted" Icon="Clear" Command="{Binding ClearCompletedCommand}" CommandParameter="Upload" />
+                        </CommandBar>
+                        <TextBlock x:Uid="Transfer_BatchHint" Style="{StaticResource TaskCaption}" TextWrapping="Wrap" Margin="8,0,8,4" />
                     </StackPanel>
                 </Grid>
             </PivotItem>
@@ -268,6 +342,10 @@
                 </Grid>
             </PivotItem>
         </Pivot>
+        <InfoBar IsOpen="True" IsClosable="False" Severity="Error" Margin="12,8,12,0" Message="{Binding PersistenceError}"
+                 Visibility="{Binding PersistenceError, Converter={StaticResource StringVisibilityConverter}}">
+            <InfoBar.ActionButton><Button x:Uid="Transfer_RetryPersistence" Command="{Binding RetryPersistenceCommand}" /></InfoBar.ActionButton>
+        </InfoBar>
 
         <!--为什么不使用AppSDK1.5 SelectBar呢？因为SettingsControls Nuget包与其不兼容，降级或者替换类似组件，所以等待修复吧-->
         <!--<SelectorBar x:Name="SelectorBar1">

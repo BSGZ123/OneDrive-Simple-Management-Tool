@@ -8,6 +8,101 @@ internal static class BatchDownloadChecks
 {
     public static async Task RunAsync(TestServices services)
     {
+        await Test("a folder shares its task speed limit across concurrent files", async (f, source) =>
+        {
+            f.Server.Bytes = new byte[128 * 1024]; f.Server.DelayMilliseconds = 0;
+            source.Folder("folder", "Folder");
+            source.File("one", "one.bin", "folder"); source.File("two", "two.bin", "folder");
+            var batch = Batch(f, source, "folder");
+            batch.Policy.BytesPerSecond = 128 * 1024;
+            var record = new TransferRecord { Direction = TransferDirection.Download, AccountId = "account", DriveId = "drive", Name = "Folder", Path = f.DirectoryPath, IsFolder = true };
+            batch.AttachRecord(record, _ => { }, false);
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            await batch.StartAsync();
+            Complete(batch, 2, 1);
+            Check(batch.Policy.TransferredBytes == 256 * 1024 && timer.Elapsed.TotalSeconds >= 1.75,
+                "Child downloads did not inherit the folder's shared rate budget.");
+        });
+        await Test("durable file results and allocated names survive restoration; one failed item retries alone", async (f, source) =>
+        {
+            source.Folder("folder", "Folder");
+            source.File("good", "same.bin", "folder");
+            source.File("bad1", "bad1.bin", "folder");
+            source.File("bad2", "bad2.bin", "folder");
+            Directory.CreateDirectory(Path.Combine(f.DirectoryPath, "Folder"));
+            var failed = new HashSet<string> { "bad1", "bad2" };
+            source.BeforeResolve = (id, _) => failed.Contains(id) ? throw new DownloadFailureException(DownloadFailure.AccessDenied) : Task.CompletedTask;
+            var store = new TransferStore(Path.Combine(f.DirectoryPath, "records"));
+            var record = new TransferRecord { Direction = TransferDirection.Download, AccountId = "account", DriveId = "drive", Name = "Folder", Path = f.DirectoryPath, IsFolder = true };
+            var original = Batch(f, source, "folder");
+            original.AttachRecord(record, store.Save, false);
+            await original.StartAsync();
+            Check(original.Snapshot.Batch.CompletedFiles == 1, "Successful sibling wasn't retained.");
+            int successfulRequests = source.ResolveCounts["good"];
+            await original.StopForExitAsync();
+            original.ReleaseReservations(); // The original process has exited.
+            var reopenedStore = new TransferStore(Path.Combine(f.DirectoryPath, "records"));
+            var loaded = reopenedStore.Load().Single();
+            var restored = Batch(f, source, "folder");
+            restored.AttachRecord(loaded, reopenedStore.Save, true);
+            Check(restored.Snapshot.State == DownloadTaskState.Failed && restored.Snapshot.Batch.CompletedFiles == 1, "Restored state or success count is wrong.");
+            Check(loaded.Downloads.Single(x => x.Item.Id == "folder").Path.EndsWith("Folder (2)"), "Allocated folder name was lost.");
+            failed.Remove("bad1");
+            int otherRequests = source.ResolveCounts["bad2"];
+            await restored.RetryItemAsync("bad1");
+            Check(source.ResolveCounts["good"] == successfulRequests && source.ResolveCounts["bad2"] == otherRequests,
+                "Individual retry touched a successful file or another failure.");
+            failed.Clear();
+            await restored.StartAsync();
+            Complete(restored, 3, 1);
+            Check(source.ResolveCounts["good"] == successfulRequests && !Directory.Exists(Path.Combine(f.DirectoryPath, "Folder (3)")), "Restore duplicated completed work.");
+        });
+        await Test("restored corrupt partial files restart at zero and leave existing destinations intact", async (f, source) =>
+        {
+            source.File("file", "file.bin");
+            var record = new TransferRecord { Direction = TransferDirection.Download, AccountId = "account", DriveId = "drive", Name = "file", Path = f.DirectoryPath, IsFolder = true };
+            var original = Batch(f, source, "file");
+            original.AttachRecord(record, _ => { }, false);
+            var running = original.StartAsync();
+            await Until(() => original.Snapshot.ReceivedBytes >= 32768);
+            await original.PauseAsync(); await running;
+            var store = new TransferStore(Path.Combine(f.DirectoryPath, "records"));
+            store.Save(record);
+            original.ReleaseReservations();
+            // Release the process-wide destination lock, while simulating abandoned partial data.
+            var saved = store.Load().Single();
+            await original.CancelAsync();
+            string abandoned = Path.Combine(f.DirectoryPath, $".cloudflow-{saved.Downloads.Single().StagingId:N}.tmp");
+            await File.WriteAllBytesAsync(abandoned, new byte[1234]);
+            var restored = Batch(f, source, "file");
+            restored.AttachRecord(saved, _ => { }, true);
+            int requestsBefore = f.Server.Offsets.Count;
+            await restored.StartAsync();
+            Complete(restored, 1, 0);
+            Check(f.Server.Offsets.Skip(requestsBefore).All(x => x == 0) && !File.Exists(abandoned), "Restart reused partial bytes or leaked staging data.");
+        });
+        await Test("batch byte checkpoints survive exit and resume the original file range", async (f, source) =>
+        {
+            source.File("file", "file.bin");
+            var record = new TransferRecord { Direction = TransferDirection.Download, AccountId = "account", DriveId = "drive", Name = "file", Path = f.DirectoryPath, IsFolder = true };
+            var store = new TransferStore(Path.Combine(f.DirectoryPath, "records"));
+            var original = Batch(f, source, "file");
+            original.AttachRecord(record, store.Save, false);
+            var running = original.StartAsync();
+            await Until(() => original.Snapshot.ReceivedBytes >= 32768);
+            await original.StopForExitAsync(); await running;
+            original.ReleaseReservations();
+            var reopened = new TransferStore(Path.Combine(f.DirectoryPath, "records"));
+            var saved = reopened.Load().Single();
+            long offset = saved.Downloads.Single().Resume.Bytes;
+            Check(offset > 0 && offset < f.Server.Bytes.Length, "Batch did not persist its partial offset.");
+            var restored = Batch(f, source, "file");
+            restored.AttachRecord(saved, reopened.Save, true);
+            int before = f.Server.Offsets.Count;
+            await restored.StartAsync();
+            Complete(restored, 1, 0);
+            Check(f.Server.Offsets.Skip(before).First() == offset, "Restored batch restarted a valid partial file.");
+        });
         await Test("nested folders, empty directories and mixed root files preserve structure", async (f, source) =>
         {
             source.Folder("folder", "Documents");

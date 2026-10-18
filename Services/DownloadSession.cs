@@ -19,11 +19,12 @@ namespace OneDrive_Simple_Management_Tool.Services
         public TimeSpan RetryDelay { get; init; } = TimeSpan.FromSeconds(1);
         public bool ReplaceExisting { get; init; } = true;
         public Action<string> ValidateDestination { get; init; }
+        public Guid? StagingId { get; init; }
+        public TransferPolicy Policy { get; init; } = new();
     }
 
-    // Owns one runtime-only transfer. Pausing stops and drains the current attempt;
-    // the retained package can then be resumed with a fresh preauthenticated URL.
-    public sealed class DownloadSession : IDownloadSession
+    // Runtime downloads retain their package; durable tasks retain verified file checkpoints.
+    public sealed partial class DownloadSession : IDownloadSession
     {
         private static readonly ConcurrentDictionary<string, DownloadSession> Destinations =
             new(StringComparer.OrdinalIgnoreCase);
@@ -38,28 +39,62 @@ namespace OneDrive_Simple_Management_Tool.Services
         private DownloadSource _source;
         private bool _ownsDestination;
         private bool _readyToSave;
+        private bool _discardPreviousPartial;
+        private TransferRecord _record;
+        private Action<TransferRecord> _checkpoint;
         private DownloadSnapshot _snapshot = new(0, DownloadTaskState.Pending, 0, 0, 0, 0, DownloadFailure.None, false);
 
         public DownloadSession(string destinationPath, Func<CancellationToken, Task<DownloadSource>> resolveSource,
             DownloadSessionOptions options = null)
         {
             DestinationPath = Path.GetFullPath(destinationPath);
-            _stagingPath = Path.Combine(Path.GetDirectoryName(DestinationPath), $".cloudflow-{Guid.NewGuid():N}.tmp");
             _resolveSource = resolveSource;
             _options = options ?? new DownloadSessionOptions();
+            _stagingPath = Path.Combine(Path.GetDirectoryName(DestinationPath), $".cloudflow-{_options.StagingId ?? Guid.NewGuid():N}.tmp");
+            _discardPreviousPartial = _options.StagingId.HasValue;
             if (_options.MaxAttempts < 1) throw new ArgumentOutOfRangeException(nameof(options));
         }
 
         public string DestinationPath { get; }
+        public TransferPolicy Policy => _options.Policy;
         public DownloadSnapshot Snapshot { get { lock (_gate) return _snapshot; } }
         public event Action<DownloadSnapshot> Changed;
+        public Action RequireCheckpoint { get; set; }
+
+        public void AttachRecord(TransferRecord record, Action<TransferRecord> checkpoint, bool restore)
+        {
+            _record = record;
+            _checkpoint = checkpoint;
+            AttachResume(record.DownloadResume, resume =>
+            {
+                record.DownloadResume = resume;
+                checkpoint(record);
+                RequireCheckpoint?.Invoke();
+            });
+            if (restore)
+            {
+                var state = record.DownloadState is DownloadTaskState.Completed or DownloadTaskState.Cancelled or DownloadTaskState.Failed or DownloadTaskState.Paused
+                    ? record.DownloadState : DownloadTaskState.Interrupted;
+                _snapshot = new(1, state, state == DownloadTaskState.Completed ? record.Size : record.DownloadResume?.Bytes ?? 0, record.Size, 0, 0, record.DownloadFailure, false);
+            }
+        }
+
+        public async Task StopForExitAsync()
+        {
+            bool preserveState = Snapshot.State is DownloadTaskState.Paused or DownloadTaskState.Pausing or DownloadTaskState.Failed;
+            await PauseAsync().ConfigureAwait(false);
+            if (Snapshot.State is DownloadTaskState.Completed or DownloadTaskState.Cancelled) return;
+            if (_saveResume == null) await ResetPartialAsync().ConfigureAwait(false);
+            ReleaseDestination();
+            if (!preserveState) Update(state: DownloadTaskState.Interrupted, received: _resume?.Bytes ?? 0);
+        }
 
         public Task StartAsync()
         {
             lock (_gate)
             {
                 if (!_activeTask.IsCompleted || _snapshot.State is not
-                    (DownloadTaskState.Pending or DownloadTaskState.Paused or DownloadTaskState.Failed))
+                    (DownloadTaskState.Pending or DownloadTaskState.Paused or DownloadTaskState.Failed or DownloadTaskState.Interrupted))
                     return _activeTask;
                 _cancellation?.Dispose();
                 _cancellation = new CancellationTokenSource();
@@ -73,6 +108,7 @@ namespace OneDrive_Simple_Management_Tool.Services
         {
             lock (_gate)
             {
+                if (_snapshot.State == DownloadTaskState.Pending) Publish(DownloadTaskState.Paused);
                 if (_snapshot.State is DownloadTaskState.Preparing or DownloadTaskState.Downloading or DownloadTaskState.Retrying)
                 {
                     Publish(DownloadTaskState.Pausing);
@@ -125,11 +161,19 @@ namespace OneDrive_Simple_Management_Tool.Services
             await Task.Yield();
             try
             {
+                using var slot = await TransferScheduler.Shared.EnterAsync(token, Policy).ConfigureAwait(false);
+                lock (_gate) RequireCheckpoint?.Invoke();
                 if (!_ownsDestination)
                 {
                     if (!Destinations.TryAdd(DestinationPath, this))
                         throw new DownloadFailureException(DownloadFailure.DestinationBusy);
                     _ownsDestination = true;
+                }
+                if (_discardPreviousPartial)
+                {
+                    _options.ValidateDestination?.Invoke(DestinationPath);
+                    await ResetPartialAsync().ConfigureAwait(false);
+                    _discardPreviousPartial = false;
                 }
 
                 for (int attempt = 1; attempt <= _options.MaxAttempts; attempt++)
@@ -153,6 +197,9 @@ namespace OneDrive_Simple_Management_Tool.Services
                         }
                         _source = source;
                         Update(total: source.Size);
+
+                        if (await RecoverCommittedDownloadAsync(source, token).ConfigureAwait(false)) return;
+                        if (_saveResume != null) _readyToSave = false; // Reverify the saved prefix even after a failed final move.
 
                         if (!_readyToSave)
                             await TransferAsync(source, token).ConfigureAwait(false);
@@ -180,6 +227,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                         await ReleasePackageAsync().ConfigureAwait(false);
                         ReleaseDestination();
                         Update(state: DownloadTaskState.Completed, received: source.Size);
+                        SaveResume(null);
                         return;
                     }
                     catch (Exception exception) when (!token.IsCancellationRequested &&
@@ -197,6 +245,9 @@ namespace OneDrive_Simple_Management_Tool.Services
             }
             catch (Exception exception)
             {
+                // The destination is already committed. A checkpoint error is surfaced by
+                // the task manager and must never turn a completed file into a new transfer.
+                if (Snapshot.State == DownloadTaskState.Completed) return;
                 if (!token.IsCancellationRequested && exception is DownloadRangeException)
                 {
                     try
@@ -226,13 +277,18 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         private async Task TransferAsync(DownloadSource source, CancellationToken token)
         {
+            if (_saveResume != null)
+            {
+                await TransferDurableAsync(source, token).ConfigureAwait(false);
+                return;
+            }
             if (source.Size == 0)
             {
                 await File.WriteAllBytesAsync(_stagingPath, Array.Empty<byte>(), token).ConfigureAwait(false);
                 _readyToSave = true;
                 return;
             }
-            using var client = new HttpClient(new DownloadResponseHandler(source.Size))
+            using var client = new HttpClient(new DownloadResponseHandler(source.Size, Policy, _options.BlockTimeoutMilliseconds))
             {
                 Timeout = TimeSpan.FromSeconds(30)
             };
@@ -242,7 +298,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 ChunkCount = 1,
                 ParallelDownload = false,
                 MaxTryAgainOnFailure = 0, // One finite retry budget, owned by this session.
-                BlockTimeout = _options.BlockTimeoutMilliseconds,
+                BlockTimeout = int.MaxValue, // The response stream times network reads separately from throttling.
                 ClearPackageOnCompletionWithFailure = false,
                 EnableAutoResumeDownload = false,
                 MaximumMemoryBufferBytes = 1024 * 1024,
@@ -330,10 +386,12 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         private async Task ResetPartialAsync()
         {
+            _options.ValidateDestination?.Invoke(DestinationPath);
             await ReleasePackageAsync().ConfigureAwait(false);
             File.Delete(_stagingPath + ".download");
             File.Delete(_stagingPath);
             _readyToSave = false;
+            SaveResume(null);
         }
 
         private async Task CleanupCancelledAsync()
@@ -394,10 +452,18 @@ namespace OneDrive_Simple_Management_Tool.Services
         private void Publish(DownloadTaskState? state = null, long? received = null, long? total = null,
             long? speed = null, int? attempt = null, DownloadFailure? failure = null, bool? restarted = null)
         {
+            var previousState = _snapshot.State;
             var nextState = state ?? _snapshot.State;
             _snapshot = new(_snapshot.Revision + 1, nextState, received ?? _snapshot.ReceivedBytes,
                 total ?? _snapshot.TotalBytes, nextState == DownloadTaskState.Downloading ? speed ?? 0 : 0,
                 attempt ?? _snapshot.Attempt, failure ?? _snapshot.Failure, restarted ?? _snapshot.Restarted);
+            if (_record != null && (previousState != nextState || total.HasValue))
+            {
+                _record.DownloadState = nextState;
+                _record.DownloadFailure = _snapshot.Failure;
+                _record.Size = _snapshot.TotalBytes;
+                _checkpoint(_record);
+            }
             Changed?.Invoke(_snapshot);
         }
     }

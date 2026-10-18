@@ -233,9 +233,9 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             TotalTransfers = downloads.Count + uploads.Count;
             ActiveTransfers = downloads.Count(t => t.State is DownloadTaskState.Preparing or DownloadTaskState.Downloading or
                 DownloadTaskState.Retrying or DownloadTaskState.Pausing or DownloadTaskState.Finalizing or DownloadTaskState.Cancelling) +
-                uploads.Count(t => t.State is UploadTaskState.Preparing or UploadTaskState.Uploading or UploadTaskState.Cancelling);
-            WaitingTransfers = downloads.Count(t => t.State is DownloadTaskState.Pending or DownloadTaskState.Paused) +
-                uploads.Count(t => t.State is UploadTaskState.Pending or UploadTaskState.WaitingForConflict);
+                uploads.Count(t => t.State is UploadTaskState.Preparing or UploadTaskState.Uploading or UploadTaskState.Pausing or UploadTaskState.Cancelling);
+            WaitingTransfers = downloads.Count(t => t.State is DownloadTaskState.Pending or DownloadTaskState.Paused or DownloadTaskState.Interrupted) +
+                uploads.Count(t => t.State is UploadTaskState.Pending or UploadTaskState.WaitingForConflict or UploadTaskState.Paused or UploadTaskState.Interrupted);
             FailedTransfers = downloads.Count(t => t.State == DownloadTaskState.Failed) + uploads.Count(t => t.State == UploadTaskState.Failed);
             CompletedTransfers = downloads.Count(t => t.State == DownloadTaskState.Completed) + uploads.Count(t => t.State == UploadTaskState.Completed);
             CancelledTransfers = downloads.Count(t => t.State == DownloadTaskState.Cancelled) + uploads.Count(t => t.State == UploadTaskState.Cancelled);

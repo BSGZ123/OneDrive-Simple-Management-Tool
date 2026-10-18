@@ -14,13 +14,15 @@ namespace OneDrive_Simple_Management_Tool.Services
     internal sealed class DownloadResponseHandler : DelegatingHandler
     {
         private readonly long _expectedSize;
+        private readonly TransferPolicy _policy;
+        private readonly int _readTimeout;
 
-        public DownloadResponseHandler(long expectedSize)
+        public DownloadResponseHandler(long expectedSize, TransferPolicy policy = null, int readTimeout = 15000)
             : base(new SocketsHttpHandler
             {
                 AutomaticDecompression = DecompressionMethods.None,
                 ConnectTimeout = TimeSpan.FromSeconds(15)
-            }) => _expectedSize = expectedSize;
+            }) { _expectedSize = expectedSize; _policy = policy; _readTimeout = readTimeout; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
@@ -60,7 +62,7 @@ namespace OneDrive_Simple_Management_Tool.Services
                 }
 
                 long maximum = response.Content.Headers.ContentRange is { From: long from, To: long to } ? to - from + 1 : _expectedSize;
-                response.Content = new BoundedContent(response.Content, maximum);
+                response.Content = new BoundedContent(response.Content, maximum, _policy, _readTimeout);
                 return response;
             }
             catch
@@ -76,13 +78,15 @@ namespace OneDrive_Simple_Management_Tool.Services
         {
             private readonly HttpContent _inner;
             private readonly long _maximum;
-            public BoundedContent(HttpContent inner, long maximum)
+            private readonly TransferPolicy _policy;
+            private readonly int _readTimeout;
+            public BoundedContent(HttpContent inner, long maximum, TransferPolicy policy, int readTimeout)
             {
-                _inner = inner; _maximum = maximum;
+                _inner = inner; _maximum = maximum; _policy = policy; _readTimeout = readTimeout;
                 foreach (var header in inner.Headers) Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
             protected override bool TryComputeLength(out long length) { length = _inner.Headers.ContentLength ?? 0; return _inner.Headers.ContentLength.HasValue; }
-            protected override async Task<Stream> CreateContentReadStreamAsync() => new BoundedStream(await _inner.ReadAsStreamAsync().ConfigureAwait(false), _maximum);
+            protected override async Task<Stream> CreateContentReadStreamAsync() => new BoundedStream(await _inner.ReadAsStreamAsync().ConfigureAwait(false), _maximum, _policy, _readTimeout);
             protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
             {
                 using var input = await CreateContentReadStreamAsync().ConfigureAwait(false);
@@ -90,7 +94,7 @@ namespace OneDrive_Simple_Management_Tool.Services
             }
             protected override void Dispose(bool disposing) { if (disposing) _inner.Dispose(); base.Dispose(disposing); }
         }
-        private sealed class BoundedStream(Stream inner, long maximum) : Stream
+        internal sealed class BoundedStream(Stream inner, long maximum, TransferPolicy policy, int readTimeout) : Stream
         {
             private long _received;
             public override bool CanRead => inner.CanRead;
@@ -100,9 +104,31 @@ namespace OneDrive_Simple_Management_Tool.Services
             public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
             private int Accept(int count) { _received += count; if (_received > maximum) throw new InvalidDataException("Download body exceeds metadata size."); return count; }
             private int ReadSize(int requested) => (int)Math.Min(requested, Math.Max(1, maximum - _received + 1));
-            public override int Read(byte[] buffer, int offset, int count) => Accept(inner.Read(buffer, offset, ReadSize(count)));
-            public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
-                Accept(await inner.ReadAsync(buffer[..ReadSize(buffer.Length)], cancellationToken).ConfigureAwait(false));
+            public override int Read(byte[] buffer, int offset, int count) => ReadAsync(buffer.AsMemory(offset, count)).AsTask().GetAwaiter().GetResult();
+            public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+            {
+                int length = ReadSize(policy?.BlockSize(buffer.Length) ?? buffer.Length);
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeout.CancelAfter(readTimeout);
+                int count;
+                try
+                {
+                    count = await inner.ReadAsync(buffer[..length], timeout.Token).ConfigureAwait(false);
+                }
+                catch (IOException exception)
+                {
+                    // TLS disconnects may be plain IOExceptions. Classify at the
+                    // network boundary so disk writes/checkpoints remain storage errors.
+                    throw new HttpRequestException("The download connection failed while reading the response.", exception);
+                }
+                count = Accept(count);
+                if (policy != null)
+                {
+                    await policy.WaitAsync(count, cancellationToken).ConfigureAwait(false);
+                    policy.ReportBytes(count);
+                }
+                return count;
+            }
             public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
             public override void Flush() => throw new NotSupportedException();
             public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();

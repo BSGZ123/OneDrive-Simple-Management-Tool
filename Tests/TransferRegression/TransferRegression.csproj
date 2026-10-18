@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><LangVersion>12</LangVersion></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Models/TransferRecord.cs" Link="Production/TransferRecord.cs" />
+    <Compile Include="../../Models/DownloadTree.cs" Link="Production/DownloadTree.cs" />
+    <Compile Include="../../Models/DownloadTaskState.cs" Link="Production/DownloadTaskState.cs" />
+    <Compile Include="../../Models/UploadTaskState.cs" Link="Production/UploadTaskState.cs" />
+    <Compile Include="../../Models/UploadConflict.cs" Link="Production/UploadConflict.cs" />
+    <Compile Include="../../Services/TransferStore.cs" Link="Production/TransferStore.cs" />
+    <Compile Include="../../Services/ProtectedConfigurationFile.cs" Link="Production/ProtectedConfigurationFile.cs" />
+    <Compile Include="../../Services/TransferScheduler.cs" Link="Production/TransferScheduler.cs" />
+    <Compile Include="../../Services/UploadRecordSession.cs" Link="Production/UploadRecordSession.cs" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Services/TransferPolicy.cs" Link="Production/TransferPolicy.cs" />
+  </ItemGroup>
+</Project>

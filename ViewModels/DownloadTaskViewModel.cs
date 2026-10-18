@@ -21,6 +21,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         private long _revision;
         private long _lastProgressTick;
         private DownloadTaskState _lastReportedState;
+        public TransferRecord Record { get; private set; }
+        public TransferTaskControls Controls { get; }
 
         public DownloadTaskViewModel(DriveViewModel drive, string itemId, StorageFile file)
             : this(file.Name, new DownloadSession(file.Path, token => drive.Provider.GetDownloadSourceAsync(itemId, token)),
@@ -33,7 +35,33 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             Name = name;
             _manager = manager ?? Ioc.Default.GetRequiredService<TaskManagerViewModel>();
             _session = session;
+            Controls = new(session is DownloadSession single ? single.Policy : session is DownloadBatchSession batch ? batch.Policy : new TransferPolicy());
             _session.Changed += OnSessionChanged;
+            ApplySnapshot(_session.Snapshot);
+        }
+
+        public void AttachRecord(TransferRecord record, Action<TransferRecord> save, bool restore = false)
+        {
+            Record = record;
+            Controls.AttachRecord(record, save);
+            if (_session is DownloadBatchSession batch)
+            {
+                batch.AttachRecord(record, save, restore);
+                batch.RequireCheckpoint = () => _manager.SaveRequired(record);
+            }
+            else if (_session is DownloadSession single)
+            {
+                single.AttachRecord(record, save, restore);
+                single.RequireCheckpoint = () => _manager.SaveRequired(record);
+            }
+            ApplySnapshot(_session.Snapshot);
+        }
+
+        public void ReleaseRestoredResources()
+        {
+            Controls.Dispose();
+            _session.Changed -= OnSessionChanged;
+            if (_session is DownloadBatchSession batch) batch.ReleaseReservations();
         }
 
         public string Name { get; }
@@ -48,8 +76,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool Completed => State == DownloadTaskState.Completed;
         public bool HasFailed => State == DownloadTaskState.Failed;
         public bool IsPaused => State == DownloadTaskState.Paused;
-        public bool CanPause => State is DownloadTaskState.Preparing or DownloadTaskState.Downloading or DownloadTaskState.Retrying;
-        public bool CanResume => State is DownloadTaskState.Pending or DownloadTaskState.Paused;
+        public bool CanPause => State is DownloadTaskState.Pending or DownloadTaskState.Preparing or DownloadTaskState.Downloading or DownloadTaskState.Retrying;
+        public bool CanResume => State is DownloadTaskState.Pending or DownloadTaskState.Paused or DownloadTaskState.Interrupted;
         public bool CanRetry => HasFailed;
         public bool CanRemove => State is not (DownloadTaskState.Cancelling or DownloadTaskState.Finalizing);
         public bool IsIndeterminate => State is DownloadTaskState.Preparing or DownloadTaskState.Retrying or DownloadTaskState.Finalizing;
@@ -57,7 +85,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool CanCancelBatch => IsBatch && State is not (DownloadTaskState.Completed or DownloadTaskState.Cancelled or DownloadTaskState.Cancelling);
         public bool ShowRemove => !IsBatch || State is DownloadTaskState.Completed or DownloadTaskState.Cancelled;
         public string StatusText => (IsBatch && State == DownloadTaskState.Preparing ? "DownloadBatch_Scanning" : $"DownloadState_{State}").GetLocalized();
-        public IReadOnlyList<DownloadFailureRow> Failures { get; private set; } = Array.Empty<DownloadFailureRow>();
+        public IReadOnlyList<TransferFailureRow> Failures { get; private set; } = Array.Empty<TransferFailureRow>();
         public bool HasFailures => Failures.Count > 0;
         [ObservableProperty] private string _batchSummary = string.Empty;
 
@@ -110,13 +138,19 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             ApplySnapshot(_session.Snapshot);
             if (State is DownloadTaskState.Cancelled or DownloadTaskState.Completed)
             {
-                _session.Changed -= OnSessionChanged;
-                _manager.RemoveSelectedDownloadTasks(this);
+                if (_manager.RemoveSelectedDownloadTasks(this)) { _session.Changed -= OnSessionChanged; Controls.Dispose(); }
             }
         }
 
         public async Task StopForExitAsync()
         {
+            if (Record != null)
+            {
+                if (_session is DownloadBatchSession batch) await batch.StopForExitAsync();
+                else if (_session is DownloadSession single) await single.StopForExitAsync();
+                ApplySnapshot(_session.Snapshot);
+                return;
+            }
             await CancelTaskAsync();
             if (_session.Snapshot.State is not (DownloadTaskState.Cancelled or DownloadTaskState.Completed))
                 throw new InvalidOperationException("Download cleanup did not finish.");
@@ -146,14 +180,24 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             TotalBytes = snapshot.TotalBytes;
             DownloadSpeed = snapshot.BytesPerSecond;
             Progress = Completed ? 100 : TotalBytes == 0 ? 0 : (int)Math.Clamp(DownloadedBytes * 100.0 / TotalBytes, 0, 99);
+            Controls.Update(DownloadedBytes, TotalBytes, State == DownloadTaskState.Downloading,
+                snapshot.Batch == null || (snapshot.Batch.DiscoveryComplete && snapshot.Batch.Failures.Count == 0), Completed);
             ErrorMessage = snapshot.Failure == DownloadFailure.None ? string.Empty :
                 ($"DownloadError_{snapshot.Failure}").GetLocalized();
             Notice = IsBatch ? "DownloadBatch_KeepBoth".GetLocalized() : snapshot.Restarted ? "Download_Restarted".GetLocalized() : string.Empty;
+            if (State == DownloadTaskState.Interrupted) Notice = "Transfer_RestartNotice".GetLocalized();
             if (snapshot.Batch is { } batch)
             {
                 BatchSummary = string.Format("DownloadBatch_Summary".GetLocalized(), batch.CompletedFiles, batch.Files, batch.Folders, batch.Failures.Count);
                 if (!batch.DiscoveryComplete) BatchSummary += " " + "DownloadBatch_IncompleteScan".GetLocalized();
-                Failures = batch.Failures.Select(failure => new DownloadFailureRow(failure.Path, ($"DownloadError_{failure.Failure}").GetLocalized())).ToArray();
+                Failures = batch.Failures.Select(failure => new TransferFailureRow(failure.Path, ($"DownloadError_{failure.Failure}").GetLocalized(),
+                    async () =>
+                    {
+                        if (_manager.IsShuttingDown || State is not (DownloadTaskState.Failed or DownloadTaskState.Interrupted or DownloadTaskState.Paused)) return;
+                        if (failure.ItemId != null && _session is DownloadBatchSession session) await session.RetryItemAsync(failure.ItemId);
+                        else await _session.StartAsync();
+                        ApplySnapshot(_session.Snapshot);
+                    }, () => State is DownloadTaskState.Failed or DownloadTaskState.Interrupted or DownloadTaskState.Paused)).ToArray();
                 OnPropertyChanged(nameof(Failures));
                 OnPropertyChanged(nameof(HasFailures));
             }
@@ -161,5 +205,4 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
     }
 
-    public sealed record DownloadFailureRow(string Path, string Message);
 }

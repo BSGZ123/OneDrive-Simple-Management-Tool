@@ -171,6 +171,7 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
     public TaskCompletionSource FirstSlice { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public TaskCompletionSource FirstDelete { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     public string Url { get; }
+    public long ResumeOffset { get; set; }
 
     public LoopbackUploadServer()
     {
@@ -232,6 +233,14 @@ internal sealed class LoopbackUploadServer : IAsyncDisposable
                 .Skip(1).Where(line => line.Contains(':'))
                 .Select(line => line.Split(':', 2))
                 .ToDictionary(parts => parts[0], parts => parts[1].Trim(), StringComparer.OrdinalIgnoreCase);
+            if (requestLine[0] == "GET")
+            {
+                if (headers.ContainsKey("Authorization")) throw new InvalidOperationException("Session status must stay anonymous.");
+                byte[] statusBody = JsonSerializer.SerializeToUtf8Bytes(new { nextExpectedRanges = new[] { $"{ResumeOffset}-" }, expirationDateTime = DateTimeOffset.UtcNow.AddHours(1) });
+                await stream.WriteAsync(Encoding.ASCII.GetBytes($"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {statusBody.Length}\r\nConnection: close\r\n\r\n"), _stop.Token);
+                await stream.WriteAsync(statusBody, _stop.Token);
+                return;
+            }
             if (requestLine[0] == "DELETE")
             {
                 Deletes.Enqueue(headers);
