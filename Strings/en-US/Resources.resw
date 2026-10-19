@@ -879,6 +879,16 @@
   <data name="Startup_Services" xml:space="preserve"><value>Application services could not initialize. Retry or exit.</value></data>
   <data name="Startup_Configurations" xml:space="preserve"><value>User configuration could not initialize. Retry or exit.</value></data>
   <data name="Startup_CacheCleanup" xml:space="preserve"><value>Sign-in data was migrated, but the old encrypted cache could not be removed. Close older versions and restart to retry cleanup.</value></data>
+  <data name="Startup_AccessRepair" xml:space="preserve"><value>The account access record is damaged. All accounts stay locked until it is repaired. You can check the backup, restore from it or rebuild the record.</value></data>
+  <data name="Startup_AccessCheckBackup" xml:space="preserve"><value>Check backup</value></data>
+  <data name="Startup_AccessRestore" xml:space="preserve"><value>Restore from backup</value></data>
+  <data name="Startup_AccessRebuild" xml:space="preserve"><value>Rebuild record</value></data>
+  <data name="Startup_AccessBackupReady" xml:space="preserve"><value>The backup is readable: {0} records for {1} accounts. You can restore from it or rebuild the record.</value></data>
+  <data name="Startup_AccessBackupUnavailable" xml:space="preserve"><value>No readable backup was found. Rebuild the record to continue.</value></data>
+  <data name="Startup_AccessRepairExplanation" xml:space="preserve"><value>An encrypted copy of the damaged record is kept. Every account is signed out and its folder sync is paused. Removed-drive records are kept only when restoring from the backup. Afterwards, sign in to each account again and resume sync manually.</value></data>
+  <data name="Startup_AccessRepairAction" xml:space="preserve"><value>Repair</value></data>
+  <data name="Startup_AccessRepairFailed" xml:space="preserve"><value>Repair failed. The record was not replaced and all accounts stay locked. Retry or exit.</value></data>
+  <data name="Startup_AccessRepaired" xml:space="preserve"><value>The account access record was repaired. Every account now requires a new sign-in: sign in to each account again and resume folder sync manually.</value></data>
   <data name="SettingPage_DataTitle.Text" xml:space="preserve"><value>Storage and diagnostics</value></data>
   <data name="Settings_Diagnostics.Header" xml:space="preserve"><value>Safe diagnostics</value></data>
   <data name="Settings_Diagnostics.Description" xml:space="preserve"><value>Records only filtered events. Production sessions last up to 30 minutes and stop on exit. Debug sessions last until stopped or exit. Files stay on this device.</value></data>

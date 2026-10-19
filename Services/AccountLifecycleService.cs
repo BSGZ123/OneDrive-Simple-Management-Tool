@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,6 +39,23 @@ namespace OneDrive_Simple_Management_Tool.Services
                 }
                 catch (Exception error) { throw new AccountLifecycleException("Configuration", error); }
                 await FinishAsync(operation);
+            }
+            finally { _changes.Release(); }
+        }
+
+        // Startup repair of an unreadable access journal. Every account with cached credentials, a drive or a sync
+        // binding is journaled for sign-out; the next RetryPendingAsync removes credentials and pauses its sync.
+        public async Task RepairAccessAsync(bool useBackup, IEnumerable<string> syncAccounts)
+        {
+            await _changes.WaitAsync();
+            try
+            {
+                var accounts = new HashSet<string>(syncAccounts, StringComparer.Ordinal);
+                accounts.UnionWith(await authentication.GetAccountIdsAsync(default));
+                // An unreadable drive list has its own recovery; credentials for its accounts are covered above.
+                try { accounts.UnionWith((await drives.LoadAsync()).Data.Select(x => x.Provider.HomeAccountId)); }
+                catch (ConfigurationException) { }
+                await access.RepairAsync(accounts, useBackup);
             }
             finally { _changes.Release(); }
         }

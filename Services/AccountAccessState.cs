@@ -55,6 +55,47 @@ namespace OneDrive_Simple_Management_Tool.Services
             finally { _writes.Release(); }
         }
 
+        // Startup repair only: lets the user inspect the previous revision before choosing a recovery.
+        public async Task<IReadOnlyList<AccountCleanup>> ReadBackupAsync()
+        {
+            using var lease = await ConfigurationFileLease.AcquireAsync(_file.Path, default);
+            return (await _file.ReadAsync(default, true)).Data;
+        }
+
+        // Replaces an unreadable journal after explicit confirmation. Drive removals from the backup are kept, and
+        // every known account gets a pending sign-out, so access returns only through a new interactive sign-in.
+        public async Task RepairAsync(IEnumerable<string> accounts, bool useBackup)
+        {
+            await _writes.WaitAsync();
+            try
+            {
+                using var lease = await ConfigurationFileLease.AcquireAsync(_file.Path, default);
+                bool broken = false;
+                try { await _file.ReadAsync(default); }
+                catch (ConfigurationException) { broken = true; }
+                // Another process has already repaired it. Do not overwrite its work from a stale error screen.
+                if (!broken) throw new ConfigurationException(ConfigurationFailure.Conflict);
+                var backup = useBackup ? await _file.ReadAsync(default, true) : null;
+                var kept = backup?.Data.Where(x => x.Scope.DriveId != null).ToList() ?? new();
+                var signOut = accounts.Concat(backup?.Data.Select(x => x.Scope.AccountId) ?? Enumerable.Empty<string>())
+                    .Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.Ordinal).ToList();
+                var next = kept.Concat(signOut.Select(x => new AccountCleanup(new AccountScope(x), false, ClearCredentials: true))).ToList();
+                Validate(next);
+                // Keep encrypted copies of the damaged journal and of a backup that is not used.
+                await _file.ArchiveAsync(_file.Path, default);
+                if (!useBackup) await _file.ArchiveAsync(_file.BackupPath, default);
+                var saved = await _file.WriteAsync(next, checked((backup?.Revision ?? 0) + 1), false, default);
+                lock (_gate)
+                {
+                    _records = next;
+                    _revision = saved.Revision;
+                    foreach (var account in signOut) _accountChanges[account] = ++_generation;
+                    _initialized = true;
+                }
+            }
+            finally { _writes.Release(); }
+        }
+
         public long Generation { get { lock (_gate) return _generation; } }
         public IReadOnlyList<AccountCleanup> Pending { get { lock (_gate) return _records.Where(x => x.Pending).ToArray(); } }
         public bool IsRemoved(string account, string drive)
