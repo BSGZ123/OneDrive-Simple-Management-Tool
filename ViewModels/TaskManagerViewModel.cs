@@ -24,9 +24,10 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
             _blocked.Add((account, drive));
             try
             {
-                await Task.WhenAll(UploadTasks.Where(x => x.Drive.Provider.HomeAccountId == account &&
+                // Like closing the window, stop only unfinished tasks; finished cards stay as history.
+                await Task.WhenAll(UploadTasks.Where(x => x.NeedsExitProtection && x.Drive.Provider.HomeAccountId == account &&
                         (drive == null || x.Drive.Provider.DriveId == drive)).ToArray().Select(x => x.CancelTaskAsync())
-                    .Concat(DownloadTasks.Where(x => x.AccountId == account && (drive == null || x.DriveId == drive))
+                    .Concat(DownloadTasks.Where(x => x.NeedsExitProtection && x.AccountId == account && (drive == null || x.DriveId == drive))
                         .ToArray().Select(x => x.StopForExitAsync())));
             }
             finally { _blocked.Remove((account, drive)); }

@@ -263,8 +263,13 @@ internal static class BatchDownloadChecks
         {
             source.AccountId = "A"; source.DriveId = "one";
             source.File("large", "large.bin");
+            source.File("done", "done.bin");
             services.Manager = new TaskManagerViewModel();
             var manager = services.Manager;
+            var finished = manager.QueueDownloadBatch(source, ["done"], f.DirectoryPath, "finished");
+            await finished.StartDownload();
+            DispatcherQueue.Drain();
+            Check(finished.State == DownloadTaskState.Completed, "Finished transfer did not complete.");
             string existing = Path.Combine(f.DirectoryPath, "keep.txt");
             await File.WriteAllTextAsync(existing, "keep");
             var otherSource = new TreeSource(f) { AccountId = "B", DriveId = "one" };
@@ -278,6 +283,7 @@ internal static class BatchDownloadChecks
             await Until(() => { DispatcherQueue.Drain(); return active.DownloadedBytes >= 32768; });
             await manager.StopAccountAsync("A", "one"); await running;
             Check(!manager.DownloadTasks.Contains(active) && manager.DownloadTasks.Contains(other) && manager.DownloadTasks.Contains(sibling), "Wrong transfers stopped");
+            Check(manager.DownloadTasks.Contains(finished) && finished.State == DownloadTaskState.Completed, "Finished transfer card was removed");
             Check(other.State == DownloadTaskState.Pending && sibling.State == DownloadTaskState.Pending, "Unaffected transfer state changed");
             Check(File.ReadAllText(existing) == "keep" && !Directory.GetFiles(f.DirectoryPath, ".cloudflow-*").Any(), "Local file lost or active writer remains");
             await manager.StopAccountAsync("A");
