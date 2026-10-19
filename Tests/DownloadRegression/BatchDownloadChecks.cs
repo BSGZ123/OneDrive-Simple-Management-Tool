@@ -264,12 +264,18 @@ internal static class BatchDownloadChecks
             source.AccountId = "A"; source.DriveId = "one";
             source.File("large", "large.bin");
             source.File("done", "done.bin");
+            source.File("bad", "bad.bin");
+            source.BeforeResolve = (id, _) => id == "bad" ? throw new DownloadFailureException(DownloadFailure.AccessDenied) : Task.CompletedTask;
             services.Manager = new TaskManagerViewModel();
             var manager = services.Manager;
             var finished = manager.QueueDownloadBatch(source, ["done"], f.DirectoryPath, "finished");
             await finished.StartDownload();
+            var failed = manager.QueueDownloadBatch(source, ["bad"], f.DirectoryPath, "failed");
+            await failed.StartDownload();
             DispatcherQueue.Drain();
             Check(finished.State == DownloadTaskState.Completed, "Finished transfer did not complete.");
+            Check(failed.State == DownloadTaskState.Failed && failed.HasFailures, "Failed transfer did not fail.");
+            var failures = failed.Failures;
             string existing = Path.Combine(f.DirectoryPath, "keep.txt");
             await File.WriteAllTextAsync(existing, "keep");
             var otherSource = new TreeSource(f) { AccountId = "B", DriveId = "one" };
@@ -284,10 +290,13 @@ internal static class BatchDownloadChecks
             await manager.StopAccountAsync("A", "one"); await running;
             Check(!manager.DownloadTasks.Contains(active) && manager.DownloadTasks.Contains(other) && manager.DownloadTasks.Contains(sibling), "Wrong transfers stopped");
             Check(manager.DownloadTasks.Contains(finished) && finished.State == DownloadTaskState.Completed, "Finished transfer card was removed");
+            Check(manager.DownloadTasks.Contains(failed) && failed.State == DownloadTaskState.Failed && failed.Failures.SequenceEqual(failures), "Failed transfer card or its errors were removed");
             Check(other.State == DownloadTaskState.Pending && sibling.State == DownloadTaskState.Pending, "Unaffected transfer state changed");
             Check(File.ReadAllText(existing) == "keep" && !Directory.GetFiles(f.DirectoryPath, ".cloudflow-*").Any(), "Local file lost or active writer remains");
             await manager.StopAccountAsync("A");
             Check(!manager.DownloadTasks.Contains(sibling) && manager.DownloadTasks.Contains(other), "Account scope crossed to B");
+            Check(manager.DownloadTasks.Contains(finished) && manager.DownloadTasks.Contains(failed) && failed.State == DownloadTaskState.Failed,
+                "Account sign-out removed ended transfer cards");
             await other.StopForExitAsync();
         });
         await Test("batch localization and explicit cancel retain a cancelled card", async (f, source) =>

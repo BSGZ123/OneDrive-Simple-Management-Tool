@@ -29,6 +29,7 @@ internal static partial class Program
         ("A failed descendant still waits for other uploads and their cancellation", FailedSiblingWaits),
         ("An unrelated cancellation exception is a failure", UnrelatedCancellation),
         ("Completed and failed tasks can be removed exactly once", RemoveTerminal),
+        ("Account stop leaves completed and failed tasks with their errors", AccountStopKeepsEnded),
         ("Precancelled service calls do not perform storage or HTTP work", PrecancelledServices)
     ];
 
@@ -353,6 +354,18 @@ internal static partial class Program
     private sealed class CancellingProgress(CancellationTokenSource cancellation) : IProgress<long>
     {
         public void Report(long value) => cancellation.Cancel();
+    }
+
+    private static async Task AccountStopKeepsEnded()
+    {
+        await using var fixture = new UploadFixture();
+        var pending = NewTask(fixture, new StorageFile("pending.bin", 100));
+        var completed = await RunTask(fixture, new StorageFile("completed.bin", 100));
+        var failed = await RunTask(fixture, new StorageFile("failed.bin", 100) { OpenError = new IOException("Open failed.") });
+        Assert(pending.NeedsAccountStop && !completed.NeedsAccountStop && !failed.NeedsAccountStop,
+            "Account stop selected an ended task or skipped a pending one.");
+        Assert(failed.HasFailed && failed.NeedsExitProtection && !string.IsNullOrWhiteSpace(failed.ErrorMessage),
+            "A failed task lost its error or its exit protection.");
     }
 
     private static async Task RemoveTerminal()

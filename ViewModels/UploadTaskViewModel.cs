@@ -61,6 +61,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool IsCancelled => State == UploadTaskState.Cancelled;
         public bool IsTerminal => State is UploadTaskState.Completed or UploadTaskState.Skipped or UploadTaskState.Cancelled;
         public bool NeedsExitProtection => !_activeTask.IsCompleted || !_cancelTask.IsCompleted || !IsTerminal;
+        // Cancelling a failed upload only removes its card, so account stop leaves the card and error in place.
+        public bool NeedsAccountStop => !_activeTask.IsCompleted || !_cancelTask.IsCompleted || !(IsTerminal || HasFailed);
         public bool CanRemove => !_removalRequested;
 
         [ObservableProperty]

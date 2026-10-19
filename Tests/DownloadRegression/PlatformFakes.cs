@@ -58,6 +58,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public UploadTaskViewModel(DriveViewModel drive, string id, Windows.Storage.IStorageItem item, UploadConflictResolver conflicts = null) { Drive = drive; }
         public DriveViewModel Drive { get; }
         public bool NeedsExitProtection { get; set; }
+        public bool NeedsAccountStop => NeedsExitProtection;
         public bool WasCancelled { get; private set; }
         public Func<Task> OnCancel { get; set; } = () => Task.CompletedTask;
         public Task StartUpload() { NeedsExitProtection = true; return Task.CompletedTask; }
