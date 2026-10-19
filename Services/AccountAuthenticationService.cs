@@ -29,6 +29,7 @@ namespace OneDrive_Simple_Management_Tool.Services
     {
         AccountAccessState Access => null;
         Task SignOutAsync(string accountId, CancellationToken token) => throw new NotSupportedException();
+        Task<IReadOnlyList<string>> GetAccountIdsAsync(CancellationToken token) => throw new NotSupportedException();
         Task<AccountToken> AcquireSilentAsync(string accountId, CancellationToken token);
         Task<AccountToken> AcquireInteractiveAsync(string expectedAccountId, CancellationToken token);
     }
@@ -102,6 +103,13 @@ namespace OneDrive_Simple_Management_Tool.Services
                 token.ThrowIfCancellationRequested();
                 await app.RemoveAsync(account);
             }
+        }
+
+        public async Task<IReadOnlyList<string>> GetAccountIdsAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            return (await app.GetAccountsAsync()).Select(a => a.HomeAccountId?.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id)).Distinct(StringComparer.Ordinal).ToArray();
         }
 
         private static AccountToken Validate(AuthenticationResult result, string expected, CancellationToken token)

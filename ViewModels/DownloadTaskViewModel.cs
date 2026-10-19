@@ -70,6 +70,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public string DestinationPath => _session.DestinationPath;
         // Read the session directly: a queued UI snapshot can lag behind a finalization or pause.
         public bool NeedsExitProtection => _session.Snapshot.State is not (DownloadTaskState.Completed or DownloadTaskState.Cancelled);
+        // Account sign-out or drive removal also keeps failed cards and their errors; retrying is refused by account access.
+        public bool NeedsAccountStop => _session.Snapshot.State is not (DownloadTaskState.Completed or DownloadTaskState.Cancelled or DownloadTaskState.Failed);
         public DateTime StartTime { get; private set; }
         public DateTime? FinishTime { get; private set; }
 

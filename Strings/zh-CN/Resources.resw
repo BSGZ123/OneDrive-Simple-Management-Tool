@@ -879,6 +879,16 @@
   <data name="Startup_Services" xml:space="preserve"><value>应用服务初始化失败，请重试或退出。</value></data>
   <data name="Startup_Configurations" xml:space="preserve"><value>用户配置初始化失败，请重试或退出。</value></data>
   <data name="Startup_CacheCleanup" xml:space="preserve"><value>登录数据已迁移，但旧加密缓存未能移除。请关闭旧版本并重启以重试清理。</value></data>
+  <data name="Startup_AccessRepair" xml:space="preserve"><value>账户访问记录已损坏。修复前所有账户保持锁定。可以检查备份、从备份恢复或重建记录。</value></data>
+  <data name="Startup_AccessCheckBackup" xml:space="preserve"><value>检查备份</value></data>
+  <data name="Startup_AccessRestore" xml:space="preserve"><value>从备份恢复</value></data>
+  <data name="Startup_AccessRebuild" xml:space="preserve"><value>重建记录</value></data>
+  <data name="Startup_AccessBackupReady" xml:space="preserve"><value>备份可读取：{0} 条记录，涉及 {1} 个账户。可以从备份恢复或重建记录。</value></data>
+  <data name="Startup_AccessBackupUnavailable" xml:space="preserve"><value>未找到可读取的备份，请重建记录后继续。</value></data>
+  <data name="Startup_AccessRepairExplanation" xml:space="preserve"><value>损坏的记录会加密保留一份副本。所有账户都会退出登录，文件夹同步全部暂停；仅从备份恢复时保留已移除网盘的记录。完成后需逐个重新登录账户，并手动恢复同步。</value></data>
+  <data name="Startup_AccessRepairAction" xml:space="preserve"><value>修复</value></data>
+  <data name="Startup_AccessRepairFailed" xml:space="preserve"><value>修复失败，原记录未被替换，所有账户仍保持锁定。请重试或退出。</value></data>
+  <data name="Startup_AccessRepaired" xml:space="preserve"><value>账户访问记录已修复，所有账户都需要重新登录。请逐个重新登录账户，并手动恢复文件夹同步。</value></data>
   <data name="SettingPage_DataTitle.Text" xml:space="preserve"><value>存储与诊断</value></data>
   <data name="Settings_Diagnostics.Header" xml:space="preserve"><value>安全诊断</value></data>
   <data name="Settings_Diagnostics.Description" xml:space="preserve"><value>仅记录经过过滤的事件。生产诊断最长 30 分钟，退出即结束；Debug 诊断持续至手动结束或退出。文件仅保存在本机。</value></data>

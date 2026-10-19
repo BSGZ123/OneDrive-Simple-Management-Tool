@@ -165,6 +165,7 @@ internal static class Program
             var authentication = new MsalAccountAuthenticationService(app);
             await authentication.SignOutAsync("A", default); await authentication.SignOutAsync("A", default);
             Check(boundary.Accounts.Single().HomeAccountId.Identifier == "B" && boundary.Removed.SequenceEqual(new[] { "A" }), "MSAL account isolation failed");
+            Check((await authentication.GetAccountIdsAsync(default)).SequenceEqual(new[] { "B" }), "Cached accounts were not listed");
         });
         await Case("Broken access journal cannot silently become an active session", async f =>
         {
@@ -175,6 +176,93 @@ internal static class Program
             await Throws<ConfigurationException>(() => reopened.InitializeAsync());
             Check(reopened.IsBlocked("A") && reopened.IsBlocked("B"), "Corrupt security state failed open");
         });
+        await Case("Rebuilding a broken journal keeps the damaged copy and signs out every known account", async f =>
+        {
+            f.Auth.Accounts.AddRange(new[] { "A", "C" });
+            string path = AccessPath(f);
+            await File.WriteAllTextAsync(path, "broken");
+            var reopened = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => reopened.InitializeAsync());
+            var service = new AccountLifecycleService(reopened, f.Drives, f.Auth, f.Effects);
+            await Throws<ConfigurationException>(() => reopened.ReadBackupAsync());
+            await Throws<ConfigurationException>(() => service.RepairAccessAsync(true, Array.Empty<string>()));
+            Check(await File.ReadAllTextAsync(path) == "broken" && reopened.IsBlocked("A"), "Failed restore changed the record or opened access");
+            var syncAccounts = (await f.SyncStore.LoadAsync(default)).Bindings.Select(x => x.AccountId).Append("S");
+            await service.RepairAccessAsync(false, syncAccounts);
+            Check(Directory.GetFiles(Path.GetDirectoryName(path), "account-access.dat.recovery-*").Length == 1, "Damaged record was not preserved");
+            Check(reopened.Pending.Select(x => x.Scope).ToHashSet().SetEquals(new AccountScope[] { new("A"), new("B"), new("C"), new("S") }) &&
+                reopened.Pending.All(x => x.ClearCredentials && !x.RemoveBookmarks), "Known accounts were not all journaled for sign-out");
+            await Throws<AccountAccessException>(() => reopened.ResumeAccountAsync("A", reopened.Generation));
+            await service.RetryPendingAsync();
+            Check(reopened.Pending.Count == 0 && f.Auth.Removed.ToHashSet().SetEquals(new[] { "A", "B", "C", "S" }), "Credentials were not removed");
+            Check((await f.SyncStore.LoadAsync(default)).Bindings.All(x => !x.Enabled), "Sync was not paused");
+            Check((await f.Drives.LoadAsync()).Data.Count == 3 && (await f.Bookmarks.LoadAsync()).Count == 3, "Repair removed drives or bookmarks");
+            var restarted = new AccountAccessState(f.Paths); await restarted.InitializeAsync();
+            Check(new[] { "A", "B", "C" }.All(x => restarted.IsBlocked(x, "1")), "Repair restored access without sign-in");
+            await restarted.ResumeAccountAsync("A", restarted.Generation);
+            Check(!restarted.IsBlocked("A", "1") && (await f.SyncStore.LoadAsync(default)).Bindings.All(x => !x.Enabled), "Sign-in resumed sync automatically");
+            f.CheckFiles();
+        });
+        await Case("Restoring a broken journal from backup keeps drive removals and still requires sign-in", async f =>
+        {
+            await f.Service.ExecuteAsync(new("A", "1"));
+            await f.Service.ExecuteAsync(new("B", "1")); // Later writes move the A removal into the backup.
+            string path = AccessPath(f);
+            await File.WriteAllTextAsync(path, "broken");
+            var reopened = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => reopened.InitializeAsync());
+            Check((await reopened.ReadBackupAsync()).Any(x => x.Scope == new AccountScope("A", "1")), "Backup could not be inspected");
+            var service = new AccountLifecycleService(reopened, f.Drives, f.Auth, f.Effects);
+            await service.RepairAccessAsync(true, Array.Empty<string>());
+            Check(reopened.IsRemoved("A", "1") && reopened.Pending.Any(x => x.Scope == new AccountScope("A")), "Backup removal or sign-out missing");
+            await service.RetryPendingAsync();
+            Check(reopened.Pending.Count == 0 && reopened.IsRemoved("A", "1") && reopened.IsBlocked("A", "2") && reopened.IsBlocked("B", "1"),
+                "Restored record lost a removal or allowed access");
+            Check(Directory.GetFiles(Path.GetDirectoryName(path), "account-access.dat.recovery-*").Length == 1, "Damaged record was not preserved");
+            f.CheckFiles();
+        });
+        await Case("A null payload is treated as damage and can be restored from backup", async f =>
+        {
+            await f.Service.ExecuteAsync(new("A", "1"));
+            await f.Service.ExecuteAsync(new("B", "1")); // Later writes move the A removal into the backup.
+            string path = AccessPath(f);
+            await File.WriteAllTextAsync(path, "{\"Format\":\"OneDriveConfiguration\",\"Version\":1,\"Protection\":\"DPAPI-CurrentUser\",\"Payload\":null}");
+            var reopened = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => reopened.InitializeAsync());
+            await new AccountLifecycleService(reopened, f.Drives, f.Auth, f.Effects).RepairAccessAsync(true, Array.Empty<string>());
+            Check(reopened.IsRemoved("A", "1") && reopened.Pending.Any(x => x.Scope == new AccountScope("A")), "Null payload blocked restore");
+            Check(Directory.GetFiles(Path.GetDirectoryName(path), "account-access.dat.recovery-*").Length == 1, "Damaged record was not preserved");
+        });
+        await Case("Oversized damaged files are set aside unchanged so restore and rebuild still work", async f =>
+        {
+            await f.Service.ExecuteAsync(new("A", "1"));
+            await f.Service.ExecuteAsync(new("B", "1"));
+            string path = AccessPath(f), directory = Path.GetDirectoryName(path);
+            byte[] oversized = new byte[4 * 1024 * 1024 + 1];
+            oversized[0] = (byte)'x';
+            await File.WriteAllBytesAsync(path, oversized);
+            var reopened = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => reopened.InitializeAsync());
+            await new AccountLifecycleService(reopened, f.Drives, f.Auth, f.Effects).RepairAccessAsync(true, Array.Empty<string>());
+            var archived = Directory.GetFiles(directory, "account-access.dat.recovery-*");
+            Check(archived.Length == 1 && (await File.ReadAllBytesAsync(archived[0])).SequenceEqual(oversized), "Oversized original was not kept unchanged");
+            Check(reopened.IsRemoved("A", "1"), "Restore from backup failed");
+            // Rebuild must also get past an oversized backup that it does not use.
+            await File.WriteAllBytesAsync(path, oversized);
+            await File.WriteAllBytesAsync(path + ".bak", oversized);
+            var again = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => again.InitializeAsync());
+            await new AccountLifecycleService(again, f.Drives, f.Auth, f.Effects).RepairAccessAsync(false, Array.Empty<string>());
+            Check(Directory.GetFiles(directory, "account-access.dat.recovery-*").Length == 3 && !File.Exists(path + ".bak"), "Oversized files were not both set aside");
+            Check(again.Pending.Any(x => x.Scope == new AccountScope("A")) && again.IsBlocked("A", "2"), "Rebuild did not require sign-in");
+        });
+        await Case("Repair refuses a readable journal and leaves it unchanged", async f =>
+        {
+            await f.Service.ExecuteAsync(new("A"));
+            byte[] before = await File.ReadAllBytesAsync(AccessPath(f));
+            var error = await Throws<ConfigurationException>(() => f.Service.RepairAccessAsync(false, Array.Empty<string>()));
+            Check(error.Failure == ConfigurationFailure.Conflict && before.SequenceEqual(await File.ReadAllBytesAsync(AccessPath(f))), "Readable journal was overwritten");
+        });
         await Case("Both languages contain the full lifecycle explanations and failure actions", f =>
         {
             foreach (var language in new[] { "en-US", "zh-CN" })
@@ -184,6 +272,9 @@ internal static class Program
                 foreach (string key in new[] { "SignOutExplanation", "RemoveExplanation", "FileNotice", "Pending", "FailedStop", "FailedSync", "FailedBookmarks", "FailedCache", "FailedCredentials", "FailedConfiguration" })
                     Check(!string.IsNullOrWhiteSpace(data["AccountLifecycle_" + key]), "Missing localized lifecycle text");
                 _ = string.Format(data["AccountLifecycle_SignOutExplanation"], "fictional", 2, 3, 4);
+                foreach (string key in new[] { "Repair", "CheckBackup", "Restore", "Rebuild", "BackupReady", "BackupUnavailable", "RepairExplanation", "RepairAction", "RepairFailed", "Repaired" })
+                    Check(!string.IsNullOrWhiteSpace(data["Startup_Access" + key]), "Missing localized access repair text");
+                _ = string.Format(data["Startup_AccessBackupReady"], 2, 1);
             }
             return Task.CompletedTask;
         });
@@ -201,6 +292,7 @@ internal static class Program
         try { await action(); } catch (T error) { return error; }
         throw new Exception("Expected " + typeof(T).Name);
     }
+    private static string AccessPath(Fixture f) => Path.Combine(f.Paths.Root, "Configuration", "account-access.dat");
     private static DriveDTO Drive(string account, string drive) => new() { DisplayName = "Same name", Provider = new() { HomeAccountId = account, DriveId = drive } };
 
     private sealed class Fixture : IAsyncDisposable
@@ -283,6 +375,8 @@ internal static class Program
     {
         public bool Fail;
         public List<string> Removed = new();
+        public List<string> Accounts = new();
+        public Task<IReadOnlyList<string>> GetAccountIdsAsync(CancellationToken token) => Task.FromResult<IReadOnlyList<string>>(Accounts.ToArray());
         public Task<AccountToken> AcquireSilentAsync(string account, CancellationToken token) => throw new NotSupportedException();
         public Task<AccountToken> AcquireInteractiveAsync(string account, CancellationToken token) => throw new NotSupportedException();
         public Task SignOutAsync(string account, CancellationToken token) { if (Fail) throw new IOException(); Removed.Add(account); return Task.CompletedTask; }
