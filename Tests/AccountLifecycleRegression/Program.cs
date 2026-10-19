@@ -221,6 +221,41 @@ internal static class Program
             Check(Directory.GetFiles(Path.GetDirectoryName(path), "account-access.dat.recovery-*").Length == 1, "Damaged record was not preserved");
             f.CheckFiles();
         });
+        await Case("A null payload is treated as damage and can be restored from backup", async f =>
+        {
+            await f.Service.ExecuteAsync(new("A", "1"));
+            await f.Service.ExecuteAsync(new("B", "1")); // Later writes move the A removal into the backup.
+            string path = AccessPath(f);
+            await File.WriteAllTextAsync(path, "{\"Format\":\"OneDriveConfiguration\",\"Version\":1,\"Protection\":\"DPAPI-CurrentUser\",\"Payload\":null}");
+            var reopened = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => reopened.InitializeAsync());
+            await new AccountLifecycleService(reopened, f.Drives, f.Auth, f.Effects).RepairAccessAsync(true, Array.Empty<string>());
+            Check(reopened.IsRemoved("A", "1") && reopened.Pending.Any(x => x.Scope == new AccountScope("A")), "Null payload blocked restore");
+            Check(Directory.GetFiles(Path.GetDirectoryName(path), "account-access.dat.recovery-*").Length == 1, "Damaged record was not preserved");
+        });
+        await Case("Oversized damaged files are set aside unchanged so restore and rebuild still work", async f =>
+        {
+            await f.Service.ExecuteAsync(new("A", "1"));
+            await f.Service.ExecuteAsync(new("B", "1"));
+            string path = AccessPath(f), directory = Path.GetDirectoryName(path);
+            byte[] oversized = new byte[4 * 1024 * 1024 + 1];
+            oversized[0] = (byte)'x';
+            await File.WriteAllBytesAsync(path, oversized);
+            var reopened = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => reopened.InitializeAsync());
+            await new AccountLifecycleService(reopened, f.Drives, f.Auth, f.Effects).RepairAccessAsync(true, Array.Empty<string>());
+            var archived = Directory.GetFiles(directory, "account-access.dat.recovery-*");
+            Check(archived.Length == 1 && (await File.ReadAllBytesAsync(archived[0])).SequenceEqual(oversized), "Oversized original was not kept unchanged");
+            Check(reopened.IsRemoved("A", "1"), "Restore from backup failed");
+            // Rebuild must also get past an oversized backup that it does not use.
+            await File.WriteAllBytesAsync(path, oversized);
+            await File.WriteAllBytesAsync(path + ".bak", oversized);
+            var again = new AccountAccessState(f.Paths);
+            await Throws<ConfigurationException>(() => again.InitializeAsync());
+            await new AccountLifecycleService(again, f.Drives, f.Auth, f.Effects).RepairAccessAsync(false, Array.Empty<string>());
+            Check(Directory.GetFiles(directory, "account-access.dat.recovery-*").Length == 3 && !File.Exists(path + ".bak"), "Oversized files were not both set aside");
+            Check(again.Pending.Any(x => x.Scope == new AccountScope("A")) && again.IsBlocked("A", "2"), "Rebuild did not require sign-in");
+        });
         await Case("Repair refuses a readable journal and leaves it unchanged", async f =>
         {
             await f.Service.ExecuteAsync(new("A"));

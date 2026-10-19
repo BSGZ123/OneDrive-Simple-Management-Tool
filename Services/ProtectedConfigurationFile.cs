@@ -135,6 +135,8 @@ namespace OneDrive_Simple_Management_Tool.Services
                 var envelope = JsonSerializer.Deserialize(bytes, ProtectedConfigurationJsonContext.Default.ProtectedEnvelope);
                 if (envelope.Format != "OneDriveConfiguration" || envelope.Version != 1 || envelope.Protection != "DPAPI-CurrentUser")
                     throw new ConfigurationException(ConfigurationFailure.Version);
+                // A well-formed envelope with a null payload is damage too; never let it escape as ArgumentNullException.
+                if (envelope.Payload == null) throw new ConfigurationException(ConfigurationFailure.Invalid);
                 plaintext = _protector.Unprotect(envelope.Payload, _purpose);
                 using var inner = JsonDocument.Parse(plaintext);
                 Require(inner.RootElement, "SchemaVersion", "Revision", "Data");
@@ -218,6 +220,12 @@ namespace OneDrive_Simple_Management_Tool.Services
         public async Task ArchiveAsync(string source, CancellationToken token)
         {
             if (!File.Exists(source)) return;
+            // Too large to read under this file's bound: set it aside unchanged so recovery is not blocked.
+            if (new FileInfo(source).Length > _maximumBytes)
+            {
+                File.Move(source, Path + ".recovery-" + Guid.NewGuid().ToString("N"));
+                return;
+            }
             byte[] data = await ReadBoundedAsync(source, _maximumBytes, token).ConfigureAwait(false);
             try
             {
