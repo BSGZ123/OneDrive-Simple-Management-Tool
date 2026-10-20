@@ -74,6 +74,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public DriveViewModel Drive { get; }
         public bool NeedsExitProtection { get; set; }
         public bool NeedsAccountStop => NeedsExitProtection;
+        public Task DiscardResumeAsync() => Task.CompletedTask;
         public bool WasCancelled { get; private set; }
         public Func<Task> OnCancel { get; set; } = () => Task.CompletedTask;
         public Task StartUpload() { Starts++; State = UploadTaskState.Uploading; NeedsExitProtection = true; return Task.CompletedTask; }

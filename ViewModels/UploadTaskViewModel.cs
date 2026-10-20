@@ -100,7 +100,7 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool IsCancelled => State == UploadTaskState.Cancelled;
         public bool IsTerminal => State is UploadTaskState.Completed or UploadTaskState.Skipped or UploadTaskState.Cancelled;
         public bool NeedsExitProtection => !_activeTask.IsCompleted || !_cancelTask.IsCompleted || !IsTerminal;
-        // Cancelling a failed upload only removes its card, so account stop leaves the card and error in place.
+        // Account stop keeps ended cards and their errors; DiscardResumeAsync drops their upload sessions.
         public bool NeedsAccountStop => !_activeTask.IsCompleted || !_cancelTask.IsCompleted || !(IsTerminal || HasFailed);
         public bool CanRemove => !_removalRequested;
 
@@ -298,6 +298,18 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
                 _save(Record);
                 UpdateRecordedProgress();
             }
+        }
+
+        // Session URLs authorize writes without the account, so an ended card kept by account stop must not keep them.
+        // A retry after a new sign-in starts fresh sessions. Fails closed when the record cannot be saved.
+        public async Task DiscardResumeAsync()
+        {
+            if (Record == null || NeedsAccountStop) return;
+            var resumable = Record.Uploads.Where(x => x.Resume != null).ToArray();
+            if (resumable.Length == 0) return;
+            await Task.WhenAll(resumable.Select(x => ResumableUploadSession.DeleteAsync(x.Resume)));
+            foreach (var item in resumable) item.Resume = null;
+            _manager.SaveRequired(Record);
         }
 
         [RelayCommand(CanExecute = nameof(CanRemove))]

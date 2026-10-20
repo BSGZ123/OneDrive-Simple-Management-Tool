@@ -14,7 +14,8 @@ internal static partial class Program
         ("Upload pause retains confirmed bytes, completed siblings and restores paused state", PauseAndRestore),
         ("Remove during upload pause drains the request and wins over pause", RemoveDuringPause),
         ("Pausing a conflict decision closes the wait and allows continuation", PauseConflict),
-        ("Failed and cancelled uploads keep their states on exit", PreserveExitState)
+        ("Failed and cancelled uploads keep their states on exit", PreserveExitState),
+        ("Account stop keeps a failed upload card but deletes its upload sessions", DiscardFailedSessions)
     ];
 
     private static UploadTaskViewModel DurableTask(UploadFixture fixture, string path, Action<TransferRecord> save = null,
@@ -51,6 +52,26 @@ internal static partial class Program
             Assert(task.Completed, "Pause changed a completed upload.");
             await task.CancelTaskAsync();
         });
+    }
+
+    private static async Task DiscardFailedSessions()
+    {
+        await using var fixture = new UploadFixture();
+        var record = new TransferRecord { Direction = TransferDirection.Upload, Name = "failed.bin", Path = "failed.bin", ItemId = "root",
+            AccountId = "test-account", DriveId = "test-drive", UploadState = UploadTaskState.Failed };
+        record.Uploads.Add(new() { Key = ".", Name = "failed.bin", Size = 10, State = TransferEntryState.Failed, ErrorKey = "Upload_Failed",
+            Resume = new(fixture.Server.Url, DateTimeOffset.UtcNow.AddHours(1), 10, "fingerprint", Bytes: 5) });
+        var task = new UploadTaskViewModel(new DriveViewModel(fixture.Provider), "root", null);
+        task.AttachRecord(record, _ => { }, true);
+        await TestUiContext.Run(async () =>
+        {
+            Assert(task.HasFailed && !task.NeedsAccountStop, "A restored failure was selected for account stop.");
+            await task.DiscardResumeAsync();
+            await task.DiscardResumeAsync();
+        });
+        Assert(fixture.Server.Deletes.Count == 1 && record.Uploads.All(x => x.Resume == null), "Upload session survived account stop.");
+        Assert(task.HasFailed && record.UploadState == UploadTaskState.Failed && record.Uploads[0].ErrorKey == "Upload_Failed" &&
+            !Manager.Removed.Contains(task), "Account stop removed the failed card or its error.");
     }
 
     private static async Task PauseAndRestore()
