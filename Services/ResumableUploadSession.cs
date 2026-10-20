@@ -47,11 +47,19 @@ namespace OneDrive_Simple_Management_Tool.Services
 
         public static async Task DeleteAsync(UploadResumeRecord resume)
         {
+            try { await DeleteRequiredAsync(resume).ConfigureAwait(false); }
+            catch { /* Best effort; OneDrive also expires abandoned sessions. Never log the URL. */ }
+        }
+
+        // Account cleanup must retain the session address when revocation cannot be confirmed.
+        public static async Task DeleteRequiredAsync(UploadResumeRecord resume)
+        {
             if (resume == null) return;
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             using var client = Client();
-            try { using var response = await client.DeleteAsync(SessionUri(resume.Url), timeout.Token).ConfigureAwait(false); }
-            catch { /* Best effort; OneDrive also expires abandoned sessions. Never log the URL. */ }
+            using var response = await client.DeleteAsync(SessionUri(resume.Url), timeout.Token).ConfigureAwait(false);
+            if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone) return;
+            response.EnsureSuccessStatusCode();
         }
 
         private void Save(UploadResumeRecord resume) { _entry.Resume = resume; _save(); }

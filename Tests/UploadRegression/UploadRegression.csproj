@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="../../Services/TransferScheduler.cs" Link="Production/TransferScheduler.cs" />
     <Compile Include="../../Models/TransferRecord.cs" Link="Production/TransferRecord.cs" />
+    <Compile Include="../../Services/TransferStore.cs" Link="Production/TransferStore.cs" />
     <Compile Include="../../Models/DownloadTree.cs" Link="Production/DownloadTree.cs" />
     <Compile Include="../../Services/UploadRecordSession.cs" Link="Production/UploadRecordSession.cs" />
     <Compile Include="../../Services/StorageUploadRecordSource.cs" Link="Production/StorageUploadRecordSource.cs" />

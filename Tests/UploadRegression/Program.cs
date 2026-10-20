@@ -39,6 +39,7 @@ internal static partial class Program
             ("A failed descendant prevents folder completion", DescendantFailure),
             .. CancellationCases(),
             .. PauseCases(),
+            .. AccountStopCases(),
             .. ConflictCases(),
             .. DialogCases()
         ];

@@ -174,7 +174,8 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         public bool IsShuttingDown { get; set; }
         public List<UploadTaskViewModel> Removed { get; } = [];
         public Action<UploadTaskViewModel> OnRemove { get; set; }
-        public void SaveRequired(OneDrive_Simple_Management_Tool.Models.TransferRecord record) { }
+        public Action<OneDrive_Simple_Management_Tool.Models.TransferRecord> OnSaveRequired { get; set; }
+        public void SaveRequired(OneDrive_Simple_Management_Tool.Models.TransferRecord record) => OnSaveRequired?.Invoke(record);
         public bool RemoveSelectedUploadTasks(UploadTaskViewModel task)
         {
             OnRemove?.Invoke(task);

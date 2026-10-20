@@ -301,14 +301,15 @@ namespace OneDrive_Simple_Management_Tool.ViewModels
         }
 
         // Session URLs authorize writes without the account, so an ended card kept by account stop must not keep them.
-        // A retry after a new sign-in starts fresh sessions. Fails closed when the record cannot be saved.
+        // A retry after a new sign-in starts fresh sessions. Deletion and persistence failures remain retryable.
         public async Task DiscardResumeAsync()
         {
             if (Record == null || NeedsAccountStop) return;
             var resumable = Record.Uploads.Where(x => x.Resume != null).ToArray();
-            if (resumable.Length == 0) return;
-            await Task.WhenAll(resumable.Select(x => ResumableUploadSession.DeleteAsync(x.Resume)));
+            await Task.WhenAll(resumable.Select(x => ResumableUploadSession.DeleteRequiredAsync(x.Resume)));
             foreach (var item in resumable) item.Resume = null;
+            // A previous save may have failed after clearing the in-memory sessions.
+            // Retry the checkpoint even when there is no remote deletion left to do.
             _manager.SaveRequired(Record);
         }
 

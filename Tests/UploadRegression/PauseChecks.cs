@@ -59,7 +59,7 @@ internal static partial class Program
         await using var fixture = new UploadFixture();
         var record = new TransferRecord { Direction = TransferDirection.Upload, Name = "failed.bin", Path = "failed.bin", ItemId = "root",
             AccountId = "test-account", DriveId = "test-drive", UploadState = UploadTaskState.Failed };
-        record.Uploads.Add(new() { Key = ".", Name = "failed.bin", Size = 10, State = TransferEntryState.Failed, ErrorKey = "Upload_Failed",
+        record.Uploads.Add(new() { Key = ".", Name = "failed.bin", Size = 10, State = TransferEntryState.Failed, ErrorKey = "FileOperation_Failed",
             Resume = new(fixture.Server.Url, DateTimeOffset.UtcNow.AddHours(1), 10, "fingerprint", Bytes: 5) });
         var task = new UploadTaskViewModel(new DriveViewModel(fixture.Provider), "root", null);
         task.AttachRecord(record, _ => { }, true);
@@ -70,7 +70,7 @@ internal static partial class Program
             await task.DiscardResumeAsync();
         });
         Assert(fixture.Server.Deletes.Count == 1 && record.Uploads.All(x => x.Resume == null), "Upload session survived account stop.");
-        Assert(task.HasFailed && record.UploadState == UploadTaskState.Failed && record.Uploads[0].ErrorKey == "Upload_Failed" &&
+        Assert(task.HasFailed && record.UploadState == UploadTaskState.Failed && record.Uploads[0].ErrorKey == "FileOperation_Failed" &&
             !Manager.Removed.Contains(task), "Account stop removed the failed card or its error.");
     }
 

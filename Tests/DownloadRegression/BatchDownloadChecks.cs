@@ -394,6 +394,46 @@ internal static class BatchDownloadChecks
                 "Account sign-out removed ended transfer cards");
             await other.StopForExitAsync();
         });
+        await Test("account stop propagates ended-upload cleanup failures and retries only the selected scope", async (f, source) =>
+        {
+            services.Manager = new TaskManagerViewModel();
+            var manager = services.Manager;
+            UploadTaskViewModel Upload(string account, string drive, UploadTaskState state)
+            {
+                var task = new UploadTaskViewModel(new DriveViewModel(new SourceProvider { HomeAccountId = account, DriveId = drive }),
+                    "root", new Windows.Storage.StorageFile("file.bin"))
+                {
+                    State = state, NeedsExitProtection = state == UploadTaskState.Uploading
+                };
+                manager.UploadTasks.Add(task);
+                return task;
+            }
+            var failed = Upload("A", "one", UploadTaskState.Failed);
+            var completed = Upload("A", "one", UploadTaskState.Completed);
+            var active = Upload("A", "one", UploadTaskState.Uploading);
+            var sibling = Upload("A", "two", UploadTaskState.Failed);
+            var other = Upload("B", "one", UploadTaskState.Failed);
+            failed.OnDiscardResume = () => Task.FromException(new IOException("Simulated session cleanup failure."));
+            try
+            {
+                await manager.StopAccountAsync("A", "one");
+                throw new Exception("Account stop accepted incomplete session cleanup.");
+            }
+            catch (IOException) { }
+            Check(failed.Discards == 1 && completed.Discards == 1 && active.WasCancelled && active.Discards == 0,
+                "Account stop routed active or ended uploads incorrectly.");
+            Check(!failed.WasCancelled && !completed.WasCancelled && manager.UploadTasks.Contains(failed) &&
+                manager.UploadTasks.Contains(completed), "Cleanup failure removed ended upload cards.");
+            failed.OnDiscardResume = () => Task.CompletedTask;
+            await manager.StopAccountAsync("A", "one");
+            Check(failed.Discards == 2 && completed.Discards == 2 && sibling.Discards == 0 && other.Discards == 0,
+                "Retry skipped ended uploads or crossed the drive/account scope.");
+            Check(failed.State == UploadTaskState.Failed && completed.State == UploadTaskState.Completed,
+                "Retry changed an ended upload's state.");
+            await manager.StopAccountAsync("A");
+            Check(sibling.Discards == 1 && other.Discards == 0 && !sibling.WasCancelled && !other.WasCancelled,
+                "Sign-out failed to clean sibling drives or touched another account.");
+        });
         await Test("batch localization and explicit cancel retain a cancelled card", async (f, source) =>
         {
             source.File("file", "file.bin", size: 0);
